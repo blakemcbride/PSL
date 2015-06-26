@@ -15,6 +15,7 @@ lisp : lisp1.o lisp2.o crc cri
 
 lispc : lisp1c.o lisp2.o lispc1.o
 	gcc -o $@ $^ -lm
+	./cri comp
 
 LISP-INI : $(COMPILER_FILES) cri
 	./cri comp
