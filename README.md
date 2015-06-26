@@ -1,5 +1,6 @@
 
-This is Portable Utah Standard LISP
+Portable Utah Standard LISP
+===========================
 
 The bulk of the system is written in C, except the compiler which is
 written in lisp.  This system is very portable.  It includes an
@@ -28,6 +29,7 @@ code re-formatting and code changes designed to simplify the build
 process along with some minor corrections and enhancements.
 
 BUILDING
+--------
 
 I have tested this system under 32 & 64 bit Linux and Mac.  It uses
 gnu make but should be easy to change.  The system is very portable so
@@ -53,19 +55,20 @@ doesn't need any LISP-INI at all.)  If you compile in your own code,
 you have yet another unique LISP-INI file, and so on.
 
 COMPILING YOUR OWN PROGRAM
+--------------------------
 
 If you create a lisp file named "try.lsp", it can be compiled into the
 system as follows:
 
-./lispc
-(compilefile "try.lsp" 'try)
-    ["anotherfile.lsp"]...			be sure to use quotes
-end						-> tryc1 trye tryn1 tryu tryx1
-(quit)
-./cr1 try try.c					-> try.c
-./crc try					-> lispc1.c
-./cri try					-> LISP-INI
-gcc -o try lisp2.c try.c lispc1.c -lm		-> try
+    ./lispc
+    (compilefile "try.lsp" 'try)
+        ["anotherfile.lsp"]...                  be sure to use quotes
+    end                                         -> tryc1 trye tryn1 tryu tryx1
+    (quit)
+    ./cr1 try try.c                             -> try.c
+    ./crc try                                   -> lispc1.c
+    ./cri try                                   -> LISP-INI
+    gcc -o try lisp2.c try.c lispc1.c -lm       -> try
 
 "try" will be the complete lisp system with your code compiled in.
 An associated LSIP-INI file will also be created.
@@ -98,6 +101,7 @@ The "sl.*" files in the "manual" directory contains the full
 documentation on the PSL lisp dialect that this system conforms to.
 
 
-Blake McBride
-blake@mcbride.name
-blake1024@gmail.com
+    Blake McBride
+    blake@mcbride.name
+    blake1024@gmail.com
+    blake@arahant.com
