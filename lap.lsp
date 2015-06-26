@@ -619,7 +619,7 @@ nil   ))
       (prin2 x)
       (wrs curchannel)))
 
-(setq max!-comp!-size 6000)
+(setq max!-comp!-size 26000)
 
 (de compilefile (infile outfile)
    (prog (sexpr name type body ncp nfiles  argno xx)
@@ -653,11 +653,11 @@ nil   ))
       (wrs outchannel)
 loop1 (rds inchannel)
 loop  (cond
-       (genfunction
+        (genfunction
          (progn
             (setq sexpr (car genfunction))
             (setq genfunction (cdr genfunction))))
-      (t (setq sexpr (read))))
+        (t (setq sexpr (read))))
       (cond
         ((and (pairp sexpr) (memq (car sexpr) '(de df))
             (null (flagp (cadr sexpr) 'nocomp)))
@@ -765,15 +765,17 @@ loop  (cond
                          (go loop1))  ))))
       (t (prog nil
             (cond
-               ((and sexpr (null (flagp (car sexpr) 'ignore)))
+               ((and sexpr (pairp sexpr) (null (flagp (car sexpr) 'ignore)))
                   (progn (wrs evalchannel) (printq sexpr) (wrs outchannel))))
             (cond
-               ((and
+               ((and sexpr
                    (pairp sexpr)
                    (or (flagp (car sexpr) 'eval)
                        (flagp (car sexpr) 'ignore)))
                  (eval sexpr)))
-      nil   )))
+           nil)
+       )
+      )
       (go loop)))
 
 (de dumpxtrn nil
@@ -819,7 +821,7 @@ endofit
       (setq urwelt (reversip urwelt))
       (mapc urwelt (function print))
       (print nil)
-    %  (rds nil)
+   %   (rds nil)
       (wrs xrefchannel)
       (dumpxtrn)
       (wrs outchannel)
@@ -827,7 +829,6 @@ endofit
       (close evalchannel)
       (close urwlchannel)
       (close namechannel)
-      (close inchannel)
       (close xrefchannel)
       (return "compilation finished")))
 

@@ -1,0 +1,9 @@
+#
+./lisp <<eoi
+(load "compiler.lsp")
+(load "lap.lsp")
+(compilefile "compiler.lsp" 'comp)
+"lap.lsp"
+end
+(quit)
+eoi
