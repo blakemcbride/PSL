@@ -19,7 +19,7 @@ lisp1.o : lisp1.c Makefile
 	gcc -ggdb -O0 -Wall -pedantic -c lisp1.c
 
 lisp2.o : lisp2.c Makefile
-	 gcc -ggdb -O0 -Wall -pedantic -c lisp2.c
+	 gcc -ggdb -O0 -Wall -pedantic -Wno-parentheses -c lisp2.c
 
 cr1 : cr1.c crfile.h
 	 gcc -Wall -pedantic -o cr1 cr1.c
@@ -28,7 +28,7 @@ cr2 : cr2.c crfile.h
 	 gcc -Wall -pedantic -o cr2 cr2.c
 
 clean:
-	 rm -f lisp?.c cr? lisp?.o sizes.o *~
+	 rm -f lisp?.c cr? lisp?.o sizes.o *~ *.bak
 
 sizes :  sizes.c flags.l
 	 gcc -Wall -pedantic -o sizes sizes.c
