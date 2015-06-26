@@ -67,7 +67,7 @@ void lispc()
 			fprintf(out_file, "%s", ln);
 			continue;
 		}
-		if (ln[0] == ' ' || ln[0] == '\t')
+		if (ln[0] == ' ' || ln[0] == '\t'  ||  ln[0] == '}')
 			continue;
 		while (1) {
 			if (*lnp == ';') {
@@ -167,7 +167,7 @@ char *argv[];
 	i2 = 100;
 	buf = (char *)malloc(16000); /* set larger buffers for IO operations */
 	obuf = (char *)malloc(20000);
-	if (argc >= 2)
+	if (argc == 2)
 		strcpy(argv1, argv[1]);
 	else {
 		fprintf(stderr, "Usage: crc [file]\n");
