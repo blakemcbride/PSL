@@ -44,7 +44,7 @@ void filecopy1()
   n = 0;
   while((c = getc(in_file)) != EOF)
     if( c == '@')
-      fprintf(out_file, "Sexp(&fname\[%d\])", n);
+      fprintf(out_file, "Sexp(&fname[%d])", n);
     else if( c == '$')
       fprintf(out_file, "%d", n);
     else if( c == '/')
@@ -68,7 +68,7 @@ void filecopy1()
   fclose(in_file);
 }
 
-void main()
+int main()
 {
   buf = (char *)malloc(16000);    /* set larger buffers for IO operations */
   obuf = (char *)malloc(20000);
@@ -90,7 +90,7 @@ void main()
   i = 0;
   while(fscanf(in_file,  "%s%s%d%s", nm, pnm, &no, tp) != EOF)
     { if(strcmp(nm, "quote") == 0)
-        { fprintf(out_file,"#define quote (Sexp(&fname\[%d\]))\n", i);
+        { fprintf(out_file,"#define quote (Sexp(&fname[%d]))\n", i);
           break;
         }
       i++;
@@ -99,9 +99,9 @@ void main()
 
 /* URWELT ARRAY */
 
-  fprintf(out_file,"extern PSEXP urwelt\[\];\n");
+  fprintf(out_file,"extern PSEXP urwelt[];\n");
   fprintf(out_file,"extern unsigned ursize;\n");
-  fprintf(out_file,"extern PPAIR fnvlpr\[\];\n");
+  fprintf(out_file,"extern PPAIR fnvlpr[];\n");
 
 /*  SYSTEM IDENTIFIERS  */
 
@@ -122,7 +122,7 @@ void main()
 
 /* FUNCTION NAME IDENTIFIERS */
 
-  fprintf(out_file,"\nextern ID fname\[\];\n");
+  fprintf(out_file,"\nextern ID fname[];\n");
 
 /* HASH TABLE */
 
@@ -131,7 +131,7 @@ void main()
 /*  ERROR MESSAGES   */
 
   file_open(errors);
-  fprintf(out_file,"\nchar *emessages\[\] = {");
+  fprintf(out_file,"\nchar *emessages[] = {");
   while(fgets(ln, 80, in_file) != NULL)
     { ln[strlen(ln)-1] = 0;
       fprintf(out_file,"\n  \"%s\",", ln);

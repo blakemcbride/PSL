@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-
+#include <stdlib.h>
 #define  outfile  "lisp1.c"
 
 #include "flags.l"
@@ -46,7 +46,7 @@ char *file_name;
   setvbuf(in_file,buf,_IOFBF,16000);
 }
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char *argv[];
 {
@@ -79,7 +79,7 @@ char *argv[];
   i = 0;
     while(fscanf(in_file,  "%s%s%d%s", nm, pnm, &no, tp) != EOF)
     { if(strcmp(nm, "quote") == 0)
-        { fprintf(out_file,"#define quote (Sexp(&fname\[%d\]))\n", i);
+        { fprintf(out_file,"#define quote (Sexp(&fname[%d]))\n", i);
           break;
         }
       i++;
@@ -94,11 +94,11 @@ char *argv[];
     { setvbuf(in_file,buf,_IOFBF,16000);
       fscanf(in_file, "%d", &no);
       fclose(in_file);
-      fprintf(out_file,"PSEXP urwelt\[%d\];\n", no);
+      fprintf(out_file,"PSEXP urwelt[%d];\n", no);
     }
   else
     { no = 0;
-      fprintf(out_file,"PSEXP urwelt\[1\];\n"); }
+      fprintf(out_file,"PSEXP urwelt[1];\n"); }
   fprintf(out_file,"unsigned ursize = %d;\n", no);
 
 /*  FUNCTION COUNTING  */
@@ -139,11 +139,11 @@ char *argv[];
 
 /* ASCII CONTROL CHARACTER STRINGS */
 
-  fprintf(out_file,"\nchar asciich\[32\]\[2\] = {");
+  fprintf(out_file,"\nchar asciich[32][2] = {");
   for(i=0; i<' '; i++)
     fprintf(out_file,"\n    { '\\%o', '\\0' },", i);
   fprintf(out_file," };\n");
-  fprintf(out_file,"char ascii127\[2\] = { '\\127', '\\0' };\n");
+  fprintf(out_file,"char ascii127[2] = { '\\127', '\\0' };\n");
 
 /*  SYSTEM IDENTIFIERS  */
 
@@ -175,11 +175,11 @@ char *argv[];
     { if(i<' ')
 #if BITF
 	fprintf(out_file,
-	    "    {Tid, 0,0,0,0,1,0, %s, NULL, NIL, asciich\[%d\] },\n"
+	    "    {Tid, 0,0,0,0,1,0, %s, NULL, NIL, asciich[%d] },\n"
 	    , hsh[i], i);
       else if(i == 't')
 	fprintf(out_file,
-	    "    {Tid, 0,1,0,0,1,0, %s, Sexp(&chrid\['t'\]), NIL, \"%c\" },\n"
+	    "    {Tid, 0,1,0,0,1,0, %s, Sexp(&chrid['t']), NIL, \"%c\" },\n"
 	    , hsh[i], i);
       else if(i == '"' || i == '\\')
         fprintf(out_file,"    {Tid, 0,0,0,0,1,0, %s, NULL, NIL, \"\\%c\" },\n"
@@ -187,15 +187,15 @@ char *argv[];
       else
         fprintf(out_file,"    {Tid, 0,0,0,0,1,0, %s, NULL, NIL, \"%c\" },\n"
                     , hsh[i], i);
-      sprintf(hsh[i], "&chrid\[%d\]", i);
+      sprintf(hsh[i], "&chrid[%d]", i);
     }
   fprintf(out_file,"    {Tid, 0,0,0,0,1,0, %s, NULL, NIL, ascii127 } };\n"
 		    , hsh[127]);
 #else
-        fprintf(out_file,"    {Tid, 2, %s, NULL, NIL, asciich\[%d\] },\n"
+        fprintf(out_file,"    {Tid, 2, %s, NULL, NIL, asciich[%d] },\n"
                     , hsh[i], i);
       else if(i == 't')
-        fprintf(out_file,"    {Tid, 18, %s, Sexp(&chrid\['t'\]), NIL, \"%c\" },\n"
+        fprintf(out_file,"    {Tid, 18, %s, Sexp(&chrid['t']), NIL, \"%c\" },\n"
                     , hsh[i], i);
       else if(i == '"' || i == '\\')
         fprintf(out_file,"    {Tid, 2, %s, NULL, NIL, \"\\%c\" },\n"
@@ -203,7 +203,7 @@ char *argv[];
       else
         fprintf(out_file,"    {Tid, 2, %s, NULL, NIL, \"%c\" },\n"
                     , hsh[i], i);
-      sprintf(hsh[i], "&chrid\[%d\]", i);
+      sprintf(hsh[i], "&chrid[%d]", i);
     }
   fprintf(out_file,"    {Tid, 2, %s, NULL, NIL, ascii127 } };\n"
 		    , hsh[127]);
@@ -213,7 +213,7 @@ char *argv[];
 /* FUNCTION POINTERS */
 
   file_open(fnames);
-  fprintf(out_file,"\nFPOINTER fnpntr\[%d\] = {",func_cnt);
+  fprintf(out_file,"\nFPOINTER fnpntr[%d] = {",func_cnt);
   while(fscanf(in_file, "%s%s%d%s", nm, pnm, &no, tp) != EOF)
     { fprintf(out_file,"\n    { Tfpointer, %d, %s },", no, pnm); }
   fclose(in_file);
@@ -239,9 +239,9 @@ char *argv[];
 
   file_open(fnames);
   i = 0;
-  fprintf(out_file,"\nPAIR fnvlpr\[%d\] = {",func_cnt);
+  fprintf(out_file,"\nPAIR fnvlpr[%d] = {",func_cnt);
   while(fscanf(in_file, "%s%s%d%s", nm, pnm, &no, tp) != EOF)
-    { fprintf(out_file,"\n    { Tpair, Sexp(&%s), Sexp(&fnpntr\[%d\]) },", tp, i);
+    { fprintf(out_file,"\n    { Tpair, Sexp(&%s), Sexp(&fnpntr[%d]) },", tp, i);
       i++; }
   fclose(in_file);
   in_file = fopen(compn1, "r");
@@ -249,7 +249,7 @@ char *argv[];
   while(in_file != NULL)
     { setvbuf(in_file,buf,_IOFBF,16000);
       while(fscanf(in_file,  "%s%s%d%s", nm, pnm, &no, tp) != EOF)
-        { fprintf(out_file,"\n    { Tpair, Sexp(&%s), Sexp(&fnpntr\[%d\]) },", tp, i);
+        { fprintf(out_file,"\n    { Tpair, Sexp(&%s), Sexp(&fnpntr[%d]) },", tp, i);
           i++; }
       fclose(in_file);
       sprintf(tp,"%d",k);
@@ -265,18 +265,18 @@ char *argv[];
 
   file_open(fnames);
   i = 0;
-  fprintf(out_file,"\nID fname\[%d\] = {", func_cnt);
+  fprintf(out_file,"\nID fname[%d] = {", func_cnt);
   while(fscanf(in_file, "%s%s%d%s", nm, pnm, &no, tp) != EOF)
     { hs = hash(nm);
 #if BITF
       fprintf(out_file,
-	    "    {Tid, 0,0,0,1,1,0, %s, Sexp(&fnvlpr\[%d\]), NIL, \"%s\" },\n"
+	    "    {Tid, 0,0,0,1,1,0, %s, Sexp(&fnvlpr[%d]), NIL, \"%s\" },\n"
 	    , hsh[hs], i, nm);
 #else
-      fprintf(out_file,"    {Tid, 6, %s, Sexp(&fnvlpr\[%d\]), NIL, \"%s\" },\n"
+      fprintf(out_file,"    {Tid, 6, %s, Sexp(&fnvlpr[%d]), NIL, \"%s\" },\n"
                     , hsh[hs], i, nm);
 #endif
-      sprintf(hsh[hs], "&fname\[%d\]", i);
+      sprintf(hsh[hs], "&fname[%d]", i);
       i++;
     }
   fclose(in_file);
@@ -288,14 +288,14 @@ char *argv[];
         { hs = hash(nm);
 #if BITF
 	  fprintf(out_file,
-	    "    {Tid, 0,0,0,1,1,0, %s, Sexp(&fnvlpr\[%d\]), NIL, \"%s\" },\n"
+	    "    {Tid, 0,0,0,1,1,0, %s, Sexp(&fnvlpr[%d]), NIL, \"%s\" },\n"
 	    , hsh[hs], i, nm);
 #else
 	  fprintf(out_file,
-	    "    {Tid, 6, %s, Sexp(&fnvlpr\[%d\]), NIL, \"%s\" },\n"
+	    "    {Tid, 6, %s, Sexp(&fnvlpr[%d]), NIL, \"%s\" },\n"
 	    , hsh[hs], i, nm);
 #endif
-          sprintf(hsh[hs], "&fname\[%d\]", i);
+          sprintf(hsh[hs], "&fname[%d]", i);
           i++;
          }
       fclose(in_file);

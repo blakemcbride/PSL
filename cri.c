@@ -1,5 +1,6 @@
 /* creator of the LISP-INI */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define  outfile  "LISP-INI"
@@ -28,7 +29,7 @@ char *file_name;
   if(buf != NULL) setvbuf(in_file,buf,_IOFBF,16000);
 }
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char *argv[];
 {

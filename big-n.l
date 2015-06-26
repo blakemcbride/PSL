@@ -7,7 +7,7 @@
 
 void umultiply(x,y)
 long *x,*y;
-{ longdbl z;        /* long double is a ten byte double defined in TURBOC */
+{ longdbl z;   
   z = longd(*x) * (*y);
   *x = (long) (z/BASE);
   *y = (long) (z - longd(*x)*BASE);
@@ -226,8 +226,8 @@ r0: reg1 = Sexp(&ZERO);
 }
 
 #define addon(E)   z=bigcdr(z)=zbig(E,NIL)
-#define laydown    if(e>0)addon(e);else if(z==Sexp(&dummybig))l--; \
-                   else addon(e); \
+#define laydown    if(e>0) { addon(e);} else if(z==Sexp(&dummybig))l--; \
+                   else { addon(e);}  \
                    if(k>0) do { addon(d); } while(--k != 0)
 #define exchange   dd = reg1; reg1 = reg2; reg2 = dd; l1 = 2*l2 - l1
 
@@ -301,8 +301,8 @@ int s;
 #undef laydown
 #undef exchange
 
-#define addon(Q)  if(Q>0) z=bigcdr(z)=zbig(Q,NIL); \
-   else if(z==Sexp(&dummybig))l--; else  z=bigcdr(z)=zbig(Q,NIL)
+#define addon(Q)  if(Q>0)  z=bigcdr(z)=zbig(Q,NIL); \
+   else if(z==Sexp(&dummybig))  l--;  else  z=bigcdr(z)=zbig(Q,NIL)
 
 
 void zdivision(p)           /* arbitrary precision integer division */
@@ -345,7 +345,7 @@ int p;                                  /* p == 0  ===> remainder */
       v = 0;                    /*remainder*/
       do { rl = bigval(reg1);
            v = udivide(v,&rl,b);
-           if(p>0) addon(rl);
+           if(p>0) { addon(rl); } 
            reg1 = bigcdr(reg1);
          } while (reg1 != NIL);
       if(p!=1)
@@ -362,8 +362,8 @@ int p;                                  /* p == 0  ===> remainder */
       for(i=1; i<=l2; i++)
         { reg2 = bigcdr(reg2);
           *np-- = bigval(reg2); }
-      np = arit1 + l1;
       if(arit1sz<=l1+2) resize(&arit1, &arit1sz,l1+2);
+      np = arit1 + l1;
       arit1[0] = arit1[l1+1] = arit2[0] = 0;
       for(i=1; i<l1; i++)
         { *np-- = bigval(reg1);
@@ -372,7 +372,7 @@ int p;                                  /* p == 0  ===> remainder */
       d = arit2[l2-1] + longd(arit2[l2])*BASE;
       for(i = l1; i>=l2; i--)
         { e = (longd(arit1[i+1])*BASE)/d;
-          q = (long)((longd(arit1[i-1]) + longd(arit1[i])*BASE)/d + e*BASE);
+          q = (long)((longd(arit1[i-1]) + longd(arit1[i])*BASE)/d + e*BASE + 0.5);
           u = 0;  k = i-l2;
           for(j=1;j<=l2; j++)
             { k++;
@@ -393,7 +393,7 @@ int p;                                  /* p == 0  ===> remainder */
                 }
             }
           arit1[k+1] = 0;
-          if(p>0) addon(q);
+          if(p>0) { addon(q); }  
         }
       if(p!=1)                   /*get remainder in arith1 */
         { np = arit1;

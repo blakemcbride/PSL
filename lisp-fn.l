@@ -1,7 +1,6 @@
 /*  Warning:  DO NOT use $ or @ characters in this file.
     They do have some special meanings */
-void booleanp(i)      /* utility used by most of boolean functions */
-int i;
+void booleanp(int i)      /* utility used by most of boolean functions */
 { reg1 = i ? T : NIL; }
 
 int greaterp1(x,y)    /* utility used by Greaterp, Lessp */
@@ -201,6 +200,8 @@ Apply()
   if (!pairp(f) || car(f) != Sexp(&lambda))
     zerror(16, f);
   u = cadr(f);
+  if (!pairp(u))                     /* improper lambda expression Nov 2014 TY */
+    zerror(19, f);
   n = 0;
   while (u != NIL)
     { if (null(reg2)) zerror(17);
@@ -406,10 +407,13 @@ Cdr()
 Close1()
 { FILE *f;
   if(fixp(reg1)) 
-    { fclose( f=(FILE *) intval(reg1) );
-      kill_input_buf_save_entry(f); }               /* 7.0 . It will not harm write files */ 
-  else zerror(20, reg1);                            /*       Since they have no buf.table */
-}                                                   /*       entry at all.                */
+    { if(kill_input_buf_save_entry(f = (FILE *) intval(reg1)))    /* 7.1 is it a valid file handle  TY */
+        { if(fclose(f))                         /* 7.0 . It will not harm write files */
+              zerror(20, reg1); }               /*  Since they have no buf.table entry at all.  GU */
+      else zerror(43, reg1);    
+    }            
+  else zerror(36, reg1, @);                    
+}                                        
 /*@*/
 Cdif()
 { int i;
@@ -542,7 +546,8 @@ Copy()
 }
 
 void defn()
-{ reg2 = reg1;      /* utility used by de,df,dm */
+{ 
+  reg2 = reg1;      /* utility used by de,df,dm */
   Caddr(); Ncons();
   reg3 = zcons(cadr(reg2),reg1);
   reg3 = zcons(Sexp(&lambda),reg3);
@@ -550,7 +555,12 @@ void defn()
 }
 /*@*/
 De()
-{
+{ reg2 = cadr(reg1);
+  if(!pairp(reg2))
+     zerror(45 , reg2, @); /* id parameters list expected Nov 2014 TY*/
+  while(!null(reg2))
+    if(idp(car(reg2))) reg2 = cdr(reg2);
+         else zerror(45, cadr(reg1), @);
   defn();
   reg2 = Sexp(&expr);
   Putd();
@@ -571,8 +581,8 @@ Deflist()    /*GU*/ /*This code is compiler generated, works very well */
 }
 
 /*@*/
-/* STD-LISP COMPILER COMPILED Delete ... as you see a programm is better then
-   T. Yilmaz...................................................Saka, saka */
+/* STD-LISP COMPILER COMPILED Delete. as you see a programm is better then
+   T. Yilmaz............................................Saka, saka */
 Delete()
 {
   if (null(reg2)) zreturn(NIL)
@@ -595,7 +605,8 @@ lab2 :
 
 /*@*/
 Df()
-{
+{ if(!pairp(cadr(reg1)) || !null(cdadr(reg1)))
+     zerror(45 , cadr(reg1), @); /*Parameter list expected Nov 2014 TY*/
   defn();
   reg2 = Sexp(&fexpr);
   Putd();
@@ -630,7 +641,8 @@ Dl()
 }   */
 /*@*/
 Dm()
-{
+{ if(!pairp(cadr(reg1)) || !null(cdadr(reg1)))
+     zerror(45 , cadr(reg1), @);  /*Parameter list expected Nov 2014 TY*/
   defn();
   reg2 = Sexp(&macro);
   Putd();
@@ -643,7 +655,7 @@ Dump()
   else if(idp(reg1)) zdump(pname(reg1));
   else zerror(27, reg1, @);
  #else
-  printf("\n*** dump not implemented !\n");
+  printf("\n*** not compiled in DEBUG mode !\n");
 #endif
 }
 /*
@@ -794,7 +806,7 @@ Eval()
 #if TRACEABLE
   if(ztracearg($,1)) goto exit;
 #endif
-  if(idp(reg1))
+  if(idp(reg1)){     /* curly parant. added - Mar 2009 TY */
     if(value(reg1) == NULL || functionp(reg1))
       zerror(18, reg1);
     else
@@ -803,10 +815,12 @@ Eval()
         ztraceval($);
 #endif
         return; }
+   } 
   kalloc(3); kset0(reg1); kset(1,reg2);
-  if(pairp(car(reg1)))
+  if(pairp(car(reg1))) {
     if(caar(reg1) == Sexp(&lambda)) goto lab1;
       else zerror(19, car(reg1));
+  }
   if(codep(car(reg1))) goto lab1;
   if(!idp(car(reg1)) || !functionp(car(reg1))) zerror(15, car(reg1));
   reg1 = value(car(reg1));
@@ -888,9 +902,9 @@ Explode()
       if(n<0) *x++ = '-';
       sprintf(x, "%ld", bigval(reg1));
       x = tx;
-      reg2 = local0 = zcons1(Sexp(ch(*x++)));
+      reg2 = local0 = zcons1(Sexp(ch((int)*x++))); /* (int) has been added - Mar 2009 */
       while(1)
-        { while(*x) local0 = cdr(local0) = zcons1(Sexp(ch(*x++)));
+        { while(*x) local0 = cdr(local0) = zcons1(Sexp(ch((int)*x++)));
           if(null(reg1 = bigcdr(reg1))) break;
           sprintf(tx, "%ld", bigval(reg1));
           n = strlen(tx);
@@ -902,8 +916,8 @@ Explode()
   if(pairp(reg1) || vectorp(reg1)) zerror(0, reg1, Sexp(&nid), @);
   zescape(reg1);
   x = tx;
-  local0 = reg1 = zcons1(Sexp(ch(*x++)));
-  while(*x) local0 = cdr(local0) = zcons1(Sexp(ch(*x++)));
+  local0 = reg1 = zcons1(Sexp(ch((int)*x++)));
+  while(*x) local0 = cdr(local0) = zcons1(Sexp(ch((int)*x++)));
   kpop(1);
 }
 /*@*/
@@ -959,11 +973,7 @@ Fix()
           s = f<0 ? -1 : 1;
           reg1 = NIL;
           while(i>=2*DZ) { reg1 = zbig(0L,reg1); j++; i -= DZ; }
-#if _TURBOC_
-          z /= pow10(j*DZ);
-#else
           z /= pow(10,j*DZ);
-#endif
           k = (long)(z/BASE);
           z -= k*BASE;
           reg1 = zbig((long)z,reg1); j++;
@@ -1001,14 +1011,14 @@ Flag()
 /*@*/
 Flagp()
 {  PSEXP z;
-
    if(!idp(reg1)) goto jnil;
    z = proplist(reg1);
    while(!null(z))
      { if(car(z) == reg2) zreturn(T)
        z = cdr(z); }
 jnil:
-   zreturn(NIL)
+   reg1 = NIL;
+   return;
 }
 /*@*/
 Float()
@@ -1217,8 +1227,8 @@ List5()
 /*@*/
 Liter()
 {
-  booleanp(reg1 >= ch('a') && reg1 <= ch('z') ||
-          reg1 >= ch('A') && reg1 <= ch('Z'));
+  booleanp((reg1 >= ch('a') && reg1 <= ch('z')) ||    /* some more paranthesis avoid ambiguity - Mar 2009 */
+          (reg1 >= ch('A') && reg1 <= ch('Z')));
 }
 /*@*/
 Load()
@@ -1328,7 +1338,6 @@ lab3 :
   reg2 = reg1;
   kload(reg1,2);
   Nconc();
-lab4 :
   kpop(5);
   return;
 err:  zerror(0, reg1, Sexp(&npair), @);
@@ -1380,7 +1389,6 @@ lab3 :
   reg2 = reg1;
   kload(reg1,2);
   Nconc();
-lab4 :
   kpop(5);
   return;
 err:  zerror(0, reg1, Sexp(&npair), @);
@@ -1548,30 +1556,39 @@ Open1()
 {
   FILE *fp;
   char *fl;
-  char b[50],rw[3];
+  int i;
+  char b[150],rw[3];
   char *x,*y;
   extern char *getenv();
 
   if(stringp(reg1)) fl = strbody(reg1);
-  else if(idp(reg1)) fl = pname(reg1);
-  else zerror(27, reg1, @);
+    else if(idp(reg1)) fl = pname(reg1);
+    else zerror(27, reg1, @);
   if(reg2 == Sexp(&inpt)) strcpy(rw, "r");
-  else if(reg2 == Sexp(&outpt)) strcpy(rw, "w");
-  else zerror(22, reg2);
+    else if(reg2 == Sexp(&outpt)) strcpy(rw, "w");
+    else zerror(22, reg2);
   fp = fopen(fl,rw);
-  if(fp == NULL) x = getenv("PATH");
-  while(fp == NULL &&  x != NULL)
-    { y = b;
-      while((*x != ';') && (*x != 0)) *y++ = *x++;
-      if(*x == ';') x++;
-      if(*x == 0) x = NULL;
-      *y = 0;
-      y--;
-      if(*y != '\\') strcat(b, "\\");
-      strcat(b,fl);
-      fp = fopen(b,rw);
+#if LINUX              /* Search the path  7.1 TY */
+  if(fp == NULL)
+    { x = getenv("PATH");
+      if(x != NULL && *x == ':') x++;
+      while(fp == NULL &&  x != NULL)
+        { y = (char *) &b;    /* path seperation char is ":" */
+          i = 0;
+          while((*x != ':') && (*x != 0))
+            { i++;  *y++ = *x++; }
+          if(i)
+            { if( *(y-1) != '/') *y++ = '/';
+              *y = 0;    
+              strcat(b,fl);
+              fp = fopen(b,rw); }
+          if(*x == 0) x = NULL;
+            else if(*x == ':') x++;
+        }
     }
+#endif
   if(fp == NULL) zerror(23, reg1);
+  create_input_buf_save_entry(fp);    /* 7.1 TY */
   reg1 = zinteger((long) fp);
 }
 
@@ -1646,8 +1663,8 @@ Pair()
   while(1)
     { reg1 = cdr(reg1); reg2 = cdr(reg2);
       if(atom(reg1))
-        if(atom(reg2)) zkreturn(local(1),3)
-          else zerror(14);
+        { if(atom(reg2)) zkreturn(local(1),3)
+          else zerror(14); }      /* braces put - Mar 2009 */
       if(atom(reg2)) zerror(14);
       local0 = zcons(car(reg1), car(reg2));
       local(2) = cdr(local(2)) = zcons1(local0);
@@ -1813,7 +1830,7 @@ Prin2()
     case Tbig     :
     case Tinteger : Prin1();
                     break;
-    case Tfloating : sprintf(tx, "%ld", floval(reg1));
+    case Tfloating : sprintf(tx, "%g", floval(reg1));
                      zedit(tx);
                      break;
     case Tvector : zedit("[");
@@ -2058,7 +2075,7 @@ Readch()
   switch(c = yych()) {
     case EOF : zreturn(Sexp(&eof))
     case '\n' : zreturn(Sexp(&eol))
-    default : zreturn(ch(c))
+    default : zreturn(ch((int)c))
    }
 }
 /*@*/
@@ -2299,26 +2316,27 @@ Standardfzlisp()
   curtrap->msgprint = curtrap->backtrace = 1;
   curtrap->curalist = alisttop;
   curtrap->stacksave = zstackptr;
+  yytext[0] = 0;
+  inputf = stdin;
+  outputf = stdout;
+  yytext[0] = 0;
+  lastpos = curpos = "";            /* 7.1 TY */
+  endpos = &input[INPUTBUFLEN-1];   /* 7.1 TY */
+  store_input_buf_save_entry();     /* 7.1 TY */
   setjmp(curtrap->errsave);
   if(reg1 == Sexp(&begin))
     { Getd();
       if(pairp(reg1) && car(reg1) == Sexp(&expr))
         { reg1 = cdr(reg1); reg2 = NIL; Apply(); }
     }
-#if IBMPC
-/* arbirary precision integer arithmetic after version 5.0 TY */
-  printf("ษออออออออออออออออออออออออออออออออออออออออออออออออออป\n");
-  printf("บ    S  T  D     L  I  S  P      [7.0] December 99 บ\n");
-  printf("ศออออออออออออออออออออออออออออออออออออออออออออออออออผ\n");
-#else
-  printf("    S  T  D     L  I  S  P      [7.0]  December 99\n");
-#endif
+  printf("    S  T  D     L  I  S  P      [7.1] May 2009 \n"); 
   curtrap = trap;
   setjmp(curtrap->errsave);
   yytext[0] = 0;
-  curpos = "";
   inputf = stdin;
   outputf = stdout;
+  yytext[0] = 0;
+  lastpos = curpos = "";            /* 7.1 TY */
   while(1)
     { if(inputf == stdin)
         { printf("\neval:\n");
@@ -2328,8 +2346,14 @@ Standardfzlisp()
       Read1();
       if(reg1 == Sexp(&eof))
         { curpos = "";
-          if(inputf != stdin) fclose(inputf);
-          inputf = stdin; }   /* close the file if hit eof */
+          reg1 = zinteger((long) inputf);
+          if(kill_input_buf_save_entry(inputf))    /* 7.1 erase from the file table TY */
+            { if(fclose(inputf))                   
+                zerror(20, reg1); }              
+          else zerror(43, reg1);
+          inputf = stdin;
+          reg1 = Sexp(&eof);
+          restore_input_buf_save_entry(); }   /* close the file if hit eof */
       else Eval();
       if(currcol)
         { putc('\n', outputf);
@@ -2425,7 +2449,7 @@ Terpri()
 /*@*/
 Time()
 { long time();        /* declaration may be removed if necessary TY*/
-  znormalize(time());
+  znormalize(time(NULL));  /* added NULL as argument 7.1 GU */
 }
 /*@*/
 Times()
@@ -2524,7 +2548,7 @@ Token()
 
   switch(yylex()) {
     case Tid : if(delimflag)
-                 zreturn(ch(yytext[0]))
+                 zreturn(ch((int) yytext[0]))   /* (int) added - Mar 2009 TY */
                else
                  { cp = yytext;
                    cx = tx;
@@ -2549,21 +2573,18 @@ Token()
                    while(1)
                      { c = *cp++;
                        if(c == '"')
-                         if(*cp)
-                           { *cx++ = *cp++;
-                             continue; }
-                          else break;
+                         { if(*cp)          /* additional braces - Mar 2009 */
+                             { *cx++ = *cp++;
+                               continue; }
+                           else break;
+                         }
                         *cx++ = c;
                      }
                    *cx = 0;
                    cp = zsalloc(strlen(tx));
                    reg1 = zalloc(Tstring);
                    strelement(reg1) = Sstrelement(cp);/*ver 3.3*/
-#if IBMPC
-                   father(reg1) = Sstr(reg1); */  /*New ver. 3.3*/
-#else
                    setfather(reg1);
-#endif
                    strcpy(strbody(reg1), tx); /* length was stored by zsalloc */
                    return;
     case EOF :     zreturn(Sexp(&eof))     /* new ver[5.0]   .GU */

@@ -1,7 +1,3 @@
-#if LATTICE
-#include "\red\lisp\env.c"
-#endif
-
 char last_gc=0;             /*reason of last garbage collection*/
 int trace1=0,trace2=0;      /*trace level counters */
 extern unsigned NOFPAIR;
@@ -12,8 +8,10 @@ PPSEXP zstacktop;
 
 void kalloc(n)
 unsigned n;
-{ zstackptr += n;        /*zstackptr is pointer TY*/
-  if(zstackptr > zstacktop) zerror(37);       /*TY*/
+{ zstackptr += n;        /* zstackptr is pointer TY*/
+  if(zstackptr > zstacktop)
+    {  zstackptr -= n;    /* For backtracking March 2009 TY */
+       zerror(37);}       /*TY*/
 }
 #else
 void kalloc(n)
@@ -84,7 +82,7 @@ unsigned n;
 }
 
 PSEXP zalloc(tp)
-char tp;
+int tp;   /* changed char -> int Mar 2009 TY */
 { int n=0;
   PPAGE zgetpage();
   PSEXP v;
@@ -123,8 +121,8 @@ gc:
 no_gc:
       cpages[tp] = p->nextpage = zgetpage(tp);
       if(p->nextpage == NULL)
-        if(n<2) goto gc;
-          else zerror(35);           /*not enough memory TY*/
+        { if(n<2)  goto gc;  /* Mar 2009 TY */
+            else zerror(35); }          /*not enough memory TY*/
     }
 }
 
@@ -324,7 +322,7 @@ PSEXP u;
                    *y++ = '"';
                    *y = 0;
                    return;
-    case Tfloating : sprintf(tx, "%lg", floval(u));
+    case Tfloating : sprintf(tx, "%g", floval(u));  /* (%lg -> %g) Mar 2009 TY */
                      x = tx;
                      while(*x)
                        if(*x++ == '.') return;
@@ -391,22 +389,42 @@ void zinitpages()
     pages[n] = cpages[n] = zgetpage(n);
 }
 
+#define BUFSIZE 256
 void zurwelt()
 {
   FILE *fp;
   unsigned int i;
-  char *x;                                                           /*TY*/
+  char *x, buf[BUFSIZE];                                              /*TY*/
   char u = 0;
   
-  if (environment)
+  size_t j;
+/*  if environment has been set by '-e' command line option take it;
+       else set environment to "LISPINI";
+    GET the initialization file name from the environment;
+    if the name obtained, try to open it;
+       else try to open "LISP-INI";
+    if init file opened, it is the initialization file;
+       else get the full path of running program and concatanate ".lispini" to it,
+         and try open this file as an initialization file;
+    if all fail, that means no initialization file. */
+  if (environment != NULL)
    { x = (PCHAR) getenv(environment);                                /*GU*/ 
      if (!x)
       printf("Initialization environment %s not set\n",environment); } /*GU*/
   else x = getenv("LISPINI");                                        /*GU*/
   if (!x) x = "LISP-INI";                                            /*GU*/
   fp = fopen(x,"r");
+#if LINUX                                   /*this part included in 7.1 May 2009 TY */
+  if (!fp)
+    { j = readlink("/proc/self/exe", buf, (size_t) BUFSIZE);
+      if (j != -1)
+        { buf[j] = 0;
+          x = strcat(buf,".lispini");
+          fp = fopen(x, "r"); }
+    }
+#endif
   if (!fp) 
-    { printf("No initialization file: %s\n",x);
+    { printf("No initialization file: %s or LISP-INI\n",x);
       if (ursize) zysuicide(6);
       else return; }
   inputf = fp;
@@ -674,7 +692,7 @@ void errorreturn()
 
 /* Garbage Collection part */
 
-void clear_forward(char tp)
+void clear_forward(int tp)
 { unsigned s,i;     /* clear forward type from partially filled page TY */
   PPAGE pg;
   PCHAR p;
@@ -820,11 +838,7 @@ char  *s, *p;
      { p += *p + STROFFSET2;
        continue;}
      movmem(p,s,(unsigned) (*p+STROFFSET));
-#if IBMPC
-     elmfather(s) -> Xstrbody = Sstrelement(s);  /*Update the owner*/
-#else
      getelmfather(s) -> Xstrelement = Sstrelement(s);
-#endif
      *(s + *s + STROFFSET) = '\0';
      p += *s + STROFFSET2;
      s += *s + STROFFSET2; }
@@ -1018,11 +1032,7 @@ l1:   if(inheap(ob)) { if(!marked(ob)) { ob = hashlink(ob); goto l1; }}
       r = m;
       while (r--)     /* scan the page */
         {
-#if IBMPC
-          father(p) = Sstr(p);   /* to check is much more complicated */
-#else
           setfather(p);
-#endif
           p += s; }      /* take next STRING */
       if(pg->free != NULL) break;     /* last marked page TY */
       pg = pg->nextpage; }
@@ -1152,6 +1162,8 @@ skip_relocation:
    }
 }                 /* end of garbage collection part */
 
+#define LII (long unsigned)  /*just for suppress warnings about type conversion. Mar 2009 TY */
+
 void print_cell(FILE *df, PSEXP y)
 { if(y == NULL) { fprintf(df, " NULL\n"); return; }
   if(marked(y)) fprintf(df,"*");
@@ -1159,43 +1171,44 @@ void print_cell(FILE *df, PSEXP y)
 
   switch(gtype(y)) {
      case Tpair:
-       fprintf(df,"%08lx  %02x  %08lx  %08lx\n", y,Tpair,car(y),cdr(y));
+       fprintf(df,"%08lx  %02x  %08lx  %08lx\n", LII y,Tpair,LII car(y), LII cdr(y));
        return;
      case Tid:
 #if BITF
        fprintf(df,"%08lx  %02x    %08lx  %08lx  %08lx  %08lx",
-           y,Tid,hashlink(y),value(y), proplist(y),pname(y));
+           LII y,Tid,LII hashlink(y),LII value(y), LII proplist(y), LII pname(y));
 #else
        fprintf(df,"%08lx  %02x  %02x  %08lx  %08lx  %08lx  %08lx",
-           y,Tid,0x00ff & attribute(y),hashlink(y),value(y),
-               proplist(y),pname(y));
+           LII y,Tid,0x00ff & attribute(y),LII hashlink(y),LII value(y),
+               LII proplist(y),LII pname(y));
 #endif
        if(strlen(pname(y))<15) fprintf(df,"  %s\n" ,pname(y));
           else fprintf(df,"\n");
        return;
      case Tstring:
-       fprintf(df,"%08lx  %02x  %08lx\n",y, Tstring, Sstr(y));
+       fprintf(df,"%08lx  %02x  %08lx\n",LII y, Tstring, LII Sstr(y));
        return;
      case Tinteger:
-       fprintf(df,"%08lx  %02x  %12ld\n", y,Tinteger,intval(y));
+       fprintf(df,"%08lx  %02x  %12ld\n", LII y,Tinteger, intval(y));
        return;
      case Tbig:
        fprintf(df,"%08lx  %02x  %12ld  %08lx\n",
-           y,Tbig,bigval(y),bigcdr(y));
+           LII y,Tbig,bigval(y),LII bigcdr(y));
        return;
      case Tfloating:
-       fprintf(df,"%08lx  %02x  %20.14f\n",y, Tfloating, floval(y));
+       fprintf(df,"%08lx  %02x  %20.14f\n",LII y, Tfloating, floval(y));
        return;
      case Tvector:
-       fprintf(df,"%08lx  %02x  %5d %08x\n",y, Tvector, upbv(y), vectelts(y));
+       fprintf(df,"%08lx  %02x  %5d %08lx\n",LII y, Tvector, upbv(y), LII vectelts(y));
        return;
      case Tforwardadr:
-       fprintf(df,"%08lx  %02x  %08lx\n",y, Tforwardadr, forwardadr(y));
+       fprintf(df,"%08lx  %02x  %08lx\n",LII y, Tforwardadr, LII forwardadr(y));
        return;
      default:
-       fprintf(df,"Unknown type: %02x  %08lx\n", 0x00ff & type(y),y);
+       fprintf(df,"Unknown type: %02x  %08lx\n", 0x00ff & type(y),LII y);
     }
 }
+#undef LII
 
 #if DEBUG
 
@@ -1339,14 +1352,12 @@ void initregs()
 { int n;
   PPSEXP x;
 
-  trace2=trace1 = 0;
+  trace2 = trace1 = 0;
   x = registers;
   for(n=0; n<16; n++) *x++ = NIL;
 }
 
-void main(argc,argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[] )
 {
   unsigned n;
 
@@ -1359,11 +1370,11 @@ char *argv[];
              environment = (char *) malloc(strlen(argv[n]+1));
              strcpy(environment,argv[n]);
              continue; }
-          sscanf((argv[n]+1),"%d",&gcpage);    /*converts string to integer*/
+          sscanf((argv[n]+1),"%u",&gcpage);    /*converts string to integer, %d -> %u Mar 2009 TY */
           switch(*argv[n])
            {
 #if DSTACK
-             case 'S' : STACKSIZE = gcpage; break;   /*DYNAMIC STACK*/
+             case 'S' : stacksize = gcpage; break;   /*DYNAMIC STACK*/
 #endif
              case 'A' : ALISTLENGTH = gcpage; break;
              case 'P' : PNSLENGTH = gcpage; break;
@@ -1374,10 +1385,10 @@ char *argv[];
         }
     }
 #if DSTACK
-  zstackp = (PPSEXP) calloc(STACKSIZE,sizeof(PSEXP));
+  zstackp = (PPSEXP) calloc(stacksize,sizeof(PSEXP));
   if(zstackp == NULL) errorreturn();   /*clearence of stack is necessary TY*/
   zstackptr = zstackp - 1;
-  zstacktop = zstackp + STACKSIZE - 1;
+  zstacktop = zstackp + stacksize - 1;
 #else
   for(n=0; n<STACKSIZE; n++) zstackp[n] = NULL;
 #endif
@@ -1398,29 +1409,17 @@ char *argv[];
   for(n=0; n<NTYPES; n++) gcfree[n] = 0;
   if(maxpair == 1440)     /* initial value of maxpair is 1440 */
      maxpair = 5*PAGESIZE/sz[Tpair];
-#if _TURBOC_
-  if(maxpage == 5)     /* initial value of maxpage is 5 */
-     maxpage = (coreleft()/sizeof(PAGE)) - 15;
-  printf("\n %d pages pair space\n",maxpage);
-  ctrlbrk(zinterrupt);
-#endif
-#if LATTICE
-  if(maxpage == 5)
-    maxpage = ((0xA0000l-(long)arit2)/sizeof(PAGE)) - 15;
-  printf("\n %d pages pair space\n",maxpage);
-  bdosx(0x25,(PCHAR) (zinterrupt) ,0x23);  /*Set Break handling interrupt*/
-#endif
+  for (n=0; n<INPUTSAVETABLESIZE; n++)
+        input_buf_save_table[n].file = NULL;
   zinitpages();
   initregs();
   inputf = stdin;
   outputf = stdout;
   yytext[0] = 0;
   curpos = "";
+  endpos = &input[INPUTBUFLEN-1];   /* 7.1 TY */
   zysignonoff(1);
   zurwelt();
-  inputf = stdin;
-  outputf = stdout;
-  yytext[0] = 0;
-  curpos = "";
   Standardfzlisp();
+  exit(0);
 }

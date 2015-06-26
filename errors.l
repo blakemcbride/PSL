@@ -40,4 +40,7 @@ alist overflow
 % is big for %
 can not redefine %
 integer overflow
-input buffer save table overflow
+input buffer save table overflow (max 100 files can be open simultaneously)
+% is an invalid file handle
+poorly formed string
+% is not a valid argument list for %

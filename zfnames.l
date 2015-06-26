@@ -3,7 +3,7 @@ void           dispargs
 void           errorreturn
 void           initregs
 void           kalloc
-void           main
+int            main
 void           yywrap
 void           zalist
 PSEXP          zalloc

@@ -2,37 +2,17 @@
 #include <setjmp.h>
 #include <ctype.h>
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 typedef char *PCHAR;
-#if LATTICE
-#define void int
-#define getenv(x)   environment(x)
-#define myalloc(x)   getmem(x)
-extern PCHAR environment();
-extern PCHAR getmem();
-#else
 #define myalloc(x)   malloc(x)
-extern PCHAR getenv();
-#endif
-
-#if _TURBOC_
-#include <stdlib.h>
-#include <mem.h>
-#include <string.h>
-#include <alloc.h>
-
-#define   DZ         9                    /* # of decimal digits in one cell */
-#define   BASE       1000000000L            /* 10**DZ */
-#define   BM1         999999999L          /* 10**DZ -1 */
-#define   BFT     1000000000000000000.0   /* 10**(2*DZ)  */
-
-#else
 
 #define   DZ         8                    /* # of decimal digits in one cell */
-#define   BASE       100000000L            /* 10**DZ */
-#define   BM1         99999999L          /* 10**DZ -1 */
+#define   BASE      100000000L            /* 10**DZ */
+#define   BM1        99999999L          /* 10**DZ -1 */
 #define   BFT     10000000000000000.0     /* 10**(2*DZ)  */
-#endif
 
 #define   BN         2147483647L          /* biggest positive # on long int type */
 /* completely machine dependent PAGESIZE. use 'size.c' in order
@@ -74,21 +54,11 @@ struct Xpair { char Xtype;
                PSEXP Xcar;
                PSEXP Xcdr; } ;
 
-#if IBMPC
-struct Xstring { char Xtype;
-                 struct Xstrelmnt *Xstrbody; } ;       /*Changed in ver 3.3*/
-#else
 struct Xstring { char Xtype;              /* Added in 7.0 */
                  char *Xstrelement; } ;
-#endif
 
 typedef struct Xstring STRING, *PSTRING;
 
-#if IBMPC
-struct Xstrelmnt { char Xlength;                           /*New in ver 3.3*/
-                   PSTRING Xbackpointer;
-                   char Xrealstr[254]; } ;
-#endif
 struct Xinteger { char Xtype;
                   long int Xintval; } ;
 struct Xbig { char Xtype;
@@ -118,9 +88,6 @@ typedef struct Xfloating FLOATING, *PFLOATING;
 typedef struct Xvector VECTOR, *PVECTOR;
 typedef struct Xfpointer FPOINTER, *PFPOINTER;
 typedef struct Xerrmsg ERRMSG, *PERRMSG;
-#if IBMPC
-typedef struct Xstrelmnt STRELEMENT, *PSTRELEMENT;
-#endif
 typedef struct Xforwardadr FORWARDADR, *PFORWARDADR;    /*v 6.0  *GU*/
 
 #define Tpair        0

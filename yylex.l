@@ -20,13 +20,15 @@
 char input[INPUTBUFLEN];     /* input buffer */
 /*char *curpos;         Has to be initialized to point to '0' in main */
 char *lastpos;       /* Holds first position to start match on */
+char *endpos;        /* Holds the last position of input array 7.1 TY */
 char signflag;       /* is 1/0 depending on whether sign is allowed or not */
 char *ch1, *ch2;
 
 /* The below is new in ver 7.0 */
 /* corrects the problem of  rds() change => lose of unconsumed sexprs in  input buffer */ 
-
-#define INPUTSAVETABLESIZE 30
+/* additionally this part now keeps track the open files 7.1 TY */
+ 
+#define INPUTSAVETABLESIZE 100
 
 typedef 
    struct INPUT_BUF_SAVE_ENTRY 
@@ -46,13 +48,18 @@ void exponent(), sign(), digits();
 int soffinteger();
 
 /*   PATTERN : 1  */
+void incr_curpos () /* needed for isstring 7.1 TY */
+{ if (curpos < endpos) curpos++; 
+    else zerror(44);
+}
+
 
 int isstring()
 {  if (*curpos != '"') return(0);
   cont:
-   curpos++;
-   while (*curpos != '"') curpos++;
-   curpos++;
+   incr_curpos ();
+   while (*curpos != '"') incr_curpos ();
+   incr_curpos ();
    if (*curpos == '"') goto cont;
    return(1); }
 
@@ -230,7 +237,7 @@ int x;
    else signflag = 0; }
 
 int yylex()
-{
+{ 
   if (*curpos == 0)
    {
      start:
@@ -266,6 +273,7 @@ int yylex()
   if (isnonspace()) { delimflag = 1; storetext(); return(Tid); };
   if (is_blank())  goto match;
   zerror(8);
+  return(0);  /* just for supressing warning - Mar 2009 TY */
 }
 
 char yych()  /* This function is new, will be used by Readch ver [5.0] .GU */
@@ -286,9 +294,6 @@ void yywrap()     /* was formerly in lisp-zfn.l ... don't know why? */
   if(inputf == stdin)
     { printf("end of std input file\n");
       exit(0); }
-  else               /* new in 7.0..previously leak of this would cause core dump */
-    { reg1 = NIL;    /* attention: No Close() is performed !!! */
-      Rds(); }
 }           
 /* The below is new in ver 7.0 */
 
@@ -298,7 +303,7 @@ void store_input_buf_save_entry()  /* stores current input from inputf */
  for (i=0; i<INPUTSAVETABLESIZE; i++) 
     if (input_buf_save_table[i].file==inputf) goto proceed;
  for (i=0; i<INPUTSAVETABLESIZE; i++) 
-    if (!input_buf_save_table[i].file) goto proceed;
+    if (input_buf_save_table[i].file == NULL) goto proceed;
  /* if we are here no empty place in table ..=> issue error */
  zerror(42);
 proceed:
@@ -323,12 +328,24 @@ void restore_input_buf_save_entry()  /* restores current input of inputf  */
 }         
 
        
-void kill_input_buf_save_entry(FILE *f)  /* brutally removes current input from f */
+int kill_input_buf_save_entry(FILE *f)  /* brutally removes current input from f */
 {                                 /* no action if not exist */ 
  int i;
  for (i=0; i<INPUTSAVETABLESIZE; i++) 
     if (input_buf_save_table[i].file==f)
        { input_buf_save_table[i].file = NULL;
-         break; }  /* only one existence is possible */
+         return(1); }  /* only one existence is possible */
+ return(0);  /* 7.1 now returns the success TY */
 }           
 
+void create_input_buf_save_entry(FILE *f)   /* creates a buffer for input  7.1 TY */
+{                                         /* used for keep track of input files */
+  int i;
+  for (i=0; i<INPUTSAVETABLESIZE; i++)
+    if(input_buf_save_table[i].file == NULL)
+      { input_buf_save_table[i].file = f;
+        input_buf_save_table[i].curpos  = "";
+        return;
+      }
+  zerror(42); /* if we are here no empty place in table ..=> issue error */
+}

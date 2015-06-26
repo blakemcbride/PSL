@@ -1,8 +1,5 @@
 #include <stdio.h>
 #include "flags.l"
-#if LATTICE
-#define void int
-#endif
 
 typedef int *PSEXP, **PPSEXP;
 
@@ -71,7 +68,7 @@ typedef struct Xerrmsg ERRMSG, *PERRMSG;
 typedef struct Xstrelmnt STRELEMENT, *PSTRELEMENT;
 
 
-unsigned sz[12] =     { sizeof(PAIR),
+unsigned sz[] =       { sizeof(PAIR),
 			sizeof(ID),
 			sizeof(STRING),
 			sizeof(INTEGER),
@@ -82,7 +79,9 @@ unsigned sz[12] =     { sizeof(PAIR),
 			sizeof(int),
 			sizeof(long),
 			sizeof(PSEXP),
-			sizeof(double) };
+			sizeof(double),
+/*                      sizeof(long long)  */
+};
 
 long gcd(long m,long n)
 {
@@ -91,9 +90,10 @@ long gcd(long m,long n)
  return gcd(n,m%n); }
 
 
-void main()
+int main(void)
 { int i;
   long j=1;
+/*  double d1=2.,d2=1.; */
 
   printf(" size of PAIR           %d\n",sz[0]);
   printf(" size of ID             %d\n",sz[1]);
@@ -108,9 +108,13 @@ void main()
   printf(" size of long int       %d\n",sz[9]);
   printf(" size of PSEXP          %d\n",sz[10]);
   printf(" size of double         %d\n",sz[11]);
+  printf(" size of long long      %d\n",sz[12]);
   for(i=0; i<8; i++)
      j = (j/gcd(j,(long) sz[i]))*sz[i];   /* LCM of all sz[i] */
-  printf(" Set PAGESIZE to n positive integer multiple of:  %d\n",j);
-/*    if(j%sz[i]) j *= sz[i];
-  printf(" Set PAGESIZE to an integer multiple of:  %d\n",j); */
+  printf(" Set PAGESIZE to n positive integer multiple of:  %ld\n",j);
+/*  while((long)d1 != (long) d2)
+    { d1 = d2;
+      d2 *= 2; }
+  printf("\n mantissa size of double is %g \n", d1); */
+  return 0;
 }

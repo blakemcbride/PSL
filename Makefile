@@ -26,4 +26,4 @@ sizes :  sizes.c flags.l
 	 gcc -Wall -pedantic -o sizes sizes.c
 install: lisp
 	 mv lisp /usr/local/bin
-	 
+

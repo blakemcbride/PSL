@@ -158,7 +158,7 @@ zerop))
 (global '(inchannel outchannel !&!&tncp !*traceable !*rdable compfloc 
 codechannel evalchannel urwlchannel xrefchannel namechannel 
 max!-comp!-size))
-(setq max!-comp!-size 6000)
+(setq max!-comp!-size 26000)
 (flag '(fluid global dm putd) 'eval)
 (fluid '(!&u !&v))
 (setq !*plap nil)

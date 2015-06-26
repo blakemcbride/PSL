@@ -43,11 +43,7 @@
 #define Scode(x)      ((PFPOINTER) (x))
 #define Serrmsg(x)    ((PERRMSG) (x))
 #define Sforwardadr(x)((PFORWARDADR) (x))            /*v 6.0  *GU*/
-#if IBMPC
-#define Sstrelement(x)((PSTRELEMENT) (x))
-#else
 #define Sstrelement(x) ((char *) (x))
-#endif
 
 
 
@@ -91,15 +87,6 @@
 #define pname(x)      (Sid(x)-> Xpname)
 #define proplist(x)   (Sid(x)-> Xproplist)
 #define value(x)      (Sid(x)-> Xvalue)
-#if IBMPC
-#define elmbody(x)    (Sstrelement(x) -> Xrealstr )   /*New in ver 3.3*/
-#define elmfather(x)  (Sstrelement(x) -> Xbackpointer)/*New in ver 3.3*/
-#define elmlength(x)  (Sstrelement(x) -> Xlength )    /*New in ver 3.3*/
-#define father(x)     (strelement(x) -> Xbackpointer) /*New in ver 3.3*/
-#define strbody(x)    (strelement(x) -> Xrealstr)     /*Changed in ver 3.3*/
-#define strelement(x) (Sstr(x) -> Xstrbody)
-#define strlength(x)  (strelement(x) -> Xlength)      /*New in ver 3.3*/
-#else
 #define strelement(x) (Sstr(x) -> Xstrelement)
 #define strbody(x)    (strelement(x) + STROFFSET)
 #define elmbody(x)    (((char *) (x)) + STROFFSET)
@@ -113,7 +100,6 @@
      dummystrptr))
 #define elmlength(x)  (*((char *) (x)))
 #define strlength(x)  (*(strelement(x)))
-#endif
 #define upbv(x)       (Svector(x)-> Xupbv)
 #define usedvec(x)    (Svector(x)-> Xused)
 #define vectelt(x,n)  (vectelts(x)[n])
@@ -137,6 +123,7 @@
 #define cddr(x)       (cdr(cdr(x)))
 #define cdr(x)        (Spair(x)-> Xcdr)
 
+#define STACKSIZE     3500            /*size of stack */
 #if SLOWSTACK         /*alternative stack manipulation definitions*/
 #if DSTACK
 #define kpop(n)       kpops(n)
@@ -154,7 +141,6 @@
 #define local0        (zstackp[zstackptr])
 #define kset0(x)      ksets(0,&(x))
 #define kload0(x)     kloads(&(x),0)
-#define STACKSIZE     1500            /*size of stack in static case*/
 #endif
 #else
 #if DSTACK
@@ -173,7 +159,6 @@
 #define local0        (zstackp[zstackptr])
 #define kset0(x)      (zstackp[zstackptr] = x)
 #define kload0(x)     (x = zstackp[zstackptr])
-#define STACKSIZE     1500            /*size of stack in static case*/
 #endif
 #endif
 
@@ -188,11 +173,7 @@ struct alistentry  {PSEXP alistid;
 typedef struct alistentry ALISTENT, *PALISTENT;
 
 #define NTYPES    7
-#if IBMPC
-#define STROFFSET (sizeof(struct Xstrelmnt)-254)
-#else
 #define STROFFSET (sizeof(char)+sizeof(PSTRING))
-#endif
 #define STROFFSET2 (STROFFSET + 1)
 
 
@@ -227,15 +208,8 @@ typedef struct errortrap ERRORTRAP;
                  if (pageln && currlin >= pageln) \
                     {putc('\f',outputf); currlin = 0; }
 
-#if _TURBOC_
-#define longd(x)  ((long double)(x))
-#define longdbl   long double
-#undef abs
-#else
 #define longd(x)  ((double)(x))
 #define longdbl   double
-#endif
-
 
 #ifndef labs
 #define labs(x) ((x)<0?-(x):(x))

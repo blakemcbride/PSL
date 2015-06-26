@@ -1,5 +1,5 @@
-FILE *inputf = stdin;
-FILE *outputf = stdout;
+FILE *inputf;
+FILE *outputf;
 
 char tx[TXSIZE];
 char yytext[128];
@@ -22,24 +22,22 @@ unsigned strcount = 0;         /*counts # of characters in string space */
 unsigned atompgc;        /*GC on atom's print name space*/
 unsigned strgc;          /*GC on string space*/
 #if DSTACK
-int STACKSIZE = 1024;      /*local stack size*/
+int stacksize = STACKSIZE;      /*local stack size*/
 #endif
-unsigned ALISTLENGTH = 512;    /*alist stack length*/
-unsigned PNSLENGTH = 4000;     /*atom's print name space*/
-unsigned STRLENGTH = 3500;     /*string space length*/
+unsigned ALISTLENGTH = 8192;    /*alist stack length*/
+unsigned PNSLENGTH = 24000;     /*atom's print name space*/
+unsigned STRLENGTH = 8500;     /*string space length*/
 
 unsigned maxpair = 1440;       /*max empty work space if possible*/
 unsigned maxpage = 5;          /*max pages allocated without GC */
 
 PAIR dummypair = {Tpair, NIL, NIL };
 BIG dummybig = {Tbig, 0L, NIL};
-#if ! IBMPC
 PSTRING dummystrptr;
-#endif
 
 INTEGER small_num[9] = {
       {Tinteger, -1L},
-      {Tinteger, 0L},     /* mostly used numbers TY*/
+      {Tinteger, 0L},     /* frequently used numbers TY*/
       {Tinteger, 1L},
       {Tinteger, 2L},
       {Tinteger, 3L},
@@ -87,5 +85,5 @@ ERRORTRAP trap[30];
 ERRORTRAP *curtrap = trap;
 char *curpos;
 PSEXP registers[16];
-char *environment;
+char *environment = NULL;
 

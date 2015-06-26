@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-
+#include <stdlib.h>
 #include "flags.l"
 #include "crfile.h"
 
@@ -90,7 +90,15 @@ void lispc()
 
 /* FUNCTION NAME IDENTIFIERS */
 
-  fprintf(out_file,"\nextern ID fname\[\];\n");
+  fprintf(out_file,"\nextern ID fname[];\n");
+
+/* AUXILIARY FUNCTION declarations */
+
+  file_open(zfnames);
+  fprintf(out_file,"\n");
+  while(fscanf(in_file, "%s%s", tp, nm) != EOF)
+    fprintf(out_file,"%s %s();\n", tp, nm);
+  fclose(in_file);
 
 
 /*  FUNCTION DECLARATIONS  */
@@ -134,7 +142,7 @@ void lispc()
   arg 1) number of the first file. default first (1).
   arg 2) number of the last file. default all (100).  */
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char *argv[];
 { i1 = 1; i2 = 100;

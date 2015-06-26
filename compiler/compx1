@@ -8,5 +8,5 @@ Idp(),Equal(),Sub1(),Delete(),Assoc(),Member(),
 Reverse(),Min2(),Onep(),Eqn(),Cdr(),Car(),
 Cadadr(),Caddar(),Caaddr(),Cddadr(),Eval(),Minus(),
 Abs(),Getv(),Cadr(),Prin1(),Cdddar(),Open1(),
-Rds(),Read1(),Cadddr(),Plus2(),Priname(),Close1(),
-Printq(),Remainder(),Setpchar();
+Rds(),Read1(),Cadddr(),Plus2(),Close1(),Remainder(),
+Setpchar();
