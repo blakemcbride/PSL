@@ -169,8 +169,10 @@ char *argv[];
 	obuf = (char *)malloc(20000);
 	if (argc >= 2)
 		strcpy(argv1, argv[1]);
-	else
-		strcpy(argv1, "comp");
+	else {
+		fprintf(stderr, "Usage: crc [file]\n");
+		return -1;  /*  force user to use "comp" argument if desired  */
+	}
 	strcpy(compn, argv1);
 	strcat(compn, "n");
 	strcpy(compx, argv1);

@@ -58,7 +58,7 @@ char *argv[];
 	if (argc >= 2)
 		strcpy(argv1, argv[1]);
 	else
-		strcpy(argv1, "comp");
+		strcpy(argv1, "~~~");  /*  force user to use "comp" argument when building for the compiler */
 	strcpy(compn, argv1);
 	strcat(compn, "n");
 	strcpy(compn1, argv1);

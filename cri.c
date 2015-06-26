@@ -50,8 +50,10 @@ char *argv[];
 
 	if (argc >= 2)
 		strcpy(argv1, argv[1]);
-	else
-		strcpy(argv1, "comp");
+	else {
+		fprintf(stderr, "Usage: cri [file]\n");
+		return -1;  /*  force user to use "comp" argument if desired  */
+	}
 	strcpy(comp, argv1);
 	strcat(comp, "u");
 	file_open(comp);
