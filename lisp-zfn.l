@@ -537,22 +537,22 @@ unsigned n;
 {
 	switch (n) {
 	case 1:
-		printf("WRONG urwelt size!!\n");
+		printf("WRONG initialization file (LISP-INI) size!!\n");
 		break;
 	case 2:
-		printf("Initialization file must begin with size of urwelt!\n");
+		printf("Initialization file must begin with size of initialization file (LISP-INI)!\n");
 		break;
 	case 3:
-		printf("nil must end urwelt !\n");
+		printf("nil must end initialization file (LISP-INI) !\n");
 		break;
 	case 4:
-		printf("WRONG urwelt!!\n");
+		printf("WRONG initialization file (LISP-INI)!!\n");
 		break;
 	case 5:
-		printf("error in eval part of urwelt!!\n");
+		printf("error in eval part of initialization file (LISP-INI)!!\n");
 		break;
 	case 6:
-		printf("Need to load urwelt, but no initialization file exists!\n");
+		printf("Need to load initialization file (LISP-INI), but no initialization file exists!\n");
 		break;
 	}
 	exit(n);
