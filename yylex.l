@@ -265,9 +265,9 @@ int yylex()
   if (iseol())    {
 #ifndef TESTYYLEX
                     if (inputf == stdin && !null(value(&prompt)))
-                     { if(idp(value(&prompt))) printf(pname(value(&prompt)));
+                     { if(idp(value(&prompt))) printf("%s",pname(value(&prompt)));
                        else if(stringp(value(&prompt)))
-                          printf(strbody(value(&prompt))); }
+                          printf("%s",strbody(value(&prompt))); }
 #endif
                     goto start; };
   if (isnonspace()) { delimflag = 1; storetext(); return(Tid); };

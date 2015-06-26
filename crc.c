@@ -27,7 +27,7 @@ char *file_name;
 { in_file = fopen(file_name, "r");
   if(in_file == NULL)
     { printf("\n File not found: ");
-      printf(file_name);
+      printf("%s",file_name);
       printf("\n");
       exit(1); }
   setvbuf(in_file,buf,_IOFBF,16000);
@@ -59,7 +59,7 @@ void lispc()
   while(fgets(ln, 121, in_file) != NULL)
     { lnp = ln;
       if(ln[0] == '\n' || ln[0] == 'e' || ln[0] == '#')
-        { fprintf(out_file,ln); continue; }
+      { fprintf(out_file,"%s",ln); continue; }
       if(ln[0] == ' ' || ln[0] == '\t') continue;
       while(1)
         { if(*lnp == ';') { *(++lnp) = 0; break; }

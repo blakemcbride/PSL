@@ -30,7 +30,7 @@ char *file_name;
 { in_file = fopen(file_name, "r");
   if(in_file == NULL)
     { printf("\n File not found: ");
-      printf(file_name);
+      printf("%s", file_name);
       printf("\n");
       exit(1); }
   setvbuf(in_file,buf,_IOFBF,16000);

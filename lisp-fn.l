@@ -200,8 +200,10 @@ Apply()
   if (!pairp(f) || car(f) != Sexp(&lambda))
     zerror(16, f);
   u = cadr(f);
+#if 0
   if (!pairp(u))                     /* improper lambda expression Nov 2014 TY */
     zerror(19, f);
+#endif
   n = 0;
   while (u != NIL)
     { if (null(reg2)) zerror(17);
@@ -556,8 +558,10 @@ void defn()
 /*@*/
 De()
 { reg2 = cadr(reg1);
+#if 0
   if(!pairp(reg2))
      zerror(45 , reg2, @); /* id parameters list expected Nov 2014 TY*/
+#endif
   while(!null(reg2))
     if(idp(car(reg2))) reg2 = cdr(reg2);
          else zerror(45, cadr(reg1), @);
@@ -2329,7 +2333,7 @@ Standardfzlisp()
       if(pairp(reg1) && car(reg1) == Sexp(&expr))
         { reg1 = cdr(reg1); reg2 = NIL; Apply(); }
     }
-  printf("    S  T  D     L  I  S  P      [7.1] May 2009 \n"); 
+  printf("    S  T  D     L  I  S  P      [7.2] June 2015 \n"); 
   curtrap = trap;
   setjmp(curtrap->errsave);
   yytext[0] = 0;
@@ -2338,10 +2342,15 @@ Standardfzlisp()
   yytext[0] = 0;
   lastpos = curpos = "";            /* 7.1 TY */
   while(1)
-    { if(inputf == stdin)
+    {
+#ifdef VERBOSE_OUTPUT
+      if(inputf == stdin)
         { printf("\neval:\n");
           cnewline;
         }
+#else
+      printf("> ");
+#endif
       initregs();     /*Help GC  TY*/
       Read1();
       if(reg1 == Sexp(&eof))
@@ -2360,10 +2369,12 @@ Standardfzlisp()
           cnewline;
           currcol = 0;
         }
+#ifdef VERBOSE_OUTPUT
       if(outputf == stdout)
         { printf("\nvalue:\n");
           cnewline;
         }
+#endif
       Print();
     }
 }

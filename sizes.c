@@ -80,7 +80,7 @@ unsigned sz[] =       { sizeof(PAIR),
 			sizeof(long),
 			sizeof(PSEXP),
 			sizeof(double),
-/*                      sizeof(long long)  */
+                        sizeof(long long)
 };
 
 long gcd(long m,long n)
