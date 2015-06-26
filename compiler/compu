@@ -1,0 +1,308 @@
+303
+" "
+"*****"
+erfg!*
+!*msg
+"***"
+quote
+undefined
+name
+compile
+"of type"
+"uncompilable function"
+dfprint!*
+expr
+de
+fexpr
+df
+macro
+dm
+putd
+cfntype
+!*entry
+!*plap
+narg
+switch
+freelst
+condtail
+stomap
+stlst
+slst
+exit
+alsts
+regs1
+regs
+llngth
+lblist
+jmplist
+iregs1
+iregs
+flagg
+codelist
+((nil 1))
+!*alloc
+maxnargs
+"too many args for compiler in"
+fluid
+global
+(nil t)
+pa1fn
+compfn
+cmacro
+apply
+cond
+lambda
+list
+prog
+"declared fluid"
+progn
+"invalid function"
+!*r2i
+"invalid use of lambda in function"
+!*code
+anyreg
+!*ord
+"."
+!*link
+onereg
+tworeg
+"circular definition for"
+!*lbl
+"too many arguments in"
+!*load
+"cannot bind global "
+!*lambind
+!*progbind
+!*freerstr
+!*store
+!*noop
+null
+comtst
+(quote t)
+!*jumpt
+!*jumpnil
+(quote nil)
+and
+"mismatch of arguments"
+ncons
+cons
+xcons
+"invalid"
+list2
+list3
+list4
+list5
+function
+(mapcar maplist)
+(mapcan mapcon)
+nconc
+(ncons (quote nil))
+(map mapcon maplist)
+car
+(!*load 2 1)
+(!*link nconc expr 2)
+(!*link cons expr 2)
+cdr
+reversip
+golist
+(go return)
+(return (quote nil))
+!*jumpe
+!*jumpn
+!*jumpc
+!*jumpnc
+" - missing label -"
+!*jump
+transfer
+"compiler error: lost var"
+"@"
+!*nolinke
+!*linke
+!*dealloc
+!*exit
+negjmp
+optfn
+(!*load !*store)
+unknownuse
+add1
+plus2
+sub1
+difference
+minusp
+lessp
+minus
+genfunction
+"  "
+(!! !))
+(l o c a l !! !()
+atlas
+20
+framelocs
+urwelt
+urlength
+"NIL"
+"T"
+registers
+(fluid global)
+"value(urwelt["
+"])"
+"urwelt["
+"]"
+"Sexp(&ZERO)"
+"Sexp(&ONE)"
+"Sexp(&TWO)"
+"Sexp(&THREE)"
+"Sexp(&FOUR)"
+"Sexp(&M_ONE)"
+"Sexp(&FIVE)"
+"Sexp(&SIX)"
+"Sexp(&SEVEN)"
+"("
+")"
+!*maxfnamelen
+specialname
+(1)
+(!1 !2 !3 !4 !5 !6 !7 !8 !9 !0)
+(!! !_)
+alphabet
+genfname!*
+genfncount!*
+(G e n F u n)
+!!
+!*cegal
+labels
+labinuse
+grandlab
+"void "
+("()     /* ")
+(" */" t "{")
+(nil "kalloc(")
+");"
+(nil "kpop(")
+(nil "goto ")
+";"
+(nil "if (null(reg1)) goto ")
+(nil "if (!null(reg1)) goto ")
+(nil "if (reg1 == ")
+") goto "
+(nil "if (reg1 != ")
+(nil "if (")
+")) goto "
+(nil "if (!")
+" : "
+(nil)
+"kset0("
+"kset("
+","
+" = "
+"kload0("
+"kload("
+calledfloc
+"();"
+("    /* ")
+(" */")
+compf
+calledf
+(nil "return;")
+(nil "zbind(urwelt[")
+"],"
+"],NIL);"
+(nil "zunbind(")
+times2
+times
+plus
+max2
+max
+min2
+min
+rplaca
+!*rplaca
+!*rplacd
+(nil "car(")
+") = "
+(nil "cdr(")
+atom
+pairp
+(2)
+!*zcons2
+!*zcons3
+!*zcons
+(nil "zconsc(")
+(nil "zcons2c(")
+(nil "zcons3c(")
+outchannel
+!&!&tncp
+"IO files should be defined!"
+(c 1)
+output
+codechannel
+("Code files will be named :" name t)
+(e)
+evalchannel
+("Evaluate file will be named :" name t)
+(u)
+urwlchannel
+("Urwelt file will be named :" name t)
+(n 1)
+namechannel
+("Fn-names files will be named :" name t)
+(x 1)
+xrefchannel
+("Xref files will be named :" name t)
+!*traceable
+!*exit2
+!*exit3
+input
+inchannel
+(de df)
+nocomp
+lose
+(t "*** not compiled (Lose flaged) " name t)
+(t "*** Already compiled function IGNORED -->" name t)
+(t "compiling " name "  ")
+(t "compiling  " name t)
+compfloc
+((de . expr) (df . fexpr))
+(fexpr)
+!*tracearg
+(!*exit1)
+(!*exit)
+!*rdable
+rdable
+!*redefine
+subr
+fsubr
+max!-comp!-size
+(x)
+(c)
+(n)
+open
+end
+!$eof!$
+"enter file name string or 'end' >"
+ignore
+eval
+"(),"
+(t "called but not defined: " (car calledf) t)
+(" zundefined(" !&!&tncp "," narg "); }")
+">"
+"compilation finished"
+!&v
+!&u
+(t "#if TRACEABLE" nil "if(ztracearg(" !&u "," !&v ")) goto exit;" t 
+"#endif")
+(t "#if TRACEABLE" nil "if(zredefined(" !&u "," !&v ")) return;" t 
+"#endif")
+(t "#if TRACEABLE" t "exit:" nil "ztraceval(" !&u ");" t "#endif" t 
+"return;" t "}" t)
+(nil "}" t)
+(nil "return;" t "}" t)
+21
+"  subr"
+"1  fsubr"
+!'
+!(
+! 
+" . "
+!)
+nil

@@ -1,0 +1,168 @@
+(global '(!*module !*msg !*nolinke !*ord !*plap !*r2i genfunction))
+(setq !*msg t)
+(global '(erfg!* maxnargs))
+(setq maxnargs 15)
+(fluid '(alsts codelist condtail dfprint!* exit flagg freelst golist 
+iregs iregs1 jmplist lblist llngth name narg regs regs1 slst stlst 
+stomap switch))
+(flag '(!*alloc !*dealloc !*entry !*exit !*store !*jump !*jumpc !*jumpnc
+ !*jumpnil !*jumpt !*jumpe !*jumpn !*lbl !*lambind !*progbind !*freerstr
+ !*load !*link !*linke !*code) 'mc)
+(flag '(expr fexpr macro) 'compile)
+(put 'go 'pa1fn '!&paiden)
+(put 'quote 'pa1fn '!&paiden)
+(put 'code 'pa1fn '!&paiden)
+(put 'cond 'pa1fn '!&pacond)
+(put 'function 'pa1fn '!&pafunc)
+(put 'lambda 'pa1fn '!&palamb)
+(put 'prog 'pa1fn '!&paprog)
+(deflist '((caar (lambda (u) (car (car u)))) (cadr (lambda (u) (car (cdr
+ u)))) (cdar (lambda (u) (cdr (car u)))) (cddr (lambda (u) (cdr (cdr u))
+)) (caaar (lambda (u) (car (car (car u))))) (caadr (lambda (u) (car (car
+ (cdr u))))) (cadar (lambda (u) (car (cdr (car u))))) (caddr (lambda (u)
+ (car (cdr (cdr u))))) (cdaar (lambda (u) (cdr (car (car u))))) (cdadr (
+lambda (u) (cdr (car (cdr u))))) (cddar (lambda (u) (cdr (cdr (car u))))
+) (cdddr (lambda (u) (cdr (cdr (cdr u))))) (not (lambda (u) (null u)))) 
+'cmacro)
+(put 'and 'compfn '!&comandor)
+(put 'or 'compfn '!&comandor)
+(put 'and 'comtst '!&tstandor)
+(put 'or 'comtst '!&tstandor)
+(flag '(!*jump !*linke error) 'transfer)
+(put 'cond 'compfn '!&comcond)
+(put 'cons 'compfn '!&comcons)
+(put 'go 'compfn '!&comgo)
+(put 'list 'compfn '!&comlist)
+(put 'map 'pa1fn '!&pamap)
+(put 'mapc 'pa1fn '!&pamap)
+(put 'mapcan 'pa1fn '!&pamap)
+(put 'mapcar 'pa1fn '!&pamap)
+(put 'mapcon 'pa1fn '!&pamap)
+(put 'maplist 'pa1fn '!&pamap)
+(put 'map 'compfn '!&commap)
+(put 'mapc 'compfn '!&commap)
+(put 'mapcan 'compfn '!&commap)
+(put 'mapcar 'compfn '!&commap)
+(put 'mapcon 'compfn '!&commap)
+(put 'maplist 'compfn '!&commap)
+(put 'prog 'compfn '!&comprog)
+(put 'prog2 'compfn '!&comprogn)
+(put 'progn 'compfn '!&comprogn)
+(put 'return 'compfn '!&comreturn)
+(put 'setq 'compfn '!&comsetq)
+(put 'eq 'comtst '!&comeq)
+(put '!*noop 'optfn '!&moveup)
+(put '!*lbl 'optfn '!&lblopt)
+(flag '(!*code !*link !*linke) 'unknownuse)
+(put '!*jumpn 'negjmp '!*jumpe)
+(put '!*jumpe 'negjmp '!*jumpn)
+(put '!*jumpnil 'negjmp '!*jumpt)
+(put '!*jumpt 'negjmp '!*jumpnil)
+(put '!*jumpc 'negjmp '!*jumpnc)
+(put '!*jumpnc 'negjmp '!*jumpc)
+(put 'plus2 'pa1fn '!&paplus2)
+(put 'difference 'pa1fn '!&padiff)
+(put 'lessp 'pa1fn '!&palessp)
+(put 'minus 'pa1fn '!&paminus)
+(global '(registers alphabet framelocs 
+labels grandlab labinuse urwelt urlength !*cegal atlas calledf 
+calledfloc compf !*maxfnamelen genfncount!* genfname!*))
+(setq registers (mkvect 15))
+(setq alphabet (prog (!$dummy!$ i) (setq i 65) !$label (cond ((greaterp 
+i 90) (return (reverse !$dummy!$)))) (setq !$dummy!$ (cons (cons (ascii 
+(plus2 i 32)) (ascii i)) !$dummy!$)) (setq !$dummy!$ (cons (cons (ascii 
+i) (ascii i)) !$dummy!$)) (setq i (add1 i)) (go !$label)))
+(prog (i) (setq i 1) !$label (cond ((greaterp i 15) (return nil))) (putv
+ registers i (compress (append '(r e g) (explode i)))) (setq i (add1 i))
+ (go !$label))
+(setq framelocs (mkvect 20))
+(prog (i) (setq i 0) !$label (cond ((greaterp i 20) (return nil))) (putv
+ framelocs i (makelocal i)) (setq i (add1 i)) (go !$label))
+(setq labels (prog (!$dummy!$ i) (setq i 1) !$label (cond ((greaterp i 
+90) (return (reverse !$dummy!$)))) (setq !$dummy!$ (cons (compress (
+append '(l a b) (explode i))) !$dummy!$)) (setq i (add1 i)) (go !$label)
+))
+(setq urwelt nil)
+(setq urlength -1)
+(setq !*maxfnamelen nil)
+(setq genfname!* nil)
+(setq genfncount!* 0)
+(setq !*cegal '((!  S P) (!! X L) (!" D Q) (!# N B) (!$ D L) (!% P S) (
+!& A N) (!' S Q) (!( L P) (!) R P) (!* A S) (!+ P L) (!, C M) (!- M N) (
+!. D T) (!/ S L) (!: C L) (!; S C) (!< L T) (!= E Q) (!> G T) (!? Q S) (
+!@ A T) (![ L B) (!\ B S) (!] R B) (!^ U P) (!` B Q) (!_ U S) (!{ L C) (
+!| O R) (!} R C) (!~ T L) (!1 !1) (!2 !2) (!3 !3) (!4 !4) (!5 !5) (!6 !6
+) (!7 !7) (!8 !8) (!9 !9) (!0 !0)))
+(flag '(open close write read system) 'specialname)
+(setq grandlab labels)
+(setq labinuse nil)
+(put 'plus 'compfn '!&complus)
+(put 'times 'compfn '!&comtimes)
+(put 'max 'compfn '!&commax)
+(put 'min 'compfn '!&commin)
+(setq !*r2i t)
+(put 'car 'anyreg t)
+(put 'cdr 'anyreg t)
+(put 'rplaca 'compfn 'comrpla)
+(put 'rplacd 'compfn 'comrpla)
+(put '!*jumpnc 'optfn '!*jumpncopt)
+(put '!*freerstr 'optfn '!*freerstropt)
+(put 'pairp 'comtst '!&testfn)
+(put 'null 'comtst '!&testfn)
+(put 'atom 'comtst '!&testfn)
+(put 'idp 'comtst '!&testfn)
+(put 'stringp 'comtst '!&testfn)
+(put 'fixp 'comtst '!&testfn)
+(put 'floatp 'comtst '!&testfn)
+(put 'vectorp 'comtst '!&testfn)
+(put 'codep 'comtst '!&testfn)
+(put 'numberp 'comtst '!&testfn)
+(put 'constantp 'comtst '!&testfn)
+(put 'globalp 'comtst '!&testfn)
+(put 'fluidp 'comtst '!&testfn)
+(put 'functionp 'comtst '!&testfn)
+(flag '(add1 abs alength and append ascii atom close codep compress cond
+ cons xcons expand nconc ncons constantp copy difference digit eject eq 
+eqn eval evlis explode fix fixp float floatp fluid fluidp function get 
+getv greaterp lessp garbage gensym getprop getd global globalp go idp 
+intern length linelength list liter lposn max max2 min min2 minus mkvect
+ not null numberp oblist or onep orderp pagelength pairp posn prin1 
+prin2 princ print prog prog2 progn setpchar quit quote remflag remprop 
+rplaca rplacd set rds read readch remd remob return reverse reversip 
+select setq signoff signon stringp sub1 system terpri token unfluid 
+unlink upbv vectorp wrs zerop) 'onereg)
+(flag '(assoc delete difference divide equal error list2 plus plus2 
+quotient expt flag flagp map mapc mapcan mapcar mapcon mapc2 maplist 
+member memq open load orderp pair sublis times times2 remainder logor2 
+logand2 logxor2) 'tworeg)
+(setq compf '(abs add1 alength and append apply ascii assoc atom caaaar 
+caaadr caaar caadar caaddr caadr caar cadaar cadadr cadar caddar cadddr 
+caddr cadr car cdaaar cdaadr cdaar cdadar cdaddr cdadr cdar cddaar 
+cddadr cddar cdddar cddddr cdddr cddr cdr close cdif cmod cplus crecip 
+ctimes setmod codep compress cond cons constantp copy de deflist delete 
+df difference digit divide dm dump eject eq eqn equal error errorset 
+eval evlis expand explode expt fix fixp flag flagp float floatp fluid 
+fluidp function garbage gensym get getprop getd getv global globalp go 
+greaterp idp intern length lessp linelength list list2 list3 list4 list5
+ liter load logor2 logand2 logxor2 lposn map mapc mapc2 mapcan mapcar 
+mapcon maplist max max2 member memq min min2 minus minusp mkvect nconc 
+ncons not null numberp oblist open onep or orderp pagelength pair pairp 
+plus plus2 posn prin1 prin2 princ print prog prog2 progn put putd putv 
+quit quote quotient rds read readch remainder remd remflag remob remprop
+ return reverse reversip rplaca rplacd sassoc select set setpchar setq 
+signoff signon standard!-lisp stringp sub1 sublis subst system terpri 
+time times times2 token traceable unfluid unlink upbv vectorp wrs xcons 
+zerop))
+(setq !*nolinke t)
+(put 'cons 'compfn '!&comcons1)
+(global '(inchannel outchannel !&!&tncp !*traceable !*rdable compfloc 
+codechannel evalchannel urwlchannel xrefchannel namechannel 
+max!-comp!-size))
+(setq max!-comp!-size 6000)
+(flag '(fluid global dm putd) 'eval)
+(fluid '(!&u !&v))
+(setq !*plap nil)
+(flag '(remove) 'specialname)
+(flag '(zerop reversip) 'lose)
+(output1 "compiler loaded." t "usage: (compilefile <infile> <outfile>)" 
+t)

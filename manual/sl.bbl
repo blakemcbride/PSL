@@ -1,0 +1,55 @@
+\begin{thebibliography}{10}
+
+\bibitem{CDC-LISP}
+Computation Center.
+\newblock {\em {LISP} Reference Manual, CDC-6000}.
+\newblock The University of Texas at Austin.
+
+\bibitem{LISP/360}
+Stanford~Center for Information~Processing.
+\newblock {\em {LISP/360} Reference Manual}.
+\newblock Stanford University.
+
+\bibitem{PLC}
+M.~L. Griss and A.~C. Hearn.
+\newblock A portable {LISP} compiler.
+\newblock {\em Software---Practice and Experience}, 11:541--605, June 1981.
+
+\bibitem{Hearn:69}
+A.~C. Hearn.
+\newblock Standard {LISP}.
+\newblock {\em SIGPLAN Notices}, 4:28--49, 1969.
+\newblock Reprinted in {SIGSAM} Bulletin, ACM, Vol. 13, 1969, p. 28-49.
+
+\bibitem{REDUCE3.3}
+A.~C. Hearn.
+\newblock {REDUCE} user's manual: Version 3.3.
+\newblock Publication CP78 (Rev 1/88), {RAND}, 1988.
+
+\bibitem{MACLISP}
+{\em {MACLISP} Reference Manual}, March 1976.
+
+\bibitem{LISP1.5}
+John McCarthy, Paul~W. Abrahams, Daniel~J. Edwards, Timothy~P. Hart, and
+  Michael~I. Levin.
+\newblock {\em {LISP} 1.5 Programmers Manual}.
+\newblock The {M.I.T.} Press, Cambridge, Massachusettes, 1965.
+
+\bibitem{LISPF1}
+Mats Nordstrom, Erik Sandewall, and Diz Breslow.
+\newblock {\em {LISP F1}: A {FORTRAN} Implementation of {LISP} 1.5}.
+\newblock Uppsala University, Department of Computer Sciences.
+
+\bibitem{LISP1.6}
+Lynn~H. Quam and Whitfield Diffie.
+\newblock {\em Stanford {LISP} 1.6 Manual}.
+\newblock Stanford Artificial Intelligence Laboratory, operating note 28.7
+  edition.
+
+\bibitem{Interlisp}
+Warren Teitelman.
+\newblock {\em {INTERLISP} Reference Manual}.
+\newblock {XEROX}, Palo Alto Research Centers, 3333 Coyote Road, Palo Alto,
+  California 94304, 1978.
+
+\end{thebibliography}

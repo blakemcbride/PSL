@@ -1,0 +1,3 @@
+#
+setenv COMPINI compiler/COMP-INI
+compiler/clisp -m100000 -s20000 -a15000 -t30000 -p90000 -eCOMPINI

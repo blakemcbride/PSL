@@ -1,0 +1,2095 @@
+%      STD-LISP documentation  (LaTeX)
+%      Document Ver: 1.2
+%      Software Ver: 7.1
+%
+
+
+\documentstyle[11pt]{report}
+\pagestyle{headings}
+\textwidth 14cm
+\renewcommand{\topfraction}{.9}
+\renewcommand{\bottomfraction}{.9}
+\renewcommand{\textfraction}{.1}
+\renewcommand{\floatpagefraction}{.1}
+\newcommand{\ptr}{\raisebox{-.5ex}{*}}
+\renewcommand{\baselinestretch}{1.2}
+\newcommand{\C}{{\bf C\  }}
+\newcommand{\CC}{{\bf C}}
+\newcommand{\B}[1]{\ {\bf #1 }\ }
+\newcommand{\BB}[1]{\ {\bf #1}\ }
+
+\title{A \C Portable LISP Interpreter and Compiler
+    \thanks{This project was supported by the Revolving Fund
+      Institution of METU, Grant:AFP 88-01-05-02}
+        \vspace*{2cm} \\ \mbox{}
+        }
+\author{ E. Karabudak,\ \ \  G. \"{U}\c{c}oluk
+        \thanks{Permanent address:
+                               Dept. of Computer Engineering,
+                               METU,
+                               Ankara, Turkey}
+         ,\ \  \     T. Y{\i}lmaz
+        \thanks{Permanent address:
+                               Dept. of Physics,
+                               METU,
+                               Ankara, Turkey}
+       }
+\date{August 1990
+    \thanks{\mbox{This project was completed in a time of about three years.
+       \hspace*{1cm}}
+        \mbox{ \hspace*{4ex} The  authors  believe  they  have participated
+                   equally.}}}
+
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+\chapter{About the Distribution}
+
+This software can  freely  be distributed and  used
+provided the following  conditions:
+\begin{enumerate}
+    \item
+         Anyone can freely copy and use this software, provided that the
+         names of  the  authors are  referenced in the work the software
+         is used for.
+    \item
+         The parts of the code and documentation
+          where the authors are mentioned
+         cannot be removed.
+    \item
+         This software is distributed as is. The authors will not
+         take any responsibility for any bugs in it. Legally said:
+         \begin{quote}
+          The authors of this software and documentation
+             provide them "as is" without
+            warranty of any kind, either express or implied, including,
+            but not limited to, warranties of fitness for a
+            particular purpose.
+         \end{quote}
+    \item
+     Any code change will be clearly commented to indicate:
+     \begin{enumerate}
+          \item What change is made,
+          \item By whom it is made,
+          \item When was it made.
+     \end{enumerate}
+       The authors will be notified in case of a code alternation.
+\end{enumerate}
+\newpage
+The authors can be contacted at:
+\vspace*{2cm}
+\begin{center}
+\begin{minipage}[t]{5cm}
+\noindent
+Dr. Tugrul Yilmaz, \\
+Dept. of Physics,  \\
+Middle East Technical Univ. \\
+ODTU, Ankara, Turkiye \\
+{\tt tugrul@trmetu.bitnet}
+\end{minipage}
+\hspace*{2cm}
+\begin{minipage}[t]{6cm}
+\noindent
+Dr. G\"{o}kt\"{u}rk \"{U}\c{c}oluk \\
+Dept. of Computer Engineering \\
+Middle East Technical Univ. \\
+ODTU, Ankara, Turkiye     \\
+{\tt ucoluk@trmetu.bitnet}
+\end{minipage} \vspace*{15mm}\\
+\begin{minipage}[t]{5cm}
+\noindent
+Ersin Karabudak \\
+LOGO Coorp.\\
+P.K. 322 Kad{\i}k\"{o}y, \\
+Istanbul, Turkiye
+\end{minipage}
+\end{center}
+
+
+
+
+\chapter{Introduction}
+This  document  intends  to  serve  as  a  guide  of a LISP interpreter and
+compiler coded in \C. It is in no means a LISP language manual or tutorial.
+
+
+LISP  is  the  oldest and most used language in the world of AI programming
+and symbolic manipulation . Although PROLOG with its powerful first  order
+predicate  logic  functional  design  and  built-in  backtracking mechanism
+becomes more and more popular, it is for certain that LISP will remain  the
+most  promising  computer  language  in the fields mentioned, for many more
+years. It is worth to mention  that  there  exists  hardware  architectures
+specific  to  LISP and Texas instruments brought a LISP dedicated microchip
+into the market, in the year 1986.
+
+Parallel to the improvements in  LISP software, an academic  language  that
+was  supported  by  Bell  laboratories  gained  more and more interest in the
+professional system programming world. With the  similarly  developed  UNIX
+operating   system   this   language,  namely  \C,  started  to  become  an
+indispensable standard.  Nowadays  there  exists  hundred  of  manufactured
+computers, different  in  capacity  and  size,  many  of  which  offer  the
+purchaser  a UNIX environment and even a broader class offers a \C language
+compiler, anyway. So \C has became a standard language of  serious  project
+implementation. This fact was the reason why this project has been realized:
+A  LISP  that  was  coded in \C would be totally portable. To get a working
+LISP on a completely new hardware would only require a \C  compiler  and  a
+couple of man-hour work of a non-expert.
+
+In addition to the interpreter a LISP $\Rightarrow$ \C compiler which would
+take  a  LISP  source  and produce a \C code would complete the picture. If
+this would be done then any project that had to be  developed  in  an  LISP
+could  be  realized  on  any  computer  with our system, provided that this
+computer supports a \C compiler. After the development  phase  is  completed
+the final LISP code could be compiled to a \C program and then this \C code
+could  be  moved  around, ported to any computer and \CC-compiled there. So
+this work  would  not  only  enable  a  portability  of  LISP  but  also  a
+versatility and portability of {\bf any} LISP coded software.
+
+In  this document we describe the implementation of such an interpreter and
+compiler. The software introduced here is available from the authors.
+
+It is something to regret that such a powerful language like LISP has not a
+standard.  There  has  been  effort  to  standardize  this  language,   but
+presumably  due  to  trading reasons and vicious academic quarrels still we
+are far from such a standard. Of course another reason is that LISP  itself
+provides a unique convenience for modifying any {\bf X}-LISP  to  become  a
+{\bf  Y}-LISP.  As  known,  LISP  permits  the  redefinition  of  even  the
+internally defined functions.
+
+One of the attempts for a standardization was the standard LISP proposal of
+the Utah group. The proposal is described in
+``{\em Standard Lisp Report}''\cite{std}.
+This  LISP  was
+used  for the implementation of some LISP based SAM systems like REDUCE. It
+was  named  STD-LISP,  later  Utah-STD-LISP. {\bf The LISP standard chosen
+for our implementation is this version}.
+
+So, this is an implementation of Utah-STD-LISP. {\bf It is not
+a COMMON LISP}. Furthermore the authors have strong feelings that
+COMMON LISP is still a wrong choice for  standardization and
+another mistake is to promote it to be ``COMMON''.
+
+
+
+
+
+\section{Choice of Design Preferences}
+It is for sure that writing an interpreter and compiler has not to be  done
+in  a  unique  methodology. There exists parts of such a software where one
+has to choose among several tradeoffs.  Each  of  these  alternatives  have
+their  assets and liabilities. In this section the aim is to put and answer
+some global questions of this kind.
+
+\subsection{Parameter Passing}
+
+This is {\bf not} a stack oriented LISP.  If  it  would  be  so,  the  LISP
+arguments, pre-evaluated  or  not,  would  be  pushed  onto  a stack and the
+relevant function would be called to carry out the evaluation.  It  is  the
+right  and duty of the called function to pop-off its arguments from stack,
+do  the  evaluation  and  finally  push  the  result  onto  the  stack.  An
+implementation  of this kind would be nice, cute and short in code. But the
+hardware world does not favor stack implementations. Although for  a  great
+amount  of  computers,  there  exist stack oriented microcode conveniences,
+they are expensive in time and do not  correspond  to  a  special  hardware
+architecture,  actually.  But  the  inconveniences  present  in the case of
+stack, vanish if the implementation is shifted  toward  intensive  register
+usage.  This  is  unpleasant but truth. All architectures provide a certain
+number of memory locations (usually internal) --so called registers--  that
+possess  special hardware features especially related to fast data transfer
+and manipulation. Therefore the choice of argument passing is made in favor
+of register-based evaluation. This is also the choice for the compiler made
+by A.C. Hearn ({\em See the section : Compiler})
+
+\subsection{Why Off-Line Compilation ?}
+Unlike some other LISP implementations there does not exist a function like
+{\tt (COMPILE <fnname1> <fnname2> ...)} in the normal interpreter  part  of
+this  system.  Instead of this there exists  a  separate  LISP  interpreter
+with  the compiler present (and usually used only for compilation purpose).
+If this version (which is of course bigger in size) is called  and  ordered
+to compile a LISP source, the products are four files which contain the  \C
+code  and  explained  in the section : The Compiler. This generated \C code
+along with the \C code for the interpreter will be \C compiled using a MAKE
+utility. The choice made for the internal data structure is  such  that  it
+disables  partial  compilation  and  linking (e.g. the symbol table for the
+build in functions  is  hold  as  a  static  array,  therefore  it  is  not
+expandable). These choices are done only for efficiency reasons. We believe
+the  interpreter  is  sufficient for the development phase of a project and
+the very last move is the compilation, The code generated this way will  be
+in most integrity.
+
+\subsection{Why not an Integrated Development Environment ?}
+It is an undeniable fact that  integrated  development  environments  (IDE)
+become more and more popular, so why did we choose not to do so? The answer
+is  in  fact  simple.  First  of all, the feature that the system developed
+should be fully \C portable was vital. Just the fact  that  an  IDE  would
+require  a  build in editor would mean a necessity for a graphics or screen
+kernel which of course would be system dependent. Secondly, our task was to
+build  a professional compiler for heavy work and not a toy environment for
+novice training. Furthermore a good IDE would be large in  code  size,  and
+therefore, it might have caused problems on small memory systems.
+
+\section{Source Organization \& Implementation}
+Much care has been taken to ensure the source code is self-documented and
+easy to understand. To achieve readability and consistency a number of
+conventions and organizations have been used in formulating the code.
+These are as follows.
+\begin{itemize}
+  \item All the LISP source codes are in files with extension \B{L}.
+  \item These files (files with extension \B{.l}) are not ready to compile.
+         For details see the chapter on compilation.
+  \item Macro-defined constants are appearing in upper case only.
+  \item LISP data  structures  are  all  conventionally named to start
+        with a capital letter {\bf X}.
+  \item {\tt typedef} keywords of LISP data  structures  are  all
+        appearing in upper case only. Throughout the source code
+        these keywords are used mostly and not the ones with {\bf X}.
+\end{itemize}
+File organization and description of the files are given below.
+\begin{description}
+  \item[big-n.l] contains the arbitrary precision integer arithmetic
+     support functions.
+  \item[errors.l] Contains the error messages of the LISP interpreter.
+  \item[flags.l] System dependent flag macros are defined in this file.
+  \item[fnames.l] Contains the names, internal names, number of arguments,
+     and types of the STD-LISP functions of the interpreter.
+  \item[hd.l] Contains all the global static declarations and initializations
+     of LISP interpreter.
+  \item[lisp-fn.l] Contains the implementations of the STD-LISP functions
+     of the interpreter.
+  \item[lisp-zfn.l] Contains the  support functions.
+  Here the function names   always begin with the  letter {\bf z}.
+  \item[sysid.l] List of predefined identifiers of STD-LISP,
+     their flags, print
+     names,and values. Used when BITF flag is zero.
+  \item[sysids.l] Contains the list of predefined identifiers of LISP,
+     their attributes, print names,and values. Used when BITF flag is one.
+  \item[type.l, types.l] Contain the macro definitions, structure
+     definitions, and type definitions of the implementation.
+  \item[yylex.l] Contains the parser support functions for LISP.
+  \item[zfnames.l] Contains the names of functions that are defined in
+      {\bf lisp-zfn.l}
+\end{description}
+Following utility programs are used to prepare the LISP file system.
+\begin{description}
+  \item[cr1.c] Hashtable of the predefined LISP
+      identifiers is generated, and identifiers are declared statically.
+  \item[cr2.c] Prepares support functions for compilation.
+  \item[crc.c] Prepares compiler generated functions for compilation.
+  \item[cri.c] Prepares the initialiation  file.
+  \item[size.c] Program which calculates {\tt PAGESIZE}
+\end{description}
+
+In addition to these files you will find some other files related to
+the LISP $\Rightarrow$ \C compiler. They are grouped under the subdirectory
+{\bf compiler} in distribution. Here you will find the following files:
+\begin{description}
+  \item[compiler.lsp] The LISP code of A.C. Hearn's Portable
+                      LISP compiler\cite{comp}.
+  \item[lap.lsp] The LISP code that is the front end for the compiler.
+                 The job of this code is to convert the
+                 output of Hearn's compiler (which are LISP expresions
+                 corresponding to macro calls of a lisp-machine) to
+                 C function definitions and an initialization environment
+                 (we name this environment {\em urwelt} in rememberance
+                  of W.Heisenberg, meaning whatever existed
+                  before history started).
+  \item[comp*] These files are the outcome of the compilation of the
+               compiler itself. How they are used is explained in details
+               in the {\bf ``Compiler''} chapter.
+\end{description}
+
+\subsection{LISP Options On The Command Line}
+The generic command-line format is
+\begin{quote}
+    {\tt  lisp [option option \ldots]}
+\end{quote}
+Each command line option is preceded by a dash (-), and separated from
+the other options by at least one space. There are five options available.
+Description of these options are given below.
+\begin{description}
+   \item[-S\#] Sets the dynamic SEXPR stack size. Default size is 1024 cells
+       and has been defined in {\bf hd.l}.
+       This option is valid if LISP has been compiled with
+       non-zero DSTACK (dynamic stack) option macro.
+   \item[-A\#] Sets {\tt alist} stack size. Default size is 512 cells
+       and has been defined in {\bf hd.l}.
+   \item[-P\#] Sets identifiers print name space size.
+       Default size is 4000 bytes and has been defined in {\bf hd.l}.
+   \item[-T\#] Sets string space size.
+       Default size is 3500 bytes and has been defined in {\bf hd.l}.
+   \item[-M\#] Sets minimum pair space size before garbage collection.
+   \item[-G\#] Sets minimum number of pair space pages
+       before garbage collection.
+   \item[-E{\em environment\_variable}] Introduces to lisp
+        {\em (or to the compiled
+         lisp program)} the operating system
+       environment variable which is set to the initialization file name.
+       If not supplied the default variable
+       name \B{LISPINI} is assumed and  searched
+       in the environment.   Please note that it is the name of the
+       environment variable that will follow the {\bf -E} option, and not
+       the file name itself.
+
+       \underline{For this option only:}
+        It is allowed to leave one or no blank between
+       {\bf -E} and the name of the envionment variable.
+\end{description}
+For example given the following command line
+\begin{quote}    \tt
+  lisp -s2000 -a100 -P1000 -E LINIT
+\end{quote}
+lisp will run with a stack of 2000 cells, alist stack of 100 elements and
+1000 character long identifier print name space. An assignment of the
+environment variable LINIT variable should be made prior to the execution
+of the lisp execution. For example in UNIX BOURNE shell this would be
+some lines as:
+\begin{verbatim}
+     LINIT=/usr/local/lisp/MYLISPINI
+     export LINIT
+\end{verbatim}
+if the specific initialization file for this program lives in the
+\B{/usr/local/lisp} directory under the name \BB{MYLISPINI}.
+
+\setlength{\unitlength}{1ex} % rubber-length: it  means height of letter "x"
+
+\chapter{Syntax and Data Structure}
+LISP  objects  (S-expressions  or  so  called SEXPR's) are divided into two
+classes:  atoms  and  dotted-pairs.  Atoms  are   further   classified   as
+identifiers,  integers,  big  integers,  floating  point  numbers, strings,
+vectors  and  function  pointers.  Dotted-pairs   are   composite   objects
+constructed by  the LISP function {\tt cons } (where \mbox{{\tt cons[a,b]}}
+is denoted by \mbox{(a . b)}). The main universe of discourse for  LISP  is
+the  closure  of  the  set  of all atoms under the operation {\tt cons}. Of
+course the trivial operations among numbers are also included.
+
+The syntax of these LISP objects  and  their  corresponding  internal  data
+structure are explained in the following subsections. But before going into
+details  we  would  like to make a brief summary of the static structure of
+this LISP. There exists 11 different data structures 7 of which corresponds
+to the above stated LISP objects. The remaining 4 are for internal  use  of
+which the user has an indirect discernment (like the error objects).
+These  11  data  structures  are  all  conventionally named to start with a
+capital letter {\bf X}, here they are:
+\vspace*{5ex}\\ \hspace*{5ex}
+\begin{tabular}{rl}
+     $\bullet$ &   Xpair       \\
+     $\bullet$ &   Xid         \\
+     $\bullet$ &   Xstring     \\
+     $\bullet$ &   Xinteger    \\
+     $\bullet$ &   Xbig        \\
+     $\bullet$ &   Xfloating   \\
+     $\bullet$ &   Xvector     \\
+     $\bullet$ &   Xfpointer   \\
+     $\bullet$ &   Xerrmsg     \\
+     $\bullet$ &   Xstrelmnt   \\
+     $\bullet$ &   Xforwardadr \\
+
+\end{tabular}
+\vspace*{5ex}
+
+There exist also a numbering of these objects for  identification  purpose.
+As a  coding convention the variable `{\tt tp}' is used  all  through
+the source for a variable that will hold one of these object-identification
+number.
+\vspace*{5ex}\\ \hspace*{5ex}
+\begin{tabular}{rll}
+   $\bullet$ &   Tpair      &    0  \\
+   $\bullet$ &   Tid        &    1  \\
+   $\bullet$ &   Tstring    &    2  \\
+   $\bullet$ &   Tinteger   &    3  \\
+   $\bullet$ &   Tbig       &    4  \\
+   $\bullet$ &   Tfloating  &    5  \\
+   $\bullet$ &   Tvector    &    6  \\
+   $\bullet$ &   Tfpointer  &    7  \\
+   $\bullet$ &   Terrmsg    &    8  \\
+   $\bullet$ &   Tpname     &    9  \\
+   $\bullet$ &   Tsname     &   10  \\
+   $\bullet$ &   Tforwardadr&   11  \\
+\end{tabular}
+\vspace*{5ex}
+
+These  structures  are  associated  to the following capital letter typedef
+keywords.
+[throughout the next section  these  keywords  will  be
+used  and not the ones with {\bf X}].
+\vspace*{5ex}\\ \hspace*{5ex}
+\begin{tabular}{rll}
+   $\bullet$ & PAIR       & Xpair \\
+   $\bullet$ & ID         & Xid \\
+   $\bullet$ & STRING     &  Xstring  \\
+   $\bullet$ & INTEGER    &  Xinteger  \\
+   $\bullet$ & BIG        & Xbig \\
+   $\bullet$ & FLOATING   & Xfloating \\
+   $\bullet$ & VECTOR     & Xvector \\
+   $\bullet$ & FPOINTER   & Xfpointer \\
+   $\bullet$ & ERRMSG     & Xerrmsg \\
+   $\bullet$ & STRELEMENT & Xstrelmnt
+\end{tabular}
+\vspace*{5ex}
+
+To unify all pointer to these different data  structures  under  a
+single name a continuous type casting is made: a hypothetical type is assumed,
+which is now the {\tt int } type and a pointer type is defined as
+\begin{verbatim}
+    typedef int *PSEXP;
+\end{verbatim}
+and  all  LISP  object  data structure pointers are explicitly converted by
+type casting to this hypothetical pointer.
+
+
+As will be explained in details in the section: Memory Management  and  GC,
+the  data  items  are  hold  in  linked memory pages each of which are of a
+constant size. This size is a multiple of the  least-common-factor  of  the
+sizes  of  possible  data structures that corresponds to a LISP object. The
+memory manager, upon demand for such a  specific  data  type,  allocates  a
+page  of  this size, fills it with empty objects of that type, and then put
+it in a link with the pages of similar kind. So there exist {\tt NTYPES}-many
+linked
+page lists where {\tt NTYPES} is the count of data  types  (in  this  implementa
+tion
+7). The start of these pages are hold in a pointer array.
+
+Each  data  type has its first byte of common structure. This byte is named
+as the {\tt Xtype} field and serves to identify what  this  object  is.  It
+holds  the  type identification number, described above that has a mnemonic
+define-name that starts with  the  letter  {\bf  T}  {\em  (eg.  like  {\tt
+Tpair})}.
+
+Furthermore,  for convenience, the sizes of each type is stored in an array
+`{\tt sz[NTYPES]}' where  {\tt  NTYPES  }  is  the  total  count  of  above
+explained data types.
+
+In  the  following  sections,  for  each  data  object, first a syntactical
+explanation is given then the internal data structure is described.
+
+\section{Dotted Pairs}
+Usual dot and  list   notations  for  dotted  pairs  may  be  used  in  any
+combination  on  input.  On  output, they are written in the {\bf shortest}
+possible form. For example
+\begin{verbatim}
+    ((a . b) . (c . d))
+\end{verbatim}
+is printed as
+\begin{verbatim}
+    ((a . b)  c . d)
+\end{verbatim}
+but may be written in both forms by the user. Also the expression
+\mbox{{\tt (quote x)}} may be abbreviated as {\tt 'x} where {\tt x}  is any
+S-expression.
+
+\subsection{Implementation}
+
+\begin{verbatim}
+     struct Xpair { char Xtype;
+                    PSEXP Xcar;
+                    PSEXP Xcdr; } ;
+\end{verbatim}
+
+\begin{picture}(40,15)     % picture for XPAIR
+\thicklines
+\put(0,0){\line(1,0){32}}  % ust yatay cizgi
+\put(0,6){\line(1,0){32}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(32,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(8,0){\line(0,1){6}}   % soldan 2. bolme cizgisi
+\put(20,0){\line(0,1){6}}  % soldan 3. bolme cizgisi
+\put(4,2.5){\makebox(0,0)[b]{Xtype}}
+\put(14,2.5){\makebox(0,0)[b]{Xcar}}
+\put(26,2.5){\makebox(0,0)[b]{Xcdr}}
+\put(4,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(14,7.5){\makebox(0,0)[b]{{\footnotesize\bf PSEXP}}}
+\put(26,7.5){\makebox(0,0)[b]{{\footnotesize\bf PSEXP}}}
+\end{picture}                  % end-of-picture for XPAIR
+
+
+\section{Identifiers}
+Are composed of letters, and non initial digits. Also, any other  character
+may be included in an identifier by preceding (escaping) it with a {\tt !\ }
+(exclamation  mark).  Identifiers are unlimited in length. Some examples of
+identifiers are :
+\begin{verbatim}
+    a
+    AVeryLongIdentifier
+    U238
+    emsg!*
+    !!!&x
+    !2
+\end{verbatim}
+But {\tt 2}  and {\tt u:238} are not identifiers.  As  an  exception,  the
+LISP  reader  treats  an unescaped special character, other than those that
+are meaningful to it (i.e. parentheses,  dot,  quotes  etc.)  as  a  single
+character identifier. So  {\tt u:238 } is  read  as  a  sequence  of  three
+atoms: identifier {\tt u }, identifier {\tt !: } and integer {\tt 238 }. In
+fact the LISP reader will make S-expressions from anything you  invent  for
+input.
+
+\subsection{Implementation}
+
+Depending on a compiler flag {\tt BITF } setting, one of the below  given
+definition  is performed. They differ only in the second field. In the first
+one the field {\tt Xattr} is masked explicitly with some selecting  bytes
+to  fetch  out the attribute bits. In the second this is done using the bit
+slicing property of the \C language. The alternatives  exist,  since,  some
+compilers generate inefficient codes for bit slicing.
+
+An identifier can have several attributes, like being a  global  or  fluid,
+used  as a name of interpretively defined function etc. Some of the bits in
+the second field of  this  structure  is  deviced  for  this  purpose,  the
+remaining bits are left unused.
+
+As known in LISP each identifier has an associated:
+\begin{description}
+  \item[printname]  which is the way the identifier is recognized in
+                     input and output.
+  \item[value] cell where you can  assign any SEXPR or can be left
+                    unassigned.
+  \item[property-list] where you can store several  properties  under
+                     indicators, or  flag  the identifier with to possess a
+                     property. This is a list of SEXPRs.
+\end{description}
+
+Therefore it is trivial that the internal data structure will  have  fields
+to  accommodate  these  associated quantities. You will realize that a field
+named {\tt Xhashlink} exists. In our implementation identifiers are chained
+together through this field, provided they belong to the same  hash-bucket.
+The hash-number of an identifier is determined  by  summing  up  the  ascii
+codes  of  its printname characters and then taking this number modulo 128.
+So there are 128 number of hash-buckets. A new created identifier, upon the
+decision of his hash-number is chained into the  link  of  the  identifiers
+with  the same hash-number (we call this chain a hash-bucket) via this {\tt
+Xhashlink} field. The entry points of these buckets are kept  in  an  array
+named {\tt hashtab}.
+
+\begin{verbatim}
+    struct Xid { char Xtype;
+                 unsigned Xisinheap : 1;
+                 unsigned Xisglobal : 1;
+                 unsigned Xisfluid  : 1;
+                 unsigned Xisfunction : 1;
+                 unsigned Xisinoblist : 1;
+                 unsigned Xisdclfluid : 1;
+                 struct Xid *Xhashlink;
+                 PSEXP Xvalue;
+                 PSEXP Xproplist;
+                 char *Xpname; } ;
+
+
+    struct Xid { char Xtype;
+                 char Xattr;
+                 struct Xid *Xhashlink;
+                 PSEXP Xvalue;
+                 PSEXP Xproplist;
+                 char *Xpname; } ;
+\end{verbatim}
+
+\begin{picture}(70,25)(-5,-10)  % picture for XID
+\thicklines
+\put(0,0){\line(1,0){64}}  % ust yatay cizgi
+\put(0,6){\line(1,0){64}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(64,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(8,0){\line(0,1){6}}   % soldan ikinci bolme cizgisi
+\put(9,0){\line(0,1){6}}   % soldan 3. bolme cizgisi  (bit field)
+\put(10,0){\line(0,1){6}}  % soldan 4. bolme cizgisi  (bit field)
+\put(11,0){\line(0,1){6}}  % soldan 5. bolme cizgisi  (bit field)
+\put(12,0){\line(0,1){6}}  % soldan 6. bolme cizgisi  (bit field)
+\put(13,0){\line(0,1){6}}  % soldan 7. bolme cizgisi  (bit field)
+\put(14,0){\line(0,1){6}}  % soldan 8. bolme cizgisi  (bit field)
+\put(15,0){\line(0,1){6}}  % soldan 9. bolme cizgisi  (bit field)
+\put(16,0){\line(0,1){6}}  % soldan 10.bolme cizgisi  (bit field)
+\put(28,0){\line(0,1){6}}  % soldan 11.bolme cizgisi
+\put(40,0){\line(0,1){6}}  % sagdan 3. bolme cizgisi
+\put(52,0){\line(0,1){6}}  % sagdan 2. bolme cizgisi
+\put(10,-1.5){\line(-1,0){1}}         % (bit field) ustten 1. yatik ok parcasi
+\put(10.33,-3.5){\line(-1,0){1.33}}   % (bit field) ustten 2. yatik ok parcasi
+\put(10.66,-5.5){\line(-1,0){1.66}}   % (bit field) ustten 3. yatik ok parcasi
+\put(11,-7.7){\line(-1,0){2}}         % (bit field) ustten 4. yatik ok parcasi
+\put(11.33,-9.5){\line(-1,0){2.33}}   % (bit field) ustten 5. yatik ok parcasi
+\put(11.66,-11.5){\line(-1,0){2.66}}  % (bit field) ustten 6. yatik ok parcasi
+\put(10,-1.5){\vector(1,3){0.5}}      % (bit field) ustten 1. egik ok parcasi
+\put(10.33,-3.5){\vector(1,3){1.166}} % (bit field) ustten 2. egik ok parcasi
+\put(10.66,-5.5){\vector(1,3){1.833}} % (bit field) ustten 3. egik ok parcasi
+\put(11,-7.5){\vector(1,3){2.5}}      % (bit field) ustten 4. egik ok parcasi
+\put(11.33,-9.5){\vector(1,3){3.166}} % (bit field) ustten 5. egik ok parcasi
+\put(11.66,-11.5){\vector(1,3){3.833}} %(bit field) ustten 6. egik ok parcasi
+\put(4,2.5){\makebox(0,0)[b]{Xtype}}
+\put(22,2.5){\makebox(0,0)[b]{Xhashlink}}
+\put(34,2.5){\makebox(0,0)[b]{Xvalue}}
+\put(46,2.5){\makebox(0,0)[b]{Xproplist}}
+\put(58,2.5){\makebox(0,0)[b]{Xpname}}
+\put(4,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(8.15,6.5){\makebox(0,0)[lb]{$\overbrace{\makebox[7.8ex]{}}^{1\; byte}$}}
+\put(22,7.5){\makebox(0,0)[b]{{\footnotesize\bf ID\ptr }}}
+\put(34,7.5){\makebox(0,0)[b]{{\footnotesize\bf PSEXP}}}
+\put(46,7.5){\makebox(0,0)[b]{{\footnotesize\bf PSEXP}}}
+\put(58,7.5){\makebox(0,0)[b]{{\footnotesize\bf char\ptr}}}
+\put(8.5,-1.5){\makebox(0,0)[r]{{\footnotesize Xisinheap}}}
+\put(8.5,-3.5){\makebox(0,0)[r]{{\footnotesize Xisglobal}}}
+\put(8.5,-5.5){\makebox(0,0)[r]{{\footnotesize Xisfluid}}}
+\put(8.5,-7.5){\makebox(0,0)[r]{{\footnotesize Xisfunction}}}
+\put(8.5,-9.5){\makebox(0,0)[r]{{\footnotesize Xisinoblist}}}
+\put(8.5,-11.5){\makebox(0,0)[r]{{\footnotesize Xisdclfluid}}}
+\end{picture}                  % end-of-picture for XID
+
+
+
+\section{Strings}
+Are enclosed between double quotes. Any character may be used in a  string.
+A  double  quote  should  be  written as two consecutive double quotes. The
+following are examples of valid strings.
+\begin{verbatim}
+    "abcdefghijklmnopqrstuvwxyz"
+    "that's"
+    "blabla!"
+    "He said ""LISP"""
+\end{verbatim}
+
+\subsection{Implementation}
+
+There is nothing much to say about string implementation. The corresponding
+structure  holds  a  pointer  to  a string-element. The string-elements are
+allocated from a pre-allocated (either static or dynamic, depending on what
+the compiler flag {\tt DSTACK} says)  byte  array.  It  is  something  very
+common that due to garbage collection some gaps may occur in this array. So
+the  famous  problem  of  fragmentation  arises.To  solve  this  problem  a
+Compactification is performed on this byte array, when it is necessary. The
+back-pointer that one  observes  in  the  string-element  serves  for  this
+purpose.  The last field of a string-element is declared as you see to be a
+character array of size 254, which is of course nothing real. It will never
+be the case that such a string-element is  created  using  the  \C  systems
+variable  creation  mechanisms.  This  structure declaration will always be
+used as type casting. So a good controlled pointer that points to the first
+free position in the string-byte array (where all of  the  string  elements
+live)  will  be type casted to be a STRELEMENT and will be advanced such an
+amount that the  actual  string  will  exactly  fit  into  the  place  just
+following the back-pointer. So it will also be possible to index the actual
+string  bytes  through  the  field  identifier (which was declared to be an
+array) {\tt Xrealstr}, cute, isn't it?. For the IBMPC implementation the
+string-byte elements are casted with a structure that we named
+{\tt struct Xstrelmnt }.  But as this code was ported to other computers
+this casting proved itself to be non-portable. The reason was that some
+(non - 80x86) processors (like the 680xx, or the SPARC) did not accept
+pointer indirections if  the pointer is sitting in the memory at an
+address that is not zero (modulo 4). For these cases the string-byte array
+is not type casted but the fields are accessed (harshly) by movmem calls.
+Please note that the underlying data-representation is exactly the same
+in both cases. If you have a (80x86) processor then you may turn on
+the IBMPC flag, so the fields will be accessed by type-casting and
+(hopefully) a faster code will be generated. Below is the picture for
+the IBMPC case. For the non IBMPC situation consider the second picture.
+
+\begin{center}
+{\bf IBMPC case}
+\end{center}
+
+
+\begin{verbatim}
+     struct Xstring { char Xtype;
+                      struct Xstrelmnt *Xstrbody; } ;
+
+     struct Xstrelmnt { char Xlength;
+                        STRING* Xbackpointer;
+char Xrealstr[254]; } ;
+\end{verbatim}
+
+\begin{picture}(50,30)(-10,-15)     % picture for XSTRING
+\thicklines
+\put(0,0){\line(1,0){20}}  % ust yatay cizgi
+\put(0,6){\line(1,0){20}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(20,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(8,0){\line(0,1){6}}   % soldan 2. bolme cizgisi
+\put(4,2.5){\makebox(0,0)[b]{Xtype}}
+\put(14,2.5){\makebox(0,0)[b]{Xstrbody}}
+\put(4,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(18,7.5){\makebox(0,0)[b]{{\footnotesize\bf PSTRELEMENT}}}
+\put(14,1.5){\circle*{0.8}}
+\put(14,1.5){\line(0,-1){11}}
+\put(15,-9.5){\oval(2,2)[bl]}
+\put(15,-10.5){\vector(1,0){3.8}}
+\put(19.5,-13.5){\makebox(0,0)[rb]{{\large\bf STRELEMENT :\ }}}
+\put(19.5,-16)
+{
+\begin{picture}(40,15)    % picture for XSTRELMNT
+\thicklines
+\put(0,0){\line(1,0){36}}  % ust yatay cizgi
+\put(0,6){\line(1,0){36}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(36,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(10,0){\line(0,1){6}}   % soldan 2. bolme cizgisi
+\put(26,0){\line(0,1){6}}  % soldan 3. bolme cizgisi
+\put(5,2.5){\makebox(0,0)[b]{Xlength}}
+\put(18,2.5){\makebox(0,0)[b]{Xbackpointer}}
+\put(31,2.5){\makebox(0,0)[b]{Xrealstr}}
+\put(5,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(18,7.5){\makebox(0,0)[b]{{\footnotesize\bf STRING\ptr}}}
+\put(31,7.5){\makebox(0,0)[b]{{\footnotesize\bf char[]}}}
+\put(18,1.5){\circle*{0.8}}
+\put(18,1.5){\line(0,-1){3}}
+\put(17,-1.5){\oval(2,2)[br]}
+\put(17,-2.5){\line(-1,0){42}}
+\put(-25,7){\oval(2,19)[l]}
+\put(-25,16.5){\vector(1,0){5}}
+\end{picture}                  % end-of-picture for XSTRELMNT
+}
+\end{picture}                  % end-of-picture for XSTRING
+
+
+
+\begin{center}
+{\bf non - IBMPC case}
+\end{center}
+
+
+\begin{verbatim}
+     struct Xstring { char Xtype;
+                      char *Xstrelement; } ;
+\end{verbatim}
+
+\begin{picture}(50,30)(-10,-15)     % picture for XSTRING
+\thicklines
+\put(0,0){\line(1,0){20}}  % ust yatay cizgi
+\put(0,6){\line(1,0){20}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(20,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(8,0){\line(0,1){6}}   % soldan 2. bolme cizgisi
+\put(4,2.5){\makebox(0,0)[b]{Xtype}}
+\put(14,2.5){\makebox(0,0)[b]{Xstrelement}}
+\put(4,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(12,7.5){\makebox(0,0)[b]{{\footnotesize\bf char\ptr}}}
+\put(14,1.5){\circle*{0.8}}
+\put(14,1.5){\line(0,-1){11}}
+\put(15,-9.5){\oval(2,2)[bl]}
+\put(15,-10.5){\vector(1,0){3.8}}
+\put(19.5,-16)
+{
+\begin{picture}(40,15)    % picture for XSTRELMNT
+\thicklines
+\put(0,0){\line(1,0){36}}  % ust yatay cizgi
+\put(0,6){\line(1,0){36}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(36,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(10,0){\line(0,1){6}}   % soldan 2. bolme cizgisi
+\put(26,0){\line(0,1){6}}  % soldan 3. bolme cizgisi
+\put(5,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(18,7.5){\makebox(0,0)[b]{{\footnotesize\bf STRING\ptr}}}
+\put(31,7.5){\makebox(0,0)[b]{{\footnotesize\bf char[]}}}
+\put(18,1.5){\circle*{0.8}}
+\put(18,1.5){\line(0,-1){3}}
+\put(17,-1.5){\oval(2,2)[br]}
+\put(17,-2.5){\line(-1,0){42}}
+\put(-25,7){\oval(2,19)[l]}
+\put(-25,16.5){\vector(1,0){5}}
+\end{picture}                  % end-of-picture for XSTRELMNT
+}
+\end{picture}                  % end-of-picture for XSTRING
+
+
+
+
+\section{Integers and Big Integers}
+Have  the  usual  regular  gramer  syntax:  \mbox{{\bf  [+  --]digit+}  }  .
+Normal integers (or short LISP integers) are implemented as {\tt long int}
+types of \CC. This implementation enables arbitrary size integers and their
+arithmetic.  The  system  is completely aware of all the arithmetic and the
+internal type change from integers to big integers (which  are  implemented
+as  a  kind  of  link  list)   is transparent to the user. All this type of
+internal type conversions are done automatically.
+
+\subsection{Implementation}
+
+\begin{verbatim}
+    struct Xinteger { char Xtype;
+                      long int Xintval; } ;
+
+    struct Xbig { char Xtype;
+                  long int Xintval;
+                  PSEXP Xcdr; } ;
+\end{verbatim}
+
+\begin{picture}(30,15)     % picture for XINTEGER
+\thicklines
+\put(0,0){\line(1,0){20}}  % ust yatay cizgi
+\put(0,6){\line(1,0){20}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(20,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(8,0){\line(0,1){6}}   % soldan 2. bolme cizgisi
+\put(4,2.5){\makebox(0,0)[b]{Xtype}}
+\put(14,2.5){\makebox(0,0)[b]{Xintval}}
+\put(4,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(14,7.5){\makebox(0,0)[b]{{\footnotesize\bf long int}}}
+\end{picture}                  % end-of-picture for XINTEGER
+
+
+\begin{picture}(40,15)     % picture for XBIG
+\thicklines
+\put(0,0){\line(1,0){32}}  % ust yatay cizgi
+\put(0,6){\line(1,0){32}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(32,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(8,0){\line(0,1){6}}   % soldan 2. bolme cizgisi
+\put(20,0){\line(0,1){6}}  % soldan 3. bolme cizgisi
+\put(4,2.5){\makebox(0,0)[b]{Xtype}}
+\put(14,2.5){\makebox(0,0)[b]{Xintval}}
+\put(26,2.5){\makebox(0,0)[b]{Xcdr}}
+\put(4,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(14,7.5){\makebox(0,0)[b]{{\footnotesize\bf long int}}}
+\put(26,7.5){\makebox(0,0)[b]{{\footnotesize\bf PSEXP}}}
+\end{picture}                  % end-of-picture for XBIG
+
+
+\section{Floating Point Numbers}
+Are implemented as doubles of \CC. In syntax they contain a decimal  point,
+optional sign and exponent.
+\begin{verbatim}
+    12.
+    3.1415
+    -.5
+    +12.3e-123
+    5.E7
+\end{verbatim}
+are floating point numbers, but not {\tt 2e3} (2.e3 should be used).
+
+\subsection{Implementation}
+
+\begin{verbatim}
+    struct Xfloating { char Xtype;
+                       double Xfloval; } ;
+\end{verbatim}
+
+\begin{picture}(30,15)     % picture for XFLOATING
+\thicklines
+\put(0,0){\line(1,0){20}}  % ust yatay cizgi
+\put(0,6){\line(1,0){20}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(20,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(8,0){\line(0,1){6}}   % soldan 2. bolme cizgisi
+\put(4,2.5){\makebox(0,0)[b]{Xtype}}
+\put(14,2.5){\makebox(0,0)[b]{Xfloval}}
+\put(4,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(14,7.5){\makebox(0,0)[b]{{\footnotesize\bf double}}}
+\end{picture}                  % end-of-picture for XFLOATING
+
+
+\section{Vectors}
+Are one dimensional arrays of S-expressions. Although  they  are  certainly
+composite  objects,  they  are considered to be atoms in LISP. Every vector
+has a fixed nonnegative upper bound, and its indices  range  through  0  to
+this  upper bound (inclusive). They are written between brackets, where the
+elements are separated by commas, like
+\begin{verbatim}
+    [elt0,let1,...,eltn]
+\end{verbatim}
+
+\subsection{Implementation}
+
+\begin{verbatim}
+    struct Xvector { char Xtype;
+                     int Xupbv;
+                     PSEXP *Xvectelts; } ;
+\end{verbatim}
+
+\begin{picture}(40,15)     % picture for XVECTOR
+\thicklines
+\put(0,0){\line(1,0){32}}  % ust yatay cizgi
+\put(0,6){\line(1,0){32}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(32,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(8,0){\line(0,1){6}}   % soldan 2. bolme cizgisi
+\put(20,0){\line(0,1){6}}  % soldan 3. bolme cizgisi
+\put(4,2.5){\makebox(0,0)[b]{Xtype}}
+\put(14,2.5){\makebox(0,0)[b]{Xupbv}}
+\put(26,2.5){\makebox(0,0)[b]{Xvectelts}}
+\put(4,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(14,7.5){\makebox(0,0)[b]{{\footnotesize\bf int}}}
+\put(26,7.5){\makebox(0,0)[b]{{\footnotesize\bf PSEXP\ptr}}}
+\end{picture}                  % end-of-picture for XVECTOR
+
+
+\section{Function Pointers}
+Machine code routines, either produced after compilation, or parts  of  the
+interpreter  itself  are  considered to be LISP objects. More precisely, the
+interpreter uses function pointers to access these dynamically.  These  can
+be  part  of  an  S-expression,  or can be printed. They are denoted by the
+octal address of the function enclosed between number signs {\tt \#}.
+
+
+
+\section{Functions and Function Definitions}
+Lisp  functions  are  divided into two main classes. One includes functions
+defined as {\bf lambda  expressions},  which  are  interpreted,  the  other
+includes  compiled  functions  and  functions  that are defined in the LISP
+system, which are accessed via function pointers. Arguments are  passed  to
+interpreted  functions  by  lambda convention (saving the current value  of
+the lambda dummy-argument-identifier onto an internal  stack  (the  `alist'
+stack)   and   temporarily   assigning   the   current   argument   to  the
+dummy-argument-identifier, as value),
+to compiled functions the arguments are passed through the {\bf  registers}
+(internal   defined   static   memory  locations).  Functions  are  further
+classified by the argument passing mechanism peculiar to them:
+\begin{description}
+\item[{\bf spread}] functions have a fixed  number  of  arguments  (with  a
+                    maximum  of 16) which are bound to lambda parameters on
+                    one-to-one basis. Giving incorrect number of  arguments
+                    to these results in a mismatch error.
+\item[{\bf nospread}] functions may have a variable number of arguments,but
+                    have  a  single formal parameter, which is bound to the
+                    list of the actual arguments. (Obvious examples are the
+                    LISP functions as\ \ {\tt and, or, cond, list}
+\item[{\bf eval}]   type functions receive their arguments pre-evaluated in
+                    contrast to
+\item[{\bf noeval}] type functions which receive their arguments unevaluated
+                    (as in the case of {\tt and, cond, quote})
+\end{description}
+All of the possible eight combinations are implemented as follows:
+\begin{center}
+\begin{tabular}{r|c|c|}
+    \multicolumn{1}{c}{\mbox{}}  &
+    \multicolumn{1}{c}{\bf  spread} & \multicolumn{1}{c}{\bf nospread} \\
+\cline{2-3}
+  {\bf eval} & \begin{tabular}{c} expr \\ subr \end{tabular}
+             & \begin{tabular}{c} lexpr \\ lsubr \end{tabular}           \\
+\cline{2-3}
+  {\bf noeval} & \begin{tabular}{c} nexpr \\ nsubr \end{tabular}
+             & \begin{tabular}{c} fexpr \\ fsubr \end{tabular}           \\
+\cline{2-3}
+\end{tabular}
+\end{center}
+expr, fexpr, nexpr, and lexpr's are lambda expressions, subr, fsubr, nsubr,
+and lsubr's are function pointers.
+
+In  addition  to  these there is one more type: `macro'. A function of type
+macro has a single formal parameter which is bound to the entire expression
+invoking it, and the value returned by it is reevaluated.
+
+\subsection{Implementation}
+
+The  {\tt Xfnc } field is a function pointer which contains the entry point
+of the compiled function. Since the arguments may vary in  number,  somehow
+the  system  must know this. The second field {\tt Xargno } serves for this
+purpose.
+
+\begin{verbatim}
+    struct Xfpointer { char Xtype;
+                       char Xargno;
+                       int (*Xfnc)(); } ;
+\end{verbatim}
+
+\begin{picture}(40,15)     % picture for XFPOINTER
+\thicklines
+\put(0,0){\line(1,0){28}}  % ust yatay cizgi
+\put(0,6){\line(1,0){28}}  % alt yatay cizgi
+\put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+\put(28,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+\thinlines
+\put(8,0){\line(0,1){6}}   % soldan 2. bolme cizgisi
+\put(16,0){\line(0,1){6}}  % soldan 3. bolme cizgisi
+\put(4,2.5){\makebox(0,0)[b]{Xtype}}
+\put(12,2.5){\makebox(0,0)[b]{Xargno}}
+\put(24,2.5){\makebox(0,0)[b]{Xfnc}}
+\put(4,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(12,7.5){\makebox(0,0)[b]{{\footnotesize\bf char}}}
+\put(24,7.5){\makebox(0,0)[b]{{\footnotesize\bf int (\ptr)()}}}
+\end{picture}                  % end-of-picture for XFPOINTER
+
+
+
+\section{The Lexical Analyzer}
+The  lexical  analyzer is not a DFA. At the development phase the {\bf lex}
+program of the UNIX system was used, but later, the code  this  system  has
+generated was found to be large in size. Therefore, a hand coded functional
+equivalent  has  been  substituted.  This  is  the  reason  why most of the
+functions have names that are used by the  {\bf  lex+yacc}  utilities.  The
+hand coded lexical analyzer, is not as fast as a DFA, but the difference in
+timing is very minor.
+
+The  design  philosophy  of  the lexical analyzer is consulting a series of
+functions each of which are sensible to a certain lexical pattern type. For
+example, the function {\tt isid() } is  sensible  to  identifiers.  If  the
+current  parsing  pointer  {\tt  curpos  }  points  to  a position where an
+identifier starts, then upon a call to {\tt isid() } three actions will  be
+taken by this function:
+\begin{enumerate}
+   \item     The input string is scanned until the end of the identifier is
+             found.
+   \item     {\tt curpos } is advanced to the first unused character.
+   \item     A return value of { \bf 1 } is passed back to the caller.
+\end{enumerate}
+If  the  pattern  that  was  currently  pointed by {\tt curpos } was not an
+identifier then a call to {\tt isid() } would not alter the value  of  {\tt
+curpos } and the return-value would be {\bf 0}.
+
+The  main  function of the lexical analyzing process is {\tt yylex()}, when
+this function is called, functions like  \mbox{\tt  isstring()},  \mbox{\tt
+isid()},  \mbox{\tt  isfpointer()},  etc.  are  called  until  one  of them
+succeeds (that means return a {\bf  1}).  When  this  happens  the  matched
+pattern  is  copied  into  the array {\tt yytex } by a call to the function
+\mbox{\tt storetext()}. If the parsed pattern is a delimiter then a  global
+variable {\tt delimflag } is set to {\bf 1}.
+
+
+\chapter{The Dynamic Structure}
+\section{Memory Management}
+{\tt page} is the main storage unit of this LISP implementation.
+LISP data items (SEXPR) are  hold  in  linked memory pages each
+of which are of a
+constant size. This size {\tt PAGESIZE} is a multiple of the
+least-common-factor
+of the sizes  of  possible  data structures (sizes of which are stored in
+the {\tt sz} array) that corresponds to a LISP object.
+Pages are allocated dynamically from the system memory by using {\tt malloc}.
+\begin{figure}[htb]          %figure of page organization
+\setlength{\unitlength}{1mm}
+\begin{picture}(120,90)
+\small
+
+\put(3,60){\framebox(20,21){}}               % pages[NTYPES]
+\multiput(3,63)(0,3){6}{\line(1,0){20}}      % seven data types
+\put(1,82){pages[NTYPES]}
+
+\put(21,76.5){\line(1,0){10.5}}   %pages[2] pointer. final point (31.5,76.5)
+\put(21,76.5){\circle*{1}}
+\put(31.5,78){\oval(3,3)[br]}    %final position (33,78)
+\put(33,78){\line(0,1){9}}       %final position (33,87)
+\put(34.5,87){\oval(3,3)[tl]}    %final position (36,87.5)
+\put(34.5,88.5){\vector(1,0){8.5}}
+
+\put(43,60){\framebox(25,30)[t]{\tt nextpage}} % page 1
+\put(48,84.5){\tt free}
+\put(69,84.5){\tt NULL}
+\multiput(43,87)(0,-3){2}{\line(1,0){25}}      %fields of page 1
+
+\put(88,60){\framebox(25,30)[t]{\tt nextpage}} % page 2
+\put(111,88.5){\vector(1,0){6}}
+\put(111,88.5){\circle*{1}}
+\multiput(88,87)(0,-3){2}{\line(1,0){25}}      %fields of page 2
+\put(93,84.5){\tt free}
+
+\put(3,20){\framebox(20,21){}}               % cpages[NTYPES]
+\multiput(3,23)(0,3){6}{\line(1,0){20}}      % seven data types
+\put(0,42){cpages[NTYPES]}
+\put(21,36.5){\vector(1,0){22}}
+\put(43,36.5){\line(1,0){33.5}}       %final point (76.5,36.5)
+\put(76.5,38){\oval(3,3)[br]}
+\put(78,38){\vector(0,1){50.5}}
+\put(66,88.5){\vector(1,0){22}}
+\put(66,88.5){\circle*{1}}
+\put(66,28.5){\vector(1,0){22}}
+\put(66,28.5){\circle*{1}}
+
+\put(111,85.5){\circle*{1}}
+\put(111,85.5){\line(1,0){2}}
+\put(113,75.5){\oval(6,20)[r]}         %free cell pointer
+\put(88,64){\framebox(25,3){free cell}}
+\put(116,80){\vector(0,-1){5}}
+
+\put(43,0){\framebox(25,30)[t]{\tt nextpage}} % page
+\put(48,24.5){\tt free}
+\multiput(43,27)(0,-3){2}{\line(1,0){25}}      %fields of page 3
+
+\put(88,0){\framebox(25,30)[t]{\tt nextpage}} % page 2
+\put(114,27.5){\tt NULL}
+\multiput(88,27)(0,-3){2}{\line(1,0){25}}      %fields of page 4
+\put(93,24.5){\tt free}
+
+\put(3,10){\framebox(20,3){\tt freepages}}
+\put(22,11,5){\vector(1,0){6}}
+\put(22,11.5){\circle*{1}}
+\put(28,11,5){\line(1,0){5}}        %final point (33,11.5)
+\put(33,13){\oval(3,3)[br]}         %final point (34.5,13)
+\put(34.5,13){\line(0,1){14}}       %final point (33,27)
+\put(36,27){\oval(3,3)[tl]}         %final point (36,28.5)
+\put(36,28.5){\vector(1,0){7}}      %final point (43,28.5)
+
+\end{picture}
+\caption{\bf Typical page organization.}
+\end{figure}
+Each page is a structure of three elements (defined in {\bf type.l}):
+\begin{verbatim}
+     struct page { struct page *nextpage;
+                   char *free;
+   char pagebd[PAGESIZE]; } ;
+
+     typedef struct page PAGE, *PPAGE;
+
+\end{verbatim}
+where
+\begin{description}
+ \item[nextpage] Pointer to the next page of the same page type.
+ \item[free] Free cell pointer of the link list of the free cells of the page.
+ \item[pagebd] Space for LISP data types (SEXPR).
+ \item[PAGESIZE] Size of the page.
+ \item[PAGE] Page structure type.
+ \item[PPAGE] Pointer type to a page structure type.
+\end{description}
+Following variables are also used in memory management:
+\begin{verbatim}
+
+PPAGE pages[NTYPES], cpages[NTYPES];
+PPAGE freepages;
+
+unsigned sz[NTYPES] = { sizeof(PAIR),
+                        sizeof(ID),
+                        sizeof(STRING),
+                        sizeof(INTEGER),
+                        sizeof(BIG),
+                        sizeof(FLOATING),
+                        sizeof(VECTOR) };
+
+\end{verbatim}
+\begin{description}
+  \item[NTYPES] Number of dynamically generated cell types (macro).
+      It is 7 in this implementation.
+  \item[pages] Array of pointers to the first pages of different types.
+               Used by garbage collection.
+  \item[cpages] Array of pointers to the active pages of different types.
+     Allocation of new items are done from these active pages.
+  \item[sz] Array which contains the sizes of cells.
+  \item[freepages] Pointer to a page. It points to the first page of the link
+      list of completely empty pages. These pages are generated and linked by
+      the garbage collector if all the cells in page are unbounded cells. Free
+      pages are untyped pages.
+\end{description}
+\setlength{\unitlength}{1mm}
+\begin{figure}[htb]
+\begin{picture}(160,110)(5,20)  % Allocation algorithm
+\small
+\put(80,120)
+    { \makebox(0,0){ \framebox(44,12){
+      \begin{minipage}{4cm}
+            Get current page of type  from
+    \mbox{\tt cpage[tp]}
+      \end{minipage}
+    }              }        }
+\put(80,110){\vector(0,-1){10}}
+\put(80,90)
+    { \makebox(0,0){ \framebox(34,15){
+      \begin{minipage}{3cm}
+            Check {\tt free } item pointer of the page. \\
+            Is it {\tt NULL}?
+      \end{minipage}
+    }               }       }
+\put(80,80){\vector(0,-1){10}}
+\put(82,75){{\bf Y}}
+
+\put(80,60)
+    { \makebox(0,0){  \framebox(34,12){
+      \begin{minipage}{3cm}
+            Check {\tt freepages } pointer.
+            Is it {\tt NULL}?
+      \end{minipage}
+    }              }        }
+\put(80,50){\vector(0,-1){10}}
+\put(82,45){{\bf N}}
+\put(70,20)
+    { \framebox(84,16){
+      \begin{minipage}{8cm}
+            Put the content of the {\tt freepages } pointer into
+    {\tt cpages[tp]}. Put the {\tt nextpage } pointer of the
+            page pointed by {\tt freepages } into {\tt freepages}.
+      \end{minipage}
+    }                     }
+\put(136,90)
+    {  \makebox(0,0){ \framebox(44,30){
+      \begin{minipage}{4cm}
+            Put next free item to {\tt free } item pointer if there is one.
+            Otherwise put {\tt NULL } to {\tt free } item pointer.
+            Return the pointer of the allocated item.
+      \end{minipage}
+    }               }       }
+\put(100,90){\vector(1,0){8}}
+\put(102,91){{\bf N}}
+\put(30,60)
+    {   \makebox(0,0){ \framebox(44,15){
+      \begin{minipage}{4cm}
+            Try to allocate page from the memory. Is there enough memory?
+      \end{minipage}
+    }                }      }
+\put(30,100)
+    {    \makebox(0,0){      \framebox(34,7){
+      \begin{minipage}{3cm}
+            Garbage Collection
+      \end{minipage}
+    }   }     }
+\put(30,105){\vector(0,1){15}}
+\put(30,73){\vector(0,1){20}}
+\put(32,80){{\bf N}}
+\put(30,50){\vector(0,-1){10}}
+\put(32,44){{\bf Y}}
+\put(60,60){\vector(-1,0){6}}
+\put(55,61){{\bf Y}}
+\put(30,30)
+    {    \makebox(0,0){     \framebox(44,16){
+      \begin{minipage}{4cm}
+            Put the pointer of the allocated page into
+    \mbox{\tt cpage[tp]}
+      \end{minipage}
+    }                 }     }
+\put(7,30){\vector(-1,0){7}}
+\put(50,20){\oval(100,4)[b]}
+\put(0,20){\vector(0,1){50}}
+\put(0,70){\line(0,1){50}}
+\put(1,119){\oval(2,2)[tl]}
+\put(1,120){\vector(1,0){44}}
+\end{picture}
+\caption{\bf Item allocation algorithm of type `{\tt tp}' (roughly).}
+\end{figure}
+Allocation of LISP data items are done by two functions, {\tt zalloc}
+and {\tt zgetpage} in file {\bf lisp-zfn.l}:
+\begin{description}
+  \item[zgetpage:]\ \ \ {\tt PPAGE zgetpage(unsigned tp);} \\
+     {\tt zgetpage} is the
+     function for allocating page of given type {\tt tp}. Each time it is
+     called it returns a pointer to an empty page which contains the
+     linked list of {\tt PAGESIZE/sz[tp]} number of free cells of type {\tt tp}.
+
+     Linking is done by \mbox{\tt zgetpage}
+     and first free cell address is put into free pointer of the page.
+     nextpage pointer of the page is always set to NULL.
+     \mbox{\tt zgetpage} returns a page from the free pages list,
+     if there are any pages available ({\tt freepages} non-NULL). Otherwise
+     it allocates new page from the system sources if possible and
+     otherwise it returns NULL.
+
+  \item[zalloc:]\ \ \ {\tt PSEXP zalloc(unsigned tp);} \\
+     {\tt zalloc} is the lowest-level
+     function for allocating cell of given type {\tt tp}. Each time it is
+     called it returns a pointer to a fresh cell. It returns a fresh cell,
+     if there are any cells available on active page
+     (free pointer of page non-NULL). Otherwise, it attempts to allocate a
+     new page by calling {\tt zgetpage} and if {\tt zgetpage} returns a
+     non-NULL pointer
+     to a fresh page it returns the first cell in that page else it performs
+     garbage collection which constructs linked lists of reusable cells
+     for each type.
+\end{description}
+Other allocation functions are {\tt zcalloc} and {\tt zsalloc}:
+\begin{description}
+  \item[zcalloc:]\ \ \ {\tt PCHAR zcalloc(unsigned n); } \\
+    Performs  space allocation for identifier print name
+    of size `{\tt n}' characters  from
+    print name space. Returns pointer to the allocated space.
+  \item[zsalloc:]\ \ \ {\tt PCHAR zsalloc(unsigned n);}  \\
+    Allocates space in string space for a string of `{\tt n}' character long.
+\end{description}
+
+\setlength{\unitlength}{1ex} % rubber-length: it  means height of letter "x"
+\section{The Stacks}
+As it was explained in the introduction, this implementation is not a stack
+oriented  one.  That  means  the  argument  passing  in evaluations are not
+performed via a stack but through some fixed memory locations  (registers).
+This fact, should  in no means be interpreted as no stack is used at all.
+Indeed,   there   exist   basically   three   different   stacks   in  this
+implementation.
+\begin{description}
+\item[{\bf The System Stack}] This stack  is  provided  by  the \C compiler
+         and is the place where all the \C local variables ---or so  called
+         {\bf auto}'s--- are created, arguments are passed on, the functions
+         return addresses are pushed on. The  system  is  designed  not  to
+         interfere   with   this  stack.  We  tried to refrain passing LISP
+         objects as arguments on this stack, and if we have done so, it was
+ in those cases where we were  absolutely  sure  that  no  garbage
+         collection marking would be necessary for those entities.
+\item[{\bf The SEXPR Stack}]  In  fact  this  is  not  a  stack  where  the
+         S-expressions are pushed on but merely a stack where {\bf pointers
+         to S-expressions } are pushed  on.  A  language  like  LISP,  that
+         provides  recursion  must  definitely  have  a  stack where domain
+         entities of it can be pushed. It is implemented  as  an  array  of
+         {\tt  PSEXP}'s  and  is has its start pointed by the variable {\tt
+         zstackptr  }  and  its  current  top  pointed  by   the   variable
+         {\tt  zstacktop  }.  There  exist define macros that serve to load
+         to/from this stack from/to the registers and macros  to  move  the
+         top-pointer:       ({\tt      \mbox{kalloc()},     \mbox{ksetn()},
+         \mbox{kloads()}, \mbox{ksets()} }). They  will  not  be  explained
+         here in details, the code is self-explanatory. It is for sure that
+         a garbage collection marking is performed  from  this  stack.  The
+         array  that  is  used  for  this  purpose is either allocated as a
+         static array at compile time or is allocated dynamically from heap
+         at the initialization of LISP.  The  way  chosen  depends  on  the
+         the  state the compiler flag {\tt \#DSTACK } is set to, at compile
+         time of the LISP system. If it is to be allocated dynamically then
+         the default size can be overridden by a command line option.
+\item[{\bf The ALIST stack }] This stack is used for the {\bf lambda } and
+         {\bf  prog } bindings.  Especially in the interpretive environment
+         the user defined lambda expressions and prog's are of intense use.
+         Every time a identifier is used as a lambda variable  or  a  local
+         variable for a prog body the LISP system has to save the old value
+         of  that  identifier,  in  order to be able to restore it upon the
+         exit. The implementation of the stack is realized as an  array  of
+         data  structures  (named  {\tt  ALISTENT})  of the following form.
+                  \begin{center}
+                      \begin{picture}(40,11)     % picture for alist entry
+                      \thicklines
+                      \put(0,0){\line(1,0){28}}  % ust yatay cizgi
+                      \put(0,6){\line(1,0){28}}  % alt yatay cizgi
+                      \put(0,0){\line(0,1){6}}   % en soldaki dik bolme cizgisi
+                      \put(28,0){\line(0,1){6}}  % en sagdaki dik bolme cizgisi
+                      \thinlines
+                      \put(14,0){\line(0,1){6}}   % ortadaki bolme cizgisi
+      \put(7,2.5){\makebox(0,0)[b]{alistid}}
+      \put(21,2.5){\makebox(0,0)[b]{alistval}}
+      \put(7,7.5){\makebox(0,0)[b]{{\footnotesize\bf ID\ptr}}}
+      \put(21,7.5){\makebox(0,0)[b]{{\footnotesize\bf PSEXP}}}
+                      \end{picture}        % end-of-picture for alist entry
+                  \end{center}
+        Similar to the SEXPR stack it is possible to allocate this stack in
+        the static area or dynamically depending on the same compiler flag.
+        The start of this stack is pointed by the variable {\tt alist } and
+        the top is pointed by {\tt alisttop}.
+\end{description}
+
+\section{Garbage Collection}
+During the course of a computation, contents of cells which were taken
+from free space list often becomes unnecessary. They are garbage. In general
+it is difficult to know exactly which cells are garbage.  The responsibility
+for reclamation is therefore undertaken by the LISP system itself. The fundamen
+tal assumption
+of garbage collection is
+\begin{quote}
+ \em at any point in a LISP computation, all cells
+which contain parts of the computation are reachable from a fixed set of
+known cells or registers.
+\end{quote}
+Garbage collection consist of two phases: {\em mark} and {\em sweep}.
+The first phase of the garbage collector, called the marking phase, marks
+all of the LISP data structure which is currently active. By definition,
+a cell (any LISP data object)  is  active  if  it  is  reachable  from  the
+registers,  stack,  or  identifier  table.  An  identifier  which  is   not
+reachable  in this way may still be active if it has a non-NULL {\tt value}
+or a non-NIL {\tt proplist}.
+
+In terms of our implementation, we mark from the registers, from the identifier
+list (its values and properties), from the SEXPR stack, from the {\tt urwelt} ar
+ray
+and from the ALIST stack. During the mark phase each cell which is active is
+marked (by using {\tt putmark} macro) by marking its {\tt type} field.
+The following macros (file {\bf type.l}) are used in marking and sweep phases:
+\begin{verbatim}
+
+#define putmark(x)  (type(x) := 0x80)
+#define clrmark(x)  (type(x) &= 0x7f)
+#define marked(x)   (type(x) &  0x80)
+#define gtype(x)    (type(x) &  0x7f)
+
+\end{verbatim}
+
+A structure might be referenced several times in the marking process, since
+we allow multiple reference to structure. We must take
+this into account since, though naive marking of an already marked structure
+is at wasteful, it is fatal if the structure is self-referential.
+Marking of structures are done by {\tt zmark} (file {\bf lisp-zfn.l}).
+Once all active structure has been marked, any unmarked cell can be treated
+as garbage and may be returned to the free storage for reuse. This is done
+during sweep, the second phase of the garbage collection.
+
+The sweep phase proceeds linearly through pages, collecting all those cells
+which have {\bf not} been marked. These unmarked cells are chained together
+and {\tt free} pointer of the page is set to this chain. At this stage,
+unmarking of the marked cells are done also (by {\tt zcollect}).
+If all the cells in some page
+are unmarked then this page is removed from the linked list of pages
+of a specific type and
+chained to the {\tt freepages} list.
+
+There are five garbage collection functions in the file {\bf lisp-zfn.l}
+and are described below.
+\begin{description}
+  \item[zmark:]\ \ \ {\tt void zmark(PSEXP x); } \\
+    {\tt zmark} is responsible for marking cells during garbage collection.
+    It takes an {\tt PSEXP} as an argument and it marks according to its type.
+    If the SEXPR pointed at has already been marked, {\tt zmark} simply returns,
+
+    since we
+    are assured that any cells further down the structure have already
+    been marked. If object
+    is a vector, it marks the vector itself and all objects to which the
+    entries in the vector point. If it is a dotted pair, it simply
+    marks all the cells pointed by the car and cdr pointers.
+    Any other object is assumed to be
+    elementary (i.e., contains one cell only) and is marked by marking its
+    cell. An identifiers is marked only if it is in a dynamically allocated
+    page. Compile time identifiers are allocated separately in static
+    locations and therefore they are not marked.
+  \item[zcollect:]\ \ \  {\tt int zcollect(PPAGE p, int tp); } \\
+    The sweep phase routine {\tt zcollect} is responsible for collecting
+    all those cells which have {\bf not} been marked in the page pointed by
+    `{\tt p}'. These unmarked cells are chained together
+    and the {\tt free} pointer of the page is set to this chain.
+    Unmarking of the marked cells are done also. Returns {\em one}
+    if all the cells in the page are unmarked. Otherwise returns {\em zero}.
+  \item[zcompactatom:]\ \ \ {\tt void zcompactatom(); } \\
+    Identifiers print name space {\tt (char *)startpns} compactification
+    algorithm.
+  \item[zcompactstring:]\ \ \ {\tt void zcompactstring(); } \\
+    String space {\tt (char *)startstr} compactification algorithm.
+  \item[zgarbage] {\tt void zgarbage(unsigned tp); } \\
+    Main algorithm of the garbage collection. Mark phase is done
+    first. If necessary, compactification is performed on identifiers print
+    name space {\tt startpns} and string space {\tt startstr} after the
+    mark phase. Then the sweep phase is performed. If {\tt !*gcflag} is
+    non-NIL, some statistical information about the garbage collection
+    is given to the user.
+
+\subsection{Pair space compactification}
+A compactifying garbage collector is under development. The code
+distributed includes this garbage collector as well. The way to
+turn it on is to issue the command
+\begin{verbatim}
+     (setq !*gcflag 2)
+\end{verbatim}
+\underline{Please note:} \\
+For the time being the compactification phase is {\bf NOT} bug free.
+But, the normal (non-compactifying) garbage collector, which is in use as
+default, works error-free.
+\end{description}
+
+\chapter{Compilation}
+
+\section{General}
+
+In  this  section  our intention will be to describe two actually different
+subjects together.
+ One is the prescription, or better to say, a case dependent set
+of descriptions
+\begin{itemize}
+  \item
+        to perform an actual creation of a LISP system,
+  \item
+        to start with some LISP program and create a  compiled  version  of
+        it.
+\end{itemize}
+The other  is about the internal implementation of this compilation.
+So, those who don't have a burning desire to understand every bit of what is
+going on can simply avoid reading that part. But frankly speaking, it would
+be much better if one understands the underlying scheme of  implementation,
+since  the process of compilation, for the sake of portability, is not very
+straightforward. This detailed, ``why is it so'' type of explanations are put
+in italic, below.
+
+\section{Bootstrapping LISP}
+
+``Bootstraping LISP'' means ``Creating a  pure  STD-LISP  interpreter  from
+scratch''. Here is how to do it:
+\begin{enumerate}
+\item
+      Put all the files with extension "{\bf .l}'' into the same directory.
+      Put also the \C programs \BB{cr1.c}, \BB{cr2.c}, \BB{crc.c},
+      \BB{cri.c}, \BB{size.c}, \BB{crfile.h} into the same directory.
+
+      {\em
+        Each of these \C programs will create a part of the \C source,
+       those
+       which  will later  be compiled by a \C compiler and presumably
+       will be linked to get the actual executable program.
+        \begin{description}
+  \item[cr1] Will create \BB{lisp1.c}, the part of the LISP system
+                     that contains the static declarations.
+  \item[cr2] Will  create  \BB{lisp2.c}. \B{lisp2.c} is the
+                     source of
+                     all the LISP system  functions, the memory manager,
+                     the garbage collector, the I/O routines etc.
+                     Unless these definitions are not changed you do
+                     not have to run \B{cr2} more than once even if you
+                     later perform a LISP $\Rightarrow$ \CC compilation
+                     of any LISP program.
+                     (Please note that this is not so for \BB{lisp1.c},
+                     when you later perform a LISP code compilation than
+                     \B{cr1} has to be fired again to reproduce
+                     \BB{lisp1.c}.
+  \item[crc] Actually this program and the below described program
+                     will only be used if you will compile a LISP program
+                     that you have written. Details will be explained
+                     in the section entitled  ``Compiling a LISP code''.
+                     For the time being just know that this program will
+                     attack the output of the LISP $\Rightarrow$ \C
+                     compiler and produce a true \C source that will be
+                     C compilable.
+  \item[cri] Just as  \B{crc} this program is also used only
+                     if a user written LISP code is compiled. It produces
+                     a   LISP   initialization   file,   in    which    the
+                     non-compilable, user defined  LISP expressions are stored.
+                     (e.g. quoted lists, strings, atom names).
+        \end{description}
+      }
+\item
+      Change the directory information in the  \B{crfile.h} file.
+
+      {\em We hear you groaning, but this was necessary, again, to
+           keep  true  portability,  since  systems with different operating
+           system have different directory and file access strings.
+           (The trivial example is UNIX versus DOS, one has  a  slash,  the
+            other has a backslash for directories)
+      }
+\item
+      If  necessary  edit  the  file  \BB{flags.l}. In this file you have
+      various compiler flags for the \C compilation. They are explained below:
+        \begin{description}
+ \item[TRACEABLE] If you perform a traceable and/or redefinable
+                          code generation (see the relevant section
+                          on this topic) for user defined functions,
+                          this \C flag if zero, tells the \C compiler
+                          to omit the traceability or redefinability.
+                          So, the value of this flag is only important
+                          if you perform a LISP $\Rightarrow$ \C compilation.
+ \item[DSTACK]    Of course any LISP has to have a stack, that
+                          is for sure. The DSTACK \C flag stands for
+                          `Dynamic-STACK' depending on which the stack
+                          is   created   in   the   static   data  area  or
+                          alternatively allocated at run time as a dynamic
+                          memory.
+ \item[BITF]      If this flag is non-zero then the code generated
+                          will make use of the bit-sub field  concept
+                          of \CC. If the flag is set to zero no such code
+                          will be generated.
+
+                          {\em The bit fields come into account in the
+                          tag of a dotted pair, where various informations
+                          have to be hold about that dotted pair
+                          (e.g. one bit is for garbage collection marking).
+                          It is cute and elegant to use in this case
+                          bit-fields, but unfortunately some compilers
+                          generate a terrible code for bit-field accesses.
+                          (e.g.  some  of  them  perform  a number of  shift
+                           right  operations to get the desired bit to the
+                           least  significant  bit  position  and then test
+                           it, which is awful!).
+                          But  another  alternative
+                          is to use just a byte and mask the bits of it.
+                          Then setting will correspond to a bitwise OR,
+                          and the testing will correspond to bitwise AND
+                          operation among the tested byte containing the
+                          tested bit and the selection mask byte.
+                          }
+ \item[TURBOC]    If you are using Borland's Turbo \C compiler
+                          this file will serve for better code generation.
+ \item[IBMPC]             If you are working on an IBM-PC or compatible,
+                          then the higher ascii codes are set in a specific
+                          manner, if this flag is non-zero the generated
+                          \C code of the LISP interpreter will make use
+                          of these ascii codes.
+
+                          Furthermore the IBM-PC is
+                          using the 80x86 $\mu$P-chip which allows pointers
+                          to sit at addresses that are not zero (modulo 4).
+                          The code makes use of this (non-portable) feature
+                          if the flag IBMPC is set to 1. If you don't have
+                          an 80x86 or if you get errors like
+                          (bus-error, segmentation fault) turn this flag to
+                          zero.
+        \end{description}
+\item
+      Compile all the \C files, that you have copied.
+\item
+      Execute the \B{size} program you have just compiled.
+      This program will propose a value for the constant  \BB{PAGESIZE}.
+      That constant lives in the file \BB{types.l}. Set in this file
+      {\tt \#define PAGESIZE } to an integer multiple of the proposed value.
+
+      {\em  data  structures  may  have  different  sizes  on  different \C
+       compilers, because of  the  underlying  hardware.  Therefore  it  is
+       necessary  to  determine  how  your  compiler  acts.  We  need  this
+       information because this LISP implementation does not simply  use
+       {\tt  malloc }  or  {\tt calloc } when it has to create a LISP data
+       object, for  further  details see the chapter on ``The Dynamic
+       Structure''.
+      }
+\item
+      Execute \B{cr1} and \B{cr2} in order to generate \B{lisp1.c}
+      and \BB{lisp2.c}, respectively.
+\item
+      Compile \B{lisp1.c} and \B{lisp2.c} with the \C compiler.
+\item Link them,
+      with the appropriate libraries in order to obtain an executable
+      program which is your STD-LISP interpreter.
+
+      {\em what the libraries will be is  something  system  dependent,  so
+       since  you  got  your hands on a \C compiler, we have to assume that
+       you  are  fully  capable  of  creating  an  executable  code   after
+      a \C compilation.       }
+\end{enumerate}
+
+\section{Creating LISP with Compiler}
+
+The word ``Compiler'' in the name of this section refers to the
+\mbox{LISP $\Rightarrow$ \C} compiler. This compiler is actually a LISP
+program. It constitutes of two functional parts. One is the part that is
+proposed as {\em A Portable LISP Compiler}, by M. L. Griss and A.C. Hearn.
+This part generates a compiled code in terms of some macros that correspond
+to certain actions of the underlying LISP system (e.g. calling a compiled
+function, pushing some LISP object on stack, accessing the stack, etc.)
+It  is  actually  portable,  because  what  is  needed  is only a secondary
+process, done again in LISP, that will take this macro involving code and
+looking at it produce a code in the target language (in our case \CC).
+One has to point out that the {\em A Portable LISP Compiler} assumes an
+underlying register implementation. This is another aspect which biased
+our decision towards a register implementation rather than a stack one.
+We name the second part, that converts the macros to the \C code, as
+\B{lap}.
+In our implementation \B{lap} performs some code refinements too.
+The lisp source of \B{lap} lives in the file \B{lap.lsp} distributed.
+So, a full bootstrapping of the compiler including LISP is nothing else then
+performing a LISP code compilation. But how to get the first working
+compiler? It is trivial that this
+\ldots{\em{Egg}}$\Rightarrow${\em{Chicken}}\ldots{\em{Egg}}$\Rightarrow${\em{Chi
+cken}}
+\ldots chain has to start somewhere. One answer is: You get a
+LISP  interpreter compiled (the previous section)
+you load the LISP code for the compiler, namely the file \BB{compiler.lsp},
+you load the LISP code for the lap, namely the file \B{lap.lsp} and
+ you get an interactive working
+compiler, you supply this interactive  compiler  the  same
+LISP  sources  of  the
+compiler+lap, by a \B{compilefile} LISP function call (see below for the
+arguments) and then
+ you wait for ages to get the first ``{\em{Chicken}}'' out.
+We did this process. For your benefit we have not thrown away the \C code
+that came out to produce this ``{\em{Chicken}}''.  In the source supplied,
+you will find a set of files collected under
+ a subdirectory named
+ \B{compiler}. The files included in this set
+are  the  outcome code of the compilation of the compiler (those having
+names that start with the letters \B{comp} and have no file extensions.
+In order to get a working version of  LISP,  having  the  compiled  compiler
+present, follow the steps:
+
+\begin{enumerate}
+\item
+     Copy  the set of files, in the subdirectory \BB{compiler}, to the same
+     directory you
+     will/have put all the files with extension "{\bf .l}'' of the previous
+     section.
+\item
+     Regardless of whether you had done it already or not,
+     run \B{cr1} in order to create \B{lisp1.c}.
+
+     {\em We do have to recreate  \B{lisp1.c} because
+          this file will contain some static data which will
+          be created looking at some of the files of the \B{compiler}
+          package
+     }
+\item
+     Perform those steps of the prescription of the previous section,
+     which you have not done by now up to the 6 th step, including it.
+\item
+     Run the \B{crc} program. This will create  the necessary \C sources
+     related to the compiler part.
+\item
+     Compile all the \C sources which are created by \BB{crc}.
+      (attention: \B{crc} will create more than one \C source)
+
+     {\em If you have not missed anything, now you must have to hand
+          the object codes for \BB{lisp1}, \BB{lisp2} and those
+          objects
+          which are the result of the compilation of the \B{crc}
+          produced \C sources.}
+\item
+     Simply link all of them to obtain the LISP version that has
+     the compiler present.
+
+     {\bf UNIX users:} You can do all the compilation and linking
+     of \BB{lisp1.c}, \BB{lisp2.c}, and the \BB{lispc\#.c} files
+     just in one line, namely:
+     \begin{verbatim}
+                cc lisp*.c -lm
+     \end{verbatim}
+     {\em \B{-lm} links in the standard math library}
+\item
+     Run the \B{cri} program. This will create an initialization
+     file, with the name you supplied as the second
+     command line argument.
+
+     {\em If you omit this the default name \B{LISP-INI}
+      will be given.
+      If you decide to use the second command line argument don't
+      forget to submit the first one which is: {\tt comp} for
+      the compiler compilation,
+       and some other generic name you once gave (see the section
+      ``Compiling a LISP Code'') otherwise
+
+     At run time, an environment variable should be set to the
+     name of the initialization
+     file (including the full path), and furthermore
+     the LISP that you are created shall be informed
+     at run-time     about this
+     enviroment variable by a command line option \B{-E} (for
+     details see relevant explanation in this manual).
+      If you do not use the
+     \B{-E} option then the LISP you compiled will look for
+     an environment variable with the name \B{LISPINI}.
+
+     If you forget to set the environment variable
+     to point to the initialization file, and the initializiation
+     file is not in the current directory then
+      the LISP that you have created, will
+          abort, at run-time, with an error indicating that the
+          initialization file  is absent}
+\end{enumerate}
+
+\section{Compiling a LISP Code}
+
+When you have developed a LISP package, usually it is desirable to get
+it compiled. This has advantages commonly known.
+\begin{itemize}
+\item
+     Your program will speed up by a factor of 10-20.
+\item
+     The code will no more be portable and understandable. (Yes, indeed.
+     This  actually is mostly the case for commercially
+     customized applications!)
+\item
+     The size will eventually shrink.
+\end{itemize}
+What follows is the prescription if you are at this stage. (i.e. you are
+happy, your program works, and its time to finalize the job)
+
+\begin{enumerate}
+\item
+     Execute the LISP that has the compiler present. How to create such a
+     LISP was the topic of the previous section. We suggest that you run
+     it at least with the following parameters:
+     \begin{quote}
+        {\tt LISP -P20000 -S10000}
+     \end{quote}
+
+     {\em Actually, you can do this job interpretatively, by loading the
+          LISP code for the compiler (that is also present in the software
+          supplied). But this will be painfully slow, therefore it is not very
+          logical, except one case: Due to some reason you cannot perform
+          the compilation explained in the previous section
+          ``Creating LISP with Compiler''}
+\item
+     Type-in and evaluate the following LISP expression in order to start
+     the compilation.
+     \begin{quote}
+       {\tt  (compilefile "{\em{lispfile}}" '{\em genname})}
+     \end{quote}
+     Here {\em lispfile} is the name of the file that contains your LISP
+     program (or the starting part of it). {\em genname} is a generic
+     atom which will serve in naming of the  output files. All outcome
+     files of this compilation will have names starting with {\em genname}.
+
+     {\em So the ``genname'' for the files that you have used
+      in the creation of the compiler (in the previous section) was
+      {\tt comp }. The output files are:
+       \begin{description}
+\item[{\em genname}U :]
+                       This file contains all the constants of the LISP
+                       program you have compiled.
+\item[{\em genname}E :]
+                       This file contains all the non compilable,
+                       LISP s-expressions of your  program. Later
+                       on \B{cri} will attack this file and generate
+                       the ``initialization file''.
+\item[{\em genname}N{\rm n} :]
+                       Here the last {\rm n } is an integer. All these
+                       files contain the procedure names of the LISP program
+                       that was compiled.
+\item[{\em genname}C{\rm n} :]
+                       Here the last {\rm n } is an integer. These files
+                       contain the C source of the compiled LISP procedures.
+\item[{\em genname}X{\rm n} :]
+                       Here the last {\rm n } is an integer. These files
+                       contain the names of externally called procedures.
+                       So, normally, the union set of the contents of
+                       {\em genname}X{\rm n} shall be a subset of
+                       the union set of the contents of
+                       {\em genname}N{\rm n} files. That means no procedure
+                       shall be used without having it defined somewhere.
+                       But, this compiler is cleaver to accept those
+                       undefined procedures by just giving a warning and
+                       generating such a code that this procedure is
+                       definable at run-time, cute eh?. Best to understand
+                       this feature is to test it.
+       \end{description}
+     }
+\item
+     For  the  successive
+     inputing of other LISP source files just give their names as strings
+     (included in double quotes) or as quoted atoms (if they have no
+     extensions of course).
+     To declare the end of the compilation  enter {\tt end } to finish the
+     compilation (as any bright man will immediately recognize, it is
+     therefore only  possible to get a lisp source  that lives in a file named
+     \BB{end}, compiled, if one surrounds the \BB{end}
+     with (double quotes)).
+
+\item
+     Perform all the steps of the previous section starting with the 2. step,
+     with one change: Executions of \BB{cr1}, \BB{crc}, \B{cri} shall
+     have command line arguments if the {\em genname} you used is different
+     then \B{comp}. You have to supply this {\em genname} as command line
+     argument to the mentioned \B{cr} programs. An example:
+
+     If your {\em genname} was \BB{rlisp}, for example, call \B{crc} as
+     \begin{quote}
+       {\tt crc  rlisp}
+     \end{quote}
+
+     Furthermore if you want  that \B{cri} names
+      the initialization file
+     that it is creating other than  \BB{LISP-INI}, then
+     supply this name as the {\bf second} command line argument.
+     \begin{quote}
+       {\tt cri  rlisp MY-LISP-INI}
+     \end{quote}
+      If you have forgotten to do this and \B{cri} has created the
+      initialization file with the default name  \BB{LISP-INI},
+      just you can rename it as you like.
+\end{enumerate}
+
+
+
+\section{Traceable/Redefinable Code Generation}
+This compiler has a feature which is not found in many LISP compilers.
+It is possible to order the compiler to generate a code for the user
+defined and compiled LISP functions, such that they (or a subset of them)
+will  be  redefinable  at  run-time.  Furthermore  it  is  also possible to
+have a code generation  that  enables  tracing  of  compiled  user  defined
+functions.
+
+If  you  are  performing a  LISP $\Rightarrow$ \C compilation then you have
+the choice to set the flag {\tt  !*traceable }  to  a  non-nil  value  (by
+ default  it  is  nil) before you start the compilation with the
+{\tt  compilefile } function.
+If  {\tt   !*traceable }  is  set then the \C code
+generation of all user defined functions is altered to have an overhead
+code that performs a check on the global environment (which is set
+by the LISP function {\tt  traceable }, and described below), and if
+this environment says at that moment a trace is desired a trace-print out
+will be done. The code change that is done when {\tt   !*traceable } is
+non-nil,  is  performed  by  an  insertion  of  a \C macro. Now if
+{\tt TRACEABLE},
+a \C define macro in the \B{flags.l} file, is set to zero then the \C compiler
+will omit this inserted overhead. But if  {\tt TRACEABLE} is set to 1 then
+the compilation will be  done  so  that  the  user  defined  functions  are
+traceable. Therefore, it is always clever to perform the  LISP $\Rightarrow$ \C
+compilation with {\tt   !*traceable } set to non-nil and then use or not this
+code alternation by controlling
+the \C define macro  {\tt TRACEABLE } in the \B{flags.l} file.
+
+Similar to  {\tt   !*traceable } you can set the flag  {\tt !*rdable }
+which will generate a \C code for user-defined functions that allows
+them to be redefined at run time in such a manner that even the
+compiled functions will use this new definition.
+( Normally, for most of the LISPs this is
+not the case, of course it is trivial that in any LISP you
+can redefined a compiled function, even you can replace a new definition
+for \BB{car}, but this will only effect the interpretive calls to that function
+and not the calls inside the compiled code, that means if you have
+compiled two functions \B{A} and \B{B} and \B{A} is calling\BB{B}, then
+you  redefine  \B{B} at runtime, from that moment on all interpretive calls
+to \B{B} will use the new definition but \B{A} will still work in the old
+fashion, making use of the old definition of \B{B}).
+
+If you have set  {\tt    !*traceable  }  this  automatically  implies
+all the user defined functions to be redefinable, so you do not have to
+set   {\tt !*rdable } in addition.
+
+Although it is not possible to define a subset of functions to be
+traceable it is not so  for `redefinability'. It is possible to
+declare a set of functions to be redefinable. This is done by flagging
+their  names with the atom {\tt rdable}, prior to compilation (i.e. issuing
+the {\tt compilefile } call).
+
+
+At run time the control of tracing and redefinition is done by the function
+{\tt traceable}. The usage follows:
+\begin{description}
+
+\item[$\bullet$ {\tt (traceable nil)}] Disables tracing. Furthermore
+       Disables the usage of the redefinitions of the functions that were
+       redefinable.
+
+      {\em Redefinable or traceable code has some computational overhead,
+           that is for sure. But when  the  use  of  the  redefinitions  is
+           enabled an extensive check and process is performed, it could be
+           the  case  that  although  you  have  compiled with redefinition
+           ability, you don't want to use it at that instance,  or  you  do
+           not want to trace, in those cases it is desirable to  issue
+            {\tt (traceable nil) } which will minimize the computational
+          overhead (in this case on a conditional on a global variable
+          will be processed)}.
+\item[$\bullet$ {\tt (traceable 0)}] Same as above.
+\item[$\bullet$ {\tt (traceable t)}]
+      Enables the trace of {\bf all} traceable functions to any trace depth.
+      If you set this option, regardless of the presence of any
+      {\tt 'trace } flagged function, all of the traceables will be traced.
+\item[$\bullet$ {\tt (traceable {\em number})}]
+     Enables the trace of only {\tt 'trace } flagged
+      functions to the call depth
+     which is said to be {\em number}. {\em number} is an integer greater
+     than or equal to 2. The calls of untraced functions will be counted,
+     too.
+\item[$\bullet$ {\tt (traceable 1)}]
+     Enables the use of the redefinitions for the redefinable functions.
+     If this is not enabled, the code will execute much faster.
+\item[$\bullet$ {\tt (flag {\em list-of-fn-names} 'trace)}]
+     Is used in conjunction with {\tt (traceable {\em number})}.
+     Defines a set of function names to be traced. Executing
+     {\tt (traceable nil)) } will not remove those flags.
+\end{description}
+
+\section{Altering the size of compiler generated \C files}
+If you have gone through the compilation process of a LISP code,
+you must have observed that although you submitted a single
+LISP source file, the LISP $\Rightarrow$ \C compiler decides
+to create a number of files each of which is  of a certain size.
+Why is this so?
+
+Some \C compilers cannot handle big sources, they overflow in
+symbol tables etc. So you must subdivide the code into smaller
+modules and get them all compiled.  This is not a trivial task
+since the small modules export and import some \C functions.
+The LISP $\Rightarrow$ \C compiler does this job for you.
+
+The size of `chopping' the generated \C source
+is determined by  the content of
+the LISP atom \mbox{\B{max!-comp!-size}} which is set to 2000 units.
+This atom is defined in \B{lap.lsp} which is distributed
+under the subdirectory \B{compiler}. Ofcourse you don't have
+do do a recompilation to set it to another value. You got
+two alternatives:
+\begin{enumerate}
+ \item
+   You set change it (for example to the value 7000)
+   by a
+   \begin{quote}
+      (setq max!-comp!-size 7000)
+   \end{quote}
+   prior to the \B{compilefile}  call, in the run of the
+   LISP that has the compiler present. Or
+ \item
+   You simply edit the initialization file of the LISP with the compiler
+   present.   There in you will find a line:
+\begin{quote}
+      (setq max!-comp!-size 2000)
+   \end{quote}
+  Change it, as you like.
+\end{enumerate}
+
+
+ 
+\section{Compiler's naming convention}
+
+Lisp functions are compiled (by the compiler) into \C functions.
+A lisp function name is an identifier in which any printable character
+may occur, provided that the non-alphanumerics are prefixed with the
+escape character, the exclamation mark `!'. This, of course is not the
+case in \CC, so while mapping the lisp names to \C names a
+conversion has to be made. Please note that this has nothing to do
+with the execution of the compiled code. Surely, as it is for all built-in
+functions of lisp, at the lisp level a named
+function is recognized through its name, which is an lisp identifier,
+actually a lisp atom having a function pointer sitting in its value field.
+This function pointer is generated by the \CC-compilation as to be a pointer
+to the related function, an entry point. So, after the \CC-compilation
+no trace remains about what the \CC-name of the compiled function was.
+But sometimes it is interesting to investigate the compiler generated
+\CC-code.
+
+The naming rules in the lisp$\Rightarrow$\C compilation of functions is as
+follows:
+\begin{enumerate}
+\item
+     If the first character is alphabetic then it  is capitalized.
+\item
+     If the first character is a digit (escaped) then it it is prefixed
+     with an underscore `\_'.
+\item
+     Any printable but non-alphanumeric is replaced by a pair of
+     uppercase letters by the following convention:
+
+{\small\tt
+     \begin{tabular}{|cc|cc|cc|cc|cc|cc|cc|}
+     \hline
+!\verb*. .& SP & !! & XL & !" & DQ &!\# & NB &!\$ & DL &!\% & PS &!\& & AN \\
+     \hline
+       !' & SQ & !( & LP & !) & RP & !* & AS & !+ & PL & !, & CM & !- & MN \\
+     \hline
+       !. & DT & !/ & SL & !: & CL & !; & SC & !< & LT & != & EQ & !> & GT \\
+     \hline
+       !? & QS & !@ & AT & ![ & LB &\verb.!\.&BS&!]& RB &!\^ & UP &!{\rm `}&BQ\\
+     \hline
+      !\_ & US &!\{ & LC & !| & OR &!\} & RC &!\~ & TL &
+         \multicolumn{4}{|c}{} \\
+      \cline{1-10}
+     \end{tabular}
+}
+\item
+     If the name is flagged {\tt special}, then a {\tt 1} (one) is appended
+     at the end of the name. {\em (This is normally used for name clashes
+     with the C library functions, some examples are open, read, write etc.)}
+\item 	
+     Automatic generated naming is provided, this is explained in details below:
+
+\end{enumerate}
+
+There is no theoretical limit to  the lenght of a function name.  But this might not be
+so for a \C compiler. Therefore a global variable is established to control the maximal
+length of a function name, which will be converted to a \CC-equivalent by the above stated 
+conventions. Longer function names then the maximal length stored in this global variable 	
+`{\tt !*maxfnamelen}' will be converted to automatic generated function names. Such names
+are cooked up by appending an incremented integer value (for each such new function)
+to the end of `{\tt GenFun}'.  By default `{\tt !*maxfnamelen}' is set to {\tt nil} which means 
+no such automatic naming shall be applied. 
+
+If desired you may set it,
+ (to 23 in the example below),
+ before the `{\tt compilefile}' call by an evaluation like:
+\begin{verbatim}
+      (setq !*maxfnamelen 23)
+\end{verbatim}
+
+
+\section{Built-in atoms}
+
+There are a number of Built-in atoms, like {\tt !*echo, !*raise} etc.
+They are defined as globals in the standard lisp report. As known, it
+is imposible to unglobal an atom.  No such built-in function is existing.
+If one decides to change the way a built-in atom is defined, a \CC-compilation
+of lisp has to be performed. To make the necessary changes is quite 
+   easy. Built-in atoms are described in the file 'sysids.l'. In there
+   following the name of the atoms you will see a sequence of 0/1's
+   (actually 6 of them) they correspond to the fields:
+\begin{quote}
+      Xisinheap; Xisglobal; Xisfluid; Xisfunction; Xisinoblist; Xisdclfluid
+\end{quote}
+   Now let us have decided to change the atom {\tt !*echo} from being a global
+  to be a fluid. Now,
+   as you will recognize the second 0/1  field (that is the Xisglobal field) 
+   of the '{\tt !*echo}' line in the file is
+   1 (so it is a global), to define it to be a fluid,  reset this to 0 and
+   set the following field (that is the Xisfluid field)
+    to 1 i.e. set the pattern to be: 
+\begin{verbatim}
+0 0 1 0 1 0
+\end{verbatim}
+ 
+
+\begin{thebibliography}{9}
+\bibitem{allen} J.R. Allen, {\em The Anatomy of LISP}. McGraw-Hill,
+     New York, 1978
+\bibitem{std} J. B. Marti, A. C. Hearn, M. L.Griss, and C. Griss,
+    ``{\em Standard Lisp Report}'' SIGPLAN Notices, ACM,
+       New York, 14, No 10 (1979) 48--68
+\bibitem{ccc} Brian W. Kernighan, Dennis M. Ritchie, {\em The C Programming
+   Language}. Prentice-Hall, Inc., New Jersey, 1978
+\bibitem{comp} Martin L. Griss and A. C. Hearn,{\em A Portable LISP Compiler}
+   Software-Practice and Experience, Vol. 11, 541-605 (1981)
+\end{thebibliography}
+
+
+\end{document}

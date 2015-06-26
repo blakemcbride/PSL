@@ -1,0 +1,6572 @@
+
+void ANmkfunc()     /* !&mkfunc */
+{
+  Mkquote();    /* mkquote */
+  return;
+  }
+
+void Lstchr()     /* lstchr */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = cdr(reg1);
+  if (!null(reg1)) goto lab1;
+  zconsc(NIL,reg2);
+  goto lab2;
+lab1 : 
+  Lstchr();    /* lstchr */
+  Ncons();    /* ncons */
+  Ncons();    /* ncons */
+lab2 : 
+  zcons3c(car(local(0)));
+  kpop(1);
+  return;
+}
+
+void Atsoc()     /* atsoc */
+{
+lab1 : 
+  reg3 = reg1;
+  reg1 = reg2;
+  if (null(reg1)) goto lab3;
+  reg1 = reg3;
+  if (reg1 == car(car(reg2))) goto lab2;
+  reg2 = cdr(reg2);
+  goto lab1;
+lab2 : 
+  reg1 = car(reg2);
+lab3 : 
+  return;
+}
+
+void Eqcar()     /* eqcar */
+{
+  reg3 = reg1;
+  Atom();    /* atom */
+  Null();    /* null */
+  if (null(reg1)) goto lab1;
+  reg1 = car(reg3);
+  Eq();    /* eq */
+lab1 : 
+  return;
+}
+
+void Lpri()     /* lpri */
+{
+  reg3 = reg1;
+  reg1 = NIL;
+  Wrs();    /* wrs */
+  reg4 = reg1;
+  reg1 = reg3;
+  if (pairp(reg1)) goto lab2;
+  Prin2();    /* prin2 */
+  reg1 = urwelt[0];
+  Prin2();    /* prin2 */
+  goto lab3;
+lab1 : 
+  reg5 = reg1;
+  reg1 = car(reg1);
+  reg6 = reg1;
+  Prin2();    /* prin2 */
+  reg1 = urwelt[0];
+  Prin2();    /* prin2 */
+  reg1 = cdr(reg5);
+lab2 : 
+  if (!null(reg1)) goto lab1;
+lab3 : 
+  reg1 = reg4;
+  Wrs();    /* wrs */
+  reg1 = NIL;
+  return;
+}
+
+void Lprie()     /* lprie */
+{
+  if (pairp(reg1)) goto lab1;
+  Ncons();    /* ncons */
+lab1 : 
+  zcons3c(urwelt[1]);
+  Lpri();    /* lpri */
+  reg1 = T;
+  value(urwelt[2]) = reg1;
+  Terpri();    /* terpri */
+  return;
+  }
+
+void Lprim()     /* lprim */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = value(urwelt[3]);
+  if (null(reg1)) goto lab2;
+  Terpri();    /* terpri */
+  kload0(reg1);
+  if (pairp(reg1)) goto lab1;
+  Ncons();    /* ncons */
+lab1 : 
+  zcons3c(urwelt[4]);
+  Lpri();    /* lpri */
+  Terpri();    /* terpri */
+lab2 : 
+  kpop(1);
+  return;
+}
+
+void Mkquote()     /* mkquote */
+{
+  reg2 = reg1;
+  reg1 = urwelt[5];
+  List2();    /* list2 */
+  return;
+  }
+
+void Rplacw()     /* rplacw */
+{
+  cdr(reg1) = cdr(reg2);
+  car(reg1) = car(reg2);
+  return;
+}
+
+void Compile()     /* compile */
+{
+  kalloc(4);
+  kset0(reg1);
+  goto lab4;
+lab1 : 
+  kset(2,reg1);
+  reg1 = car(reg1);
+  kset(3,reg1);
+  Getd();    /* getd */
+  kset(1,reg1);
+  if (!null(reg1)) goto lab2;
+  reg2 = urwelt[6];
+  kload(reg1,3);
+  List2();    /* list2 */
+  Lprim();    /* lprim */
+  goto lab3;
+lab2 : 
+  reg3 = cdr(reg1);
+  reg2 = car(reg1);
+  kload(reg1,3);
+  Compd();    /* compd */
+lab3 : 
+  reg1 = cdr(local(2));
+lab4 : 
+  if (!null(reg1)) goto lab1;
+  kload0(reg1);
+  kpop(4);
+  return;
+}
+
+void Compd()     /* compd */
+{
+  kalloc(4);
+  zbind(urwelt[7],reg1);
+  kset0(reg2);
+  kset(1,reg3);
+  reg2 = urwelt[8];
+  kload0(reg1);
+  Flagp();    /* flagp */
+  if (!null(reg1)) goto lab1;
+  kload0(reg4);
+  reg3 = urwelt[9];
+  reg2 = value(urwelt[7]);
+  reg1 = urwelt[10];
+  List4();    /* list4 */
+  Lprim();    /* lprim */
+  reg1 = NIL;
+  goto lab13;
+lab1 : 
+  if (atom(reg3)) goto lab12;
+  reg1 = value(urwelt[11]);
+  if (null(reg1)) goto lab6;
+  kload0(reg1);
+  if (reg1 != urwelt[12]) goto lab2;
+  zconsc(value(urwelt[7]),cdr(reg3));
+  zcons3c(urwelt[13]);
+  goto lab5;
+lab2 : 
+  if (reg1 != urwelt[14]) goto lab3;
+  zconsc(value(urwelt[7]),cdr(reg3));
+  zcons3c(urwelt[15]);
+  goto lab5;
+lab3 : 
+  if (reg1 != urwelt[16]) goto lab4;
+  zconsc(value(urwelt[7]),cdr(reg3));
+  zcons3c(urwelt[17]);
+  goto lab5;
+lab4 : 
+  reg1 = value(urwelt[7]);
+  Mkquote();    /* mkquote */
+  kset(2,reg1);
+  kload0(reg1);
+  Mkquote();    /* mkquote */
+  kset(3,reg1);
+  kload(reg1,1);
+  Mkquote();    /* mkquote */
+  reg4 = reg1;
+  kload(reg3,3);
+  kload(reg2,2);
+  reg1 = urwelt[18];
+  List4();    /* list4 */
+lab5 : 
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  reg1 = value(urwelt[11]);
+  Apply();    /* apply */
+  goto lab12;
+lab6 : 
+  kset(2,NIL);
+  reg2 = urwelt[8];
+  kload0(reg1);
+  Flagp();    /* flagp */
+  if (null(reg1)) goto lab7;
+  kload0(reg1);
+  Ncons();    /* ncons */
+  reg3 = reg1;
+  reg2 = urwelt[19];
+  reg1 = value(urwelt[7]);
+  Put();    /* put */
+lab7 : 
+  reg1 = car(cdr(local(1)));
+  Length();    /* length */
+  reg4 = reg1;
+  kload0(reg3);
+  reg2 = value(urwelt[7]);
+  reg1 = urwelt[20];
+  List4();    /* list4 */
+  kset(3,reg1);
+  reg2 = urwelt[8];
+  kload0(reg1);
+  Flagp();    /* flagp */
+  if (null(reg1)) goto lab8;
+  reg1 = value(urwelt[7]);
+lab8 : 
+  reg2 = reg1;
+  kload(reg1,1);
+  ANcomproc();    /* !&comproc */
+  zcons3c(local(3));
+  kset(2,reg1);
+  reg1 = value(urwelt[21]);
+  if (null(reg1)) goto lab11;
+  kload(reg1,2);
+  goto lab10;
+lab9 : 
+  kset(3,reg1);
+  reg1 = car(reg1);
+  Print();    /* print */
+  reg1 = cdr(local(3));
+lab10 : 
+  if (!null(reg1)) goto lab9;
+lab11 : 
+  kload(reg1,2);
+  Lap();    /* lap */
+  reg2 = urwelt[19];
+  reg1 = value(urwelt[7]);
+  Get();    /* get */
+  kset(2,reg1);
+  if (null(reg1)) goto lab12;
+  reg1 = value(urwelt[7]);
+  Getd();    /* getd */
+  reg2 = car(local(2));
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab12;
+  reg2 = urwelt[19];
+  reg1 = value(urwelt[7]);
+  Remprop();    /* remprop */
+lab12 : 
+  reg1 = value(urwelt[7]);
+lab13 : 
+  zunbind(1);
+  kpop(4);
+  return;
+}
+
+void ANcomproc()     /* !&comproc */
+{
+  kalloc(3);
+  zbind(urwelt[7],reg2);
+  zbind(urwelt[22],NIL);
+  zbind(urwelt[23],NIL);
+  zbind(urwelt[24],NIL);
+  zbind(urwelt[25],NIL);
+  zbind(urwelt[26],NIL);
+  zbind(urwelt[27],NIL);
+  zbind(urwelt[28],NIL);
+  zbind(urwelt[29],NIL);
+  zbind(urwelt[30],NIL);
+  zbind(urwelt[31],NIL);
+  zbind(urwelt[32],NIL);
+  zbind(urwelt[33],NIL);
+  zbind(urwelt[34],NIL);
+  zbind(urwelt[35],NIL);
+  zbind(urwelt[36],NIL);
+  zbind(urwelt[37],NIL);
+  zbind(urwelt[38],NIL);
+  zbind(urwelt[39],NIL);
+  kset0(reg1);
+  reg1 = Sexp(&ZERO);
+  value(urwelt[22]) = reg1;
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  value(urwelt[33]) = reg1;
+  reg1 = Sexp(&ZERO);
+  value(urwelt[22]) = reg1;
+  ANgenlbl();    /* !&genlbl */
+  value(urwelt[29]) = reg1;
+  reg1 = urwelt[40];
+  value(urwelt[26]) = reg1;
+  zconsc(urwelt[41],value(urwelt[33]));
+  Ncons();    /* ncons */
+  value(urwelt[39]) = reg1;
+  kload0(reg1);
+  ANpass1();    /* !&pass1 */
+  kset0(reg1);
+  reg1 = car(cdr(reg1));
+  Length();    /* length */
+  reg2 = value(urwelt[42]);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab1;
+  reg2 = value(urwelt[7]);
+  reg1 = urwelt[43];
+  List2();    /* list2 */
+  Lprie();    /* lprie */
+lab1 : 
+  reg1 = car(cdr(local(0)));
+  goto lab4;
+lab2 : 
+  kset(1,reg1);
+  reg1 = car(reg1);
+  kset(2,reg1);
+  ANframe();    /* !&frame */
+  reg1 = value(urwelt[22]);
+  Add1();    /* add1 */
+  value(urwelt[22]) = reg1;
+  kload(reg1,2);
+  Nonlocal();    /* nonlocal */
+  if (!null(reg1)) goto lab3;
+  kload(reg2,2);
+  reg1 = value(urwelt[22]);
+  List2();    /* list2 */
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  reg1 = value(urwelt[37]);
+  Nconc();    /* nconc */
+  value(urwelt[37]) = reg1;
+lab3 : 
+  kload(reg2,2);
+  reg1 = value(urwelt[22]);
+  List2();    /* list2 */
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  reg1 = value(urwelt[32]);
+  Nconc();    /* nconc */
+  value(urwelt[32]) = reg1;
+  reg1 = cdr(local(1));
+lab4 : 
+  if (!null(reg1)) goto lab2;
+  reg1 = value(urwelt[32]);
+  if (!null(reg1)) goto lab5;
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  Ncons();    /* ncons */
+  value(urwelt[32]) = reg1;
+lab5 : 
+  reg2 = T;
+  reg1 = car(cdr(local(0)));
+  ANfreebind();    /* !&freebind */
+  value(urwelt[30]) = reg1;
+  reg1 = car(cdr(cdr(local(0))));
+  ANpass2();    /* !&pass2 */
+  reg2 = Sexp(&ZERO);
+  reg1 = value(urwelt[30]);
+  ANfreerst();    /* !&freerst */
+  ANpass3();    /* !&pass3 */
+  reg2 = car(value(urwelt[33]));
+  reg1 = Sexp(&ONE);
+  Difference();    /* difference */
+  car(value(urwelt[33])) = reg1;
+  reg1 = value(urwelt[33]);
+  reg1 = value(urwelt[39]);
+  zunbind(18);
+  zunbind(1);
+  kpop(3);
+  return;
+}
+
+void Nonlocal()     /* nonlocal */
+{
+  if (!fluidp(reg1)) goto lab1;
+  reg1 = urwelt[44];
+  goto lab3;
+lab1 : 
+  if (!globalp(reg1)) goto lab2;
+  reg1 = urwelt[45];
+  goto lab3;
+lab2 : 
+  reg1 = NIL;
+lab3 : 
+  return;
+}
+
+void ANpass1()     /* !&pass1 */
+{
+  reg2 = NIL;
+  ANpa1();    /* !&pa1 */
+  return;
+  }
+
+void ANpa1()     /* !&pa1 */
+{
+  kalloc(4);
+  kset(2,NIL);
+  kset0(reg1);
+  kset(1,reg2);
+  if (pairp(reg1)) goto lab4;
+  if (constantp(reg1)) goto lab1;
+  reg2 = urwelt[46];
+  Memq();    /* memq */
+  if (null(reg1)) goto lab2;
+lab1 : 
+  kload0(reg1);
+  kpop(4);
+  Mkquote();    /* mkquote */
+  return;
+lab2 : 
+  kload(reg2,1);
+  kload0(reg1);
+  Memq();    /* memq */
+  if (!null(reg1)) goto lab3;
+  kload0(reg1);
+  Nonlocal();    /* nonlocal */
+  if (!null(reg1)) goto lab3;
+  kload0(reg1);
+  Mknonlocal();    /* mknonlocal */
+lab3 : 
+  kload0(reg1);
+  goto lab13;
+lab4 : 
+  reg1 = car(reg1);
+  if (atom(reg1)) goto lab5;
+  ANpa1();    /* !&pa1 */
+  kset(3,reg1);
+  kload(reg2,1);
+  reg1 = cdr(local(0));
+  ANpalis();    /* !&palis */
+  zcons3c(local(3));
+  goto lab13;
+lab5 : 
+  reg2 = urwelt[47];
+  Get();    /* get */
+  kset(2,reg1);
+  if (null(reg1)) goto lab6;
+  kload(reg2,1);
+  kload0(reg1);
+  List2();    /* list2 */
+  reg2 = reg1;
+  kload(reg1,2);
+  kpop(4);
+  Apply();    /* apply */
+  return;
+lab6 : 
+  reg1 = car(local(0));
+  Getd();    /* getd */
+  kset(2,reg1);
+  if (null(reg1)) goto lab7;
+  reg1 = car(reg1);
+  if (reg1 != urwelt[16]) goto lab7;
+  reg2 = urwelt[48];
+  reg1 = car(local(0));
+  Get();    /* get */
+  if (!null(reg1)) goto lab7;
+  kload0(reg1);
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  reg1 = cdr(local(2));
+  Apply();    /* apply */
+  goto lab8;
+lab7 : 
+  reg2 = urwelt[49];
+  reg1 = car(local(0));
+  Get();    /* get */
+  kset(2,reg1);
+  if (null(reg1)) goto lab9;
+  reg2 = cdr(local(0));
+  reg1 = car(cdr(reg1));
+  Pair();    /* pair */
+  reg2 = car(cdr(cdr(local(2))));
+  Sublis();    /* sublis */
+lab8 : 
+  kload(reg2,1);
+  kpop(4);
+  ANpa1();    /* !&pa1 */
+  return;
+lab9 : 
+  reg1 = car(local(0));
+  ANcfntype();    /* !&cfntype */
+  if (reg1 != urwelt[14]) goto lab10;
+  reg2 = urwelt[48];
+  reg1 = car(local(0));
+  Get();    /* get */
+  if (!null(reg1)) goto lab10;
+  reg1 = cdr(local(0));
+  Mkquote();    /* mkquote */
+  reg2 = reg1;
+  reg1 = car(local(0));
+  kpop(4);
+  List2();    /* list2 */
+  return;
+lab10 : 
+  kload(reg2,1);
+  reg1 = car(local(0));
+  Memq();    /* memq */
+  if (!null(reg1)) goto lab11;
+  reg1 = car(local(0));
+  if (!fluidp(reg1)) goto lab12;
+lab11 : 
+  kload(reg2,1);
+  reg1 = cdr(local(0));
+  ANpalist();    /* !&palist */
+  reg3 = reg1;
+  reg2 = car(local(0));
+  reg1 = urwelt[50];
+  kpop(4);
+  List3();    /* list3 */
+  return;
+lab12 : 
+  kload(reg2,1);
+  reg1 = cdr(local(0));
+  ANpalis();    /* !&palis */
+  zcons3c(car(local(0)));
+lab13 : 
+  kpop(4);
+  return;
+}
+
+void ANpaiden()     /* !&paiden */
+{
+  return;
+}
+
+void ANpacond()     /* !&pacond */
+{
+  kalloc(5);
+  kset(1,reg2);
+  kset(2,NIL);
+  reg1 = cdr(reg1);
+  goto lab2;
+lab1 : 
+  kset(3,reg1);
+  reg1 = car(reg1);
+  kset(4,reg1);
+  kload(reg2,1);
+  reg1 = car(reg1);
+  ANpa1();    /* !&pa1 */
+  kset0(reg1);
+  reg1 = cdr(local(4));
+  ANmkprogn();    /* !&mkprogn */
+  kload(reg2,1);
+  ANpa1();    /* !&pa1 */
+  reg2 = reg1;
+  kload0(reg1);
+  List2();    /* list2 */
+  kload(reg2,2);
+  Cons();    /* cons */
+  kset(2,reg1);
+  reg1 = cdr(local(3));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  kload(reg1,2);
+  Reversip();    /* reversip */
+  zcons3c(urwelt[51]);
+  kpop(5);
+  return;
+}
+
+void ANpafunc()     /* !&pafunc */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = car(cdr(reg1));
+  if (atom(reg1)) goto lab1;
+  reg1 = value(urwelt[7]);
+  ANmknam();    /* !&mknam */
+  reg3 = car(cdr(local(0)));
+  reg2 = urwelt[12];
+  Storefunc();    /* storefunc */
+lab1 : 
+  kpop(1);
+  ANmkfunc();    /* !&mkfunc */
+  return;
+  }
+
+void ANpalamb()     /* !&palamb */
+{
+  kalloc(3);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = cdr(cdr(reg1));
+  ANmkprogn();    /* !&mkprogn */
+  kset(2,reg1);
+  kload(reg2,1);
+  reg1 = car(cdr(local(0)));
+  Append();    /* append */
+  reg2 = reg1;
+  kload(reg1,2);
+  ANpa1();    /* !&pa1 */
+  reg2 = reg1;
+  reg1 = car(cdr(local(0)));
+  List2();    /* list2 */
+  zcons3c(urwelt[52]);
+  kpop(3);
+  return;
+}
+
+void ANpalist()     /* !&palist */
+{
+  ANpalis();    /* !&palis */
+  zcons3c(urwelt[53]);
+  return;
+}
+
+void ANpaprog()     /* !&paprog */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = car(cdr(reg1));
+  Append();    /* append */
+  reg2 = reg1;
+  reg1 = cdr(cdr(local(0)));
+  ANpaprog1();    /* !&paprog1 */
+  zcons3c(car(cdr(local(0))));
+  zcons3c(urwelt[54]);
+  kpop(1);
+  return;
+}
+
+void ANpaprog1()     /* !&paprog1 */
+{
+  kalloc(3);
+  kset(1,reg2);
+  kset(2,NIL);
+  goto lab3;
+lab1 : 
+  kset0(reg1);
+  reg1 = car(reg1);
+  if (atom(reg1)) goto lab2;
+  kload(reg2,1);
+  ANpa1();    /* !&pa1 */
+lab2 : 
+  kload(reg2,2);
+  Cons();    /* cons */
+  kset(2,reg1);
+  reg1 = cdr(local(0));
+lab3 : 
+  if (!null(reg1)) goto lab1;
+  kload(reg1,2);
+  kpop(3);
+  Reversip();    /* reversip */
+  return;
+  }
+
+void ANpalis()     /* !&palis */
+{
+  kalloc(3);
+  kset(1,reg2);
+  kset(2,NIL);
+  goto lab2;
+lab1 : 
+  kset0(reg1);
+  reg1 = car(reg1);
+  kload(reg2,1);
+  ANpa1();    /* !&pa1 */
+  kload(reg2,2);
+  Cons();    /* cons */
+  kset(2,reg1);
+  reg1 = cdr(local(0));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  kload(reg1,2);
+  kpop(3);
+  Reversip();    /* reversip */
+  return;
+  }
+
+void Mknonlocal()     /* mknonlocal */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg2 = urwelt[55];
+  List2();    /* list2 */
+  Lprim();    /* lprim */
+  kload0(reg1);
+  Ncons();    /* ncons */
+  Fluid();    /* fluid */
+  kload0(reg2);
+  reg1 = urwelt[44];
+  kpop(1);
+  List2();    /* list2 */
+  return;
+  }
+
+void ANmknam()     /* !&mknam */
+{
+  Explode();    /* explode */
+  reg3 = reg1;
+  Gensym();    /* gensym */
+  Explode();    /* explode */
+  reg2 = reg1;
+  reg1 = reg3;
+  Append();    /* append */
+  Compress();    /* compress */
+  Intern();    /* intern */
+  return;
+  }
+
+void ANmkprogn()     /* !&mkprogn */
+{
+  reg3 = reg1;
+  if (null(reg1)) goto lab1;
+  reg1 = cdr(reg1);
+  if (null(reg1)) goto lab2;
+lab1 : 
+  zconsc(urwelt[56],reg3);
+  goto lab3;
+lab2 : 
+  reg1 = car(reg3);
+lab3 : 
+  return;
+}
+
+void ANpass2()     /* !&pass2 */
+{
+  reg2 = Sexp(&ZERO);
+  ANcomval();    /* !&comval */
+  return;
+  }
+
+void ANcomval()     /* !&comval */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg2 = NIL;
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab2;
+  reg2 = Sexp(&ONE);
+  kload(reg1,1);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab1;
+  reg1 = NIL;
+  goto lab3;
+lab1 : 
+  kload(reg2,1);
+  kload0(reg1);
+  kpop(2);
+  ANlreg1();    /* !&lreg1 */
+  return;
+lab2 : 
+  kload(reg3,1);
+  reg2 = value(urwelt[26]);
+  kload0(reg1);
+  ANcomval1();    /* !&comval1 */
+lab3 : 
+  kpop(2);
+  return;
+}
+
+void ANcomval1()     /* !&comval1 */
+{
+  kalloc(2);
+  zbind(urwelt[26],reg2);
+  kset(1,NIL);
+  kset0(reg1);
+  if (pairp(reg1)) goto lab1;
+  reg2 = Sexp(&TWO);
+  reg1 = reg3;
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab9;
+  reg2 = reg3;
+  kload0(reg1);
+  ANlreg1();    /* !&lreg1 */
+  goto lab9;
+lab1 : 
+  reg1 = car(reg1);
+  if (atom(reg1)) goto lab3;
+  reg1 = car(reg1);
+  if (reg1 != urwelt[52]) goto lab2;
+  reg2 = cdr(local(0));
+  reg1 = car(local(0));
+  ANcomply();    /* !&comply */
+  goto lab9;
+lab2 : 
+  reg2 = car(local(0));
+  reg1 = urwelt[57];
+  goto lab6;
+lab3 : 
+  reg2 = urwelt[48];
+  Get();    /* get */
+  kset(1,reg1);
+  if (null(reg1)) goto lab4;
+  reg2 = reg3;
+  kload0(reg1);
+  List2();    /* list2 */
+  reg2 = reg1;
+  kload(reg1,1);
+  Apply();    /* apply */
+  goto lab9;
+lab4 : 
+  reg1 = value(urwelt[58]);
+  if (null(reg1)) goto lab5;
+  reg1 = car(local(0));
+  if (reg1 != value(urwelt[7])) goto lab5;
+  reg1 = reg3;
+  Zerop();    /* zerop */
+  if (null(reg1)) goto lab5;
+  reg1 = value(urwelt[24]);
+  if (!null(reg1)) goto lab5;
+  reg2 = reg3;
+  kload0(reg1);
+  ANcomrec();    /* !&comrec */
+  goto lab9;
+lab5 : 
+  reg1 = car(local(0));
+  if (reg1 != urwelt[52]) goto lab7;
+  reg2 = value(urwelt[7]);
+  reg1 = urwelt[59];
+lab6 : 
+  List2();    /* list2 */
+  Lprie();    /* lprie */
+  goto lab9;
+lab7 : 
+  if (reg1 != urwelt[60]) goto lab8;
+  kload0(reg1);
+  ANattach();    /* !&attach */
+  goto lab9;
+lab8 : 
+  reg2 = cdr(local(0));
+  ANcall();    /* !&call */
+lab9 : 
+  reg1 = NIL;
+  zunbind(1);
+  kpop(2);
+  return;
+}
+
+void ANanyreg()     /* !&anyreg */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg2 = urwelt[5];
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab1;
+  reg1 = T;
+  goto lab3;
+lab1 : 
+  kload0(reg1);
+  Atom();    /* atom */
+  if (!null(reg1)) goto lab2;
+  reg1 = car(local(0));
+  Idp();    /* idp */
+  if (null(reg1)) goto lab2;
+  reg2 = urwelt[61];
+  reg1 = car(local(0));
+  Get();    /* get */
+  if (null(reg1)) goto lab2;
+  reg2 = NIL;
+  reg1 = car(cdr(local(0)));
+  ANanyreg();    /* !&anyreg */
+lab2 : 
+  if (null(reg1)) goto lab3;
+  reg1 = value(urwelt[62]);
+  Null();    /* null */
+  if (!null(reg1)) goto lab3;
+  kload(reg1,1);
+  ANanyregl();    /* !&anyregl */
+lab3 : 
+  kpop(2);
+  return;
+}
+
+void ANanyregl()     /* !&anyregl */
+{
+  kalloc(1);
+lab1 : 
+  kset0(reg1);
+  Null();    /* null */
+  if (!null(reg1)) goto lab2;
+  reg2 = NIL;
+  reg1 = car(local(0));
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab2;
+  reg1 = cdr(local(0));
+  goto lab1;
+lab2 : 
+  kpop(1);
+  return;
+}
+
+void ANcall()     /* !&call */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg3);
+  reg1 = reg2;
+  ANcomlis();    /* !&comlis */
+  kload(reg3,1);
+  reg2 = reg1;
+  kload0(reg1);
+  kpop(2);
+  ANcall1();    /* !&call1 */
+  return;
+  }
+
+void ANcall1()     /* !&call1 */
+{
+  kalloc(5);
+  kset0(reg1);
+  kset(1,reg2);
+  kset(2,reg3);
+  reg1 = urwelt[63];
+  Informuser();    /* informuser */
+  reg1 = Sexp(&ZERO);
+  kload(reg1,1);
+  Length();    /* length */
+  kset(3,reg1);
+  kload(reg2,2);
+  kload(reg1,1);
+  ANloadargs();    /* !&loadargs */
+  kload0(reg1);
+  ANcfntype();    /* !&cfntype */
+  kload(reg4,3);
+  reg3 = reg1;
+  kload0(reg2);
+  reg1 = urwelt[64];
+  List4();    /* list4 */
+  ANattach();    /* !&attach */
+  reg2 = urwelt[65];
+  kload0(reg1);
+  Flagp();    /* flagp */
+  if (null(reg1)) goto lab1;
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  zcons2c(cdr(value(urwelt[32])));
+  goto lab3;
+lab1 : 
+  reg2 = urwelt[66];
+  kload0(reg1);
+  Flagp();    /* flagp */
+  if (null(reg1)) goto lab2;
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  kset(4,reg1);
+  reg2 = cdr(value(urwelt[32]));
+  reg1 = Sexp(&TWO);
+  Delasc();    /* delasc */
+  zcons3c(local(4));
+  goto lab3;
+lab2 : 
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  Ncons();    /* ncons */
+lab3 : 
+  value(urwelt[32]) = reg1;
+  reg1 = NIL;
+  kpop(5);
+  return;
+}
+
+void Delasc()     /* delasc */
+{
+  kalloc(2);
+  kset0(reg1);
+  reg1 = reg2;
+  if (null(reg1)) goto lab2;
+  kset(1,reg2);
+  reg2 = car(car(reg1));
+  kload0(reg1);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab1;
+  reg1 = cdr(local(1));
+  goto lab2;
+lab1 : 
+  reg2 = cdr(local(1));
+  kload0(reg1);
+  Delasc();    /* delasc */
+  zcons3c(car(local(1)));
+lab2 : 
+  kpop(2);
+  return;
+}
+
+void ANcomlis()     /* !&comlis */
+{
+  kalloc(3);
+  kset(1,NIL);
+  kset(2,NIL);
+  kset0(reg1);
+lab1 : 
+  if (null(reg1)) goto lab5;
+  reg2 = cdr(reg1);
+  reg1 = car(reg1);
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab2;
+  zconsc(car(local(0)),local(2));
+  goto lab4;
+lab2 : 
+  kload(reg1,1);
+  if (null(reg1)) goto lab3;
+  ANstore1();    /* !&store1 */
+lab3 : 
+  reg3 = Sexp(&ONE);
+  reg2 = value(urwelt[26]);
+  reg1 = car(local(0));
+  ANcomval1();    /* !&comval1 */
+  Gensym();    /* gensym */
+  kset(1,reg1);
+  zcons2c(cdr(car(value(urwelt[32]))));
+  zcons3c(Sexp(&ONE));
+  zcons2c(cdr(value(urwelt[32])));
+  value(urwelt[32]) = reg1;
+  zconsc(local(1),local(2));
+lab4 : 
+  kset(2,reg1);
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  goto lab1;
+lab5 : 
+  kload(reg1,2);
+  kpop(3);
+  return;
+}
+
+void ANstore1()     /* !&store1 */
+{
+  kalloc(1);
+  reg1 = car(cdr(car(value(urwelt[32]))));
+  kset0(reg1);
+  if (null(reg1)) goto lab2;
+  reg2 = urwelt[5];
+  Eqcar();    /* eqcar */
+  if (!null(reg1)) goto lab2;
+  reg2 = value(urwelt[26]);
+  kload0(reg1);
+  Atsoc();    /* atsoc */
+  if (!null(reg1)) goto lab1;
+  kload0(reg1);
+  ANframe();    /* !&frame */
+lab1 : 
+  reg2 = Sexp(&ONE);
+  kload0(reg1);
+  ANstore0();    /* !&store0 */
+lab2 : 
+  reg1 = NIL;
+  kpop(1);
+  return;
+}
+
+void ANcomply()     /* !&comply */
+{
+  kalloc(7);
+  zbind(urwelt[30],NIL);
+  kset0(reg1);
+  reg1 = Sexp(&ZERO);
+  reg1 = car(cdr(local(0)));
+  kset(3,reg1);
+  kset(2,reg3);
+  reg1 = reg2;
+  ANcomlis();    /* !&comlis */
+  reg2 = Sexp(&ONE);
+  ANloadargs();    /* !&loadargs */
+  kload(reg1,3);
+  ANremvarl();    /* !&remvarl */
+  kset(1,reg1);
+  reg1 = Sexp(&ONE);
+  kset(4,reg1);
+  kload(reg1,3);
+  goto lab2;
+lab1 : 
+  kset(5,reg1);
+  reg1 = car(reg1);
+  kset(6,reg1);
+  ANframe();    /* !&frame */
+  reg3 = value(urwelt[32]);
+  kload(reg2,6);
+  kload(reg1,4);
+  ANrepasc();    /* !&repasc */
+  value(urwelt[32]) = reg1;
+  kload(reg1,4);
+  Add1();    /* add1 */
+  kset(4,reg1);
+  reg1 = cdr(local(5));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  reg2 = T;
+  kload(reg1,3);
+  ANfreebind();    /* !&freebind */
+  value(urwelt[30]) = reg1;
+  reg1 = Sexp(&ONE);
+  kset(4,reg1);
+  kload(reg1,3);
+  goto lab5;
+lab3 : 
+  kset(5,reg1);
+  reg1 = car(reg1);
+  kset(6,reg1);
+  Nonlocal();    /* nonlocal */
+  if (!null(reg1)) goto lab4;
+  kload(reg2,4);
+  kload(reg1,6);
+  ANstore0();    /* !&store0 */
+lab4 : 
+  kload(reg1,4);
+  Add1();    /* add1 */
+  kset(4,reg1);
+  reg1 = cdr(local(5));
+lab5 : 
+  if (!null(reg1)) goto lab3;
+  kload(reg2,2);
+  reg1 = car(cdr(cdr(local(0))));
+  ANcomval();    /* !&comval */
+  kload(reg2,2);
+  reg1 = value(urwelt[30]);
+  ANfreerst();    /* !&freerst */
+  kload(reg2,1);
+  kload(reg1,3);
+  ANrstvarl();    /* !&rstvarl */
+  reg1 = NIL;
+  zunbind(1);
+  kpop(7);
+  return;
+}
+
+void ANcomrec()     /* !&comrec */
+{
+  kalloc(4);
+  kset(2,NIL);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = cdr(reg1);
+  ANcomlis();    /* !&comlis */
+  kload(reg2,1);
+  ANloadargs();    /* !&loadargs */
+  reg1 = value(urwelt[39]);
+  kset(3,reg1);
+  reg1 = cdr(reg1);
+  if (!null(reg1)) goto lab1;
+  reg2 = car(local(0));
+  reg1 = urwelt[67];
+  List2();    /* list2 */
+  Lprie();    /* lprie */
+lab1 : 
+  reg1 = cdr(cdr(local(3)));
+  if (null(reg1)) goto lab2;
+  reg1 = cdr(local(3));
+  kset(3,reg1);
+  goto lab1;
+lab2 : 
+  reg1 = car(car(local(3)));
+  if (reg1 != urwelt[68]) goto lab3;
+  reg1 = cdr(car(local(3)));
+  kset(2,reg1);
+  goto lab4;
+lab3 : 
+  ANgenlbl();    /* !&genlbl */
+  kset(2,reg1);
+  zcons3c(urwelt[68]);
+  reg2 = car(cdr(local(3)));
+  List2();    /* list2 */
+  cdr(local(3)) = reg1;
+  kload(reg1,3);
+  kload(reg1,2);
+lab4 : 
+  ANattjmp();    /* !&attjmp */
+  reg1 = NIL;
+  kpop(4);
+  return;
+}
+
+void ANloadargs()     /* !&loadargs */
+{
+  kalloc(3);
+  kset0(reg1);
+  reg1 = Sexp(&ZERO);
+  kset(1,reg2);
+  kload0(reg1);
+  Length();    /* length */
+  kset(2,reg1);
+  reg2 = value(urwelt[42]);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab1;
+  reg2 = value(urwelt[7]);
+  reg1 = urwelt[69];
+  List2();    /* list2 */
+  Lprie();    /* lprie */
+lab1 : 
+  reg2 = Sexp(&ZERO);
+  kload(reg1,1);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab2;
+  ANclrregs();    /* !&clrregs */
+lab2 : 
+  kload0(reg1);
+  if (null(reg1)) goto lab3;
+  kload(reg4,1);
+  reg3 = cdr(reg1);
+  reg2 = car(reg1);
+  kload(reg1,2);
+  ANlreg();    /* !&lreg */
+  kload(reg1,2);
+  Sub1();    /* sub1 */
+  kset(2,reg1);
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  goto lab2;
+lab3 : 
+  reg1 = NIL;
+  kpop(3);
+  return;
+}
+
+void ANlocate()     /* !&locate */
+{
+  kalloc(3);
+  kset(1,NIL);
+  kset(2,NIL);
+  kset0(reg1);
+  reg2 = urwelt[5];
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab1;
+  kload0(reg1);
+  goto lab7;
+lab1 : 
+  reg2 = value(urwelt[32]);
+  kload0(reg1);
+  ANrassoc();    /* !&rassoc */
+  if (null(reg1)) goto lab2;
+  reg1 = car(reg1);
+  goto lab7;
+lab2 : 
+  kload0(reg1);
+  if (atom(reg1)) goto lab3;
+  reg1 = car(cdr(reg1));
+  ANlocate();    /* !&locate */
+  zcons3c(car(local(0)));
+  goto lab7;
+lab3 : 
+  Nonlocal();    /* nonlocal */
+  kset(2,reg1);
+  if (null(reg1)) goto lab4;
+  kload0(reg2);
+  List2();    /* list2 */
+  goto lab7;
+lab4 : 
+  reg2 = value(urwelt[28]);
+  kload0(reg1);
+  Atsoc();    /* atsoc */
+  kset(1,reg1);
+  if (null(reg1)) goto lab5;
+  reg2 = value(urwelt[28]);
+  Delete();    /* delete */
+  value(urwelt[28]) = reg1;
+  goto lab4;
+lab5 : 
+  reg2 = value(urwelt[26]);
+  kload0(reg1);
+  Atsoc();    /* atsoc */
+  if (null(reg1)) goto lab6;
+  reg1 = cdr(reg1);
+  goto lab8;
+lab6 : 
+  kload0(reg1);
+  Mknonlocal();    /* mknonlocal */
+lab7 : 
+  Ncons();    /* ncons */
+lab8 : 
+  kpop(3);
+  return;
+}
+
+void ANlreg()     /* !&lreg */
+{
+  kalloc(3);
+  kset(2,NIL);
+  kset0(reg1);
+  kset(1,reg2);
+  reg2 = value(urwelt[32]);
+  Assoc();    /* assoc */
+  if (null(reg1)) goto lab1;
+  reg2 = cdr(reg1);
+  kload(reg1,1);
+  Member();    /* member */
+  if (!null(reg1)) goto lab4;
+lab1 : 
+  reg2 = value(urwelt[37]);
+  kload0(reg1);
+  Assoc();    /* assoc */
+  kset(2,reg1);
+  if (null(reg1)) goto lab3;
+  reg2 = Sexp(&ZERO);
+  reg1 = reg4;
+  Greaterp();    /* greaterp */
+  if (!null(reg1)) goto lab2;
+  reg2 = reg3;
+  reg1 = car(cdr(local(2)));
+  ANmemlis();    /* !&memlis */
+  if (null(reg1)) goto lab3;
+lab2 : 
+  kload0(reg2);
+  reg1 = car(cdr(local(2)));
+  ANstore0();    /* !&store0 */
+  reg2 = value(urwelt[37]);
+  kload(reg1,2);
+  Delete();    /* delete */
+  value(urwelt[37]) = reg1;
+lab3 : 
+  kload(reg1,1);
+  ANlocate();    /* !&locate */
+  zcons3c(local(0));
+  zcons3c(urwelt[70]);
+  ANattach();    /* !&attach */
+  reg3 = value(urwelt[32]);
+  kload(reg2,1);
+  kload0(reg1);
+  ANrepasc();    /* !&repasc */
+  value(urwelt[32]) = reg1;
+lab4 : 
+  reg1 = NIL;
+  kpop(3);
+  return;
+}
+
+void ANlreg1()     /* !&lreg1 */
+{
+  reg4 = reg2;
+  reg3 = NIL;
+  reg2 = reg1;
+  reg1 = Sexp(&ONE);
+  ANlreg();    /* !&lreg */
+  return;
+  }
+
+void ANfreebind()     /* !&freebind */
+{
+  kalloc(7);
+  kset(2,NIL);
+  kset(3,NIL);
+  kset0(reg1);
+  reg1 = Sexp(&ZERO);
+  reg1 = Sexp(&ONE);
+  kset(6,reg1);
+  kset(1,reg2);
+  kload0(reg1);
+  goto lab4;
+lab1 : 
+  kset(5,reg1);
+  reg1 = car(reg1);
+  kset(4,reg1);
+  if (!fluidp(reg1)) goto lab2;
+  ANgetffrm();    /* !&getffrm */
+  zcons3c(local(4));
+  zcons2c(local(2));
+  kset(2,reg1);
+  zconsc(local(6),local(3));
+  kset(3,reg1);
+  goto lab3;
+lab2 : 
+  if (!globalp(reg1)) goto lab3;
+  reg2 = reg1;
+  reg1 = urwelt[71];
+  List2();    /* list2 */
+  Lprie();    /* lprie */
+lab3 : 
+  kload(reg1,6);
+  Add1();    /* add1 */
+  kset(6,reg1);
+  reg1 = cdr(local(5));
+lab4 : 
+  if (!null(reg1)) goto lab1;
+  kload(reg1,2);
+  if (null(reg1)) goto lab7;
+  kload(reg1,1);
+  if (null(reg1)) goto lab5;
+  kload(reg3,2);
+  kload(reg2,3);
+  reg1 = urwelt[72];
+  List3();    /* list3 */
+  goto lab6;
+lab5 : 
+  kload(reg2,2);
+  reg1 = urwelt[73];
+  List2();    /* list2 */
+lab6 : 
+  ANattach();    /* !&attach */
+  kload(reg1,2);
+lab7 : 
+  kpop(7);
+  return;
+}
+
+void ANfreerst()     /* !&freerst */
+{
+  zbind(urwelt[30],reg1);
+  if (null(reg1)) goto lab1;
+  reg2 = reg1;
+  reg1 = urwelt[74];
+  List2();    /* list2 */
+  ANattach();    /* !&attach */
+lab1 : 
+  zunbind(1);
+  return;
+}
+
+void ANattach()     /* !&attach */
+{
+  zcons2c(value(urwelt[39]));
+  value(urwelt[39]) = reg1;
+  return;
+}
+
+void ANstore0()     /* !&store0 */
+{
+  kalloc(3);
+  kset0(reg1);
+  kset(1,reg2);
+  ANgetfrm();    /* !&getfrm */
+  zcons3c(local(1));
+  zcons3c(urwelt[75]);
+  kset(2,reg1);
+  zcons2c(value(urwelt[27]));
+  value(urwelt[27]) = reg1;
+  kload(reg1,2);
+  ANattach();    /* !&attach */
+  kload0(reg1);
+  if (pairp(reg1)) goto lab1;
+  ANclrstr();    /* !&clrstr */
+  zconsc(local(0),value(urwelt[39]));
+  zcons2c(value(urwelt[28]));
+  value(urwelt[28]) = reg1;
+lab1 : 
+  reg1 = NIL;
+  kpop(3);
+  return;
+}
+
+void ANclrstr()     /* !&clrstr */
+{
+  kalloc(2);
+  kset0(reg1);
+  reg1 = value(urwelt[25]);
+  if (!null(reg1)) goto lab1;
+  reg2 = value(urwelt[28]);
+  kload0(reg1);
+  Atsoc();    /* atsoc */
+  kset(1,reg1);
+  if (null(reg1)) goto lab2;
+  reg2 = value(urwelt[27]);
+  reg1 = car(cdr(reg1));
+  ANdeleq();    /* !&deleq */
+  value(urwelt[27]) = reg1;
+  reg2 = value(urwelt[28]);
+  kload(reg1,1);
+  ANdeleq();    /* !&deleq */
+  value(urwelt[28]) = reg1;
+  car(car(cdr(local(1)))) = urwelt[76];
+  reg1 = car(cdr(local(1)));
+lab1 : 
+  reg1 = NIL;
+lab2 : 
+  kpop(2);
+  return;
+}
+
+void ANcomtst()     /* !&comtst */
+{
+  kalloc(3);
+  kset(2,NIL);
+  kset0(reg1);
+  kset(1,reg2);
+lab1 : 
+  reg2 = urwelt[77];
+  kload0(reg1);
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab2;
+  reg1 = value(urwelt[23]);
+  Null();    /* null */
+  value(urwelt[23]) = reg1;
+  reg1 = car(cdr(local(0)));
+  kset0(reg1);
+  goto lab1;
+lab2 : 
+  kload0(reg1);
+  if (atom(reg1)) goto lab3;
+  reg1 = car(reg1);
+  if (pairp(reg1)) goto lab3;
+  reg2 = urwelt[78];
+  Get();    /* get */
+  kset(2,reg1);
+  if (null(reg1)) goto lab3;
+  kload(reg2,1);
+  kload0(reg1);
+  List2();    /* list2 */
+  reg2 = reg1;
+  kload(reg1,2);
+  Apply();    /* apply */
+  goto lab9;
+lab3 : 
+  reg2 = urwelt[79];
+  kload0(reg1);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab5;
+  reg1 = value(urwelt[23]);
+  if (null(reg1)) goto lab4;
+  kload(reg1,1);
+  ANattjmp();    /* !&attjmp */
+  goto lab8;
+lab4 : 
+  reg1 = T;
+  value(urwelt[38]) = reg1;
+  goto lab8;
+lab5 : 
+  reg2 = Sexp(&ONE);
+  kload0(reg1);
+  ANcomval();    /* !&comval */
+  reg1 = value(urwelt[23]);
+  if (null(reg1)) goto lab6;
+  reg1 = urwelt[80];
+  goto lab7;
+lab6 : 
+  reg1 = urwelt[81];
+lab7 : 
+  reg2 = car(local(1));
+  List2();    /* list2 */
+  ANattach();    /* !&attach */
+  reg1 = value(urwelt[39]);
+  ANaddjmp();    /* !&addjmp */
+lab8 : 
+  reg1 = value(urwelt[32]);
+  value(urwelt[31]) = reg1;
+  reg1 = value(urwelt[37]);
+  value(urwelt[36]) = reg1;
+lab9 : 
+  reg2 = urwelt[80];
+  reg1 = car(value(urwelt[39]));
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab10;
+  zconsc(urwelt[82],cdr(car(value(urwelt[32]))));
+  zcons3c(Sexp(&ONE));
+  zcons2c(cdr(value(urwelt[32])));
+  value(urwelt[32]) = reg1;
+  goto lab11;
+lab10 : 
+  reg2 = urwelt[81];
+  reg1 = car(value(urwelt[39]));
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab11;
+  zconsc(urwelt[82],cdr(car(value(urwelt[31]))));
+  zcons3c(Sexp(&ONE));
+  zcons2c(cdr(value(urwelt[31])));
+  value(urwelt[31]) = reg1;
+lab11 : 
+  reg1 = NIL;
+  kpop(3);
+  return;
+}
+
+void ANcomandor()     /* !&comandor */
+{
+  kalloc(6);
+  kset(4,NIL);
+  kset(5,NIL);
+  kset0(reg1);
+  kset(1,reg2);
+  reg2 = urwelt[83];
+  reg1 = car(reg1);
+  Eq();    /* eq */
+  kset(2,reg1);
+  ANgenlbl();    /* !&genlbl */
+  kset(3,reg1);
+  reg2 = Sexp(&ONE);
+  kload(reg1,1);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab1;
+  zbind(urwelt[31],NIL);
+  kload(reg2,3);
+  kload0(reg1);
+  ANtstandor();    /* !&tstandor */
+  reg2 = value(urwelt[31]);
+  reg1 = value(urwelt[32]);
+  ANrmerge2();    /* !&rmerge2 */
+  value(urwelt[32]) = reg1;
+  zunbind(1);
+  goto lab10;
+lab1 : 
+  reg2 = Sexp(&ZERO);
+  kload(reg1,1);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab2;
+  ANclrregs();    /* !&clrregs */
+lab2 : 
+  reg1 = cdr(local(0));
+  kset0(reg1);
+lab3 : 
+  if (null(reg1)) goto lab9;
+  reg1 = cdr(reg1);
+  if (null(reg1)) goto lab4;
+  reg1 = Sexp(&ONE);
+  goto lab5;
+lab4 : 
+  kload(reg1,1);
+lab5 : 
+  reg2 = reg1;
+  reg1 = car(local(0));
+  ANcomval();    /* !&comval */
+  zconsc(value(urwelt[37]),local(4));
+  kset(4,reg1);
+  zconsc(value(urwelt[32]),local(5));
+  kset(5,reg1);
+  reg1 = cdr(local(0));
+  if (null(reg1)) goto lab8;
+  kload(reg1,2);
+  if (null(reg1)) goto lab6;
+  reg1 = urwelt[81];
+  goto lab7;
+lab6 : 
+  reg1 = urwelt[80];
+lab7 : 
+  reg2 = car(local(3));
+  List2();    /* list2 */
+  ANattach();    /* !&attach */
+  reg1 = value(urwelt[39]);
+  ANaddjmp();    /* !&addjmp */
+lab8 : 
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  goto lab3;
+lab9 : 
+  kload(reg1,4);
+  ANrmerge();    /* !&rmerge */
+  value(urwelt[37]) = reg1;
+  kload(reg1,5);
+  ANrmerge();    /* !&rmerge */
+  value(urwelt[32]) = reg1;
+lab10 : 
+  kload(reg1,3);
+  ANattlbl();    /* !&attlbl */
+  reg1 = NIL;
+  kpop(6);
+  return;
+}
+
+void ANtstandor()     /* !&tstandor */
+{
+  kalloc(9);
+  kset(6,NIL);
+  kset(7,NIL);
+  kset(8,NIL);
+  kset0(reg1);
+  reg1 = value(urwelt[23]);
+  kset(2,reg1);
+  value(urwelt[23]) = NIL;
+  kset(1,reg2);
+  reg2 = urwelt[83];
+  reg1 = car(local(0));
+  Eq();    /* eq */
+  kset(4,reg1);
+  reg2 = reg1;
+  kload(reg1,2);
+  Eq();    /* eq */
+  kset(3,reg1);
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  ANgenlbl();    /* !&genlbl */
+  kset(5,reg1);
+  ANclrregs();    /* !&clrregs */
+  kload0(reg1);
+lab1 : 
+  if (null(reg1)) goto lab8;
+  value(urwelt[23]) = NIL;
+  reg1 = cdr(reg1);
+  if (!null(reg1)) goto lab3;
+  kload(reg1,3);
+  if (null(reg1)) goto lab3;
+  kload(reg1,4);
+  if (null(reg1)) goto lab2;
+  reg1 = T;
+  value(urwelt[23]) = reg1;
+lab2 : 
+  kload(reg2,1);
+  reg1 = car(local(0));
+  ANcomtst();    /* !&comtst */
+  zconsc(value(urwelt[32]),local(6));
+  kset(6,reg1);
+  zconsc(value(urwelt[31]),local(7));
+  goto lab6;
+lab3 : 
+  kload(reg1,4);
+  if (!null(reg1)) goto lab4;
+  reg1 = T;
+  value(urwelt[23]) = reg1;
+lab4 : 
+  kload(reg1,3);
+  if (null(reg1)) goto lab5;
+  kload(reg2,5);
+  reg1 = car(local(0));
+  ANcomtst();    /* !&comtst */
+  zconsc(value(urwelt[31]),local(6));
+  kset(6,reg1);
+  zconsc(value(urwelt[32]),local(7));
+  goto lab6;
+lab5 : 
+  kload(reg2,1);
+  reg1 = car(local(0));
+  ANcomtst();    /* !&comtst */
+  zconsc(value(urwelt[32]),local(6));
+  kset(6,reg1);
+  zconsc(value(urwelt[31]),local(7));
+lab6 : 
+  kset(7,reg1);
+  kload(reg1,8);
+  if (!null(reg1)) goto lab7;
+  zconsc(NIL,value(urwelt[25]));
+  value(urwelt[25]) = reg1;
+  reg1 = T;
+  kset(8,reg1);
+lab7 : 
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  goto lab1;
+lab8 : 
+  kload(reg1,5);
+  ANattlbl();    /* !&attlbl */
+  kload(reg1,3);
+  if (!null(reg1)) goto lab9;
+  reg1 = car(local(6));
+  goto lab10;
+lab9 : 
+  kload(reg1,6);
+  ANrmerge();    /* !&rmerge */
+lab10 : 
+  value(urwelt[32]) = reg1;
+  kload(reg1,3);
+  if (null(reg1)) goto lab11;
+  reg1 = car(local(7));
+  goto lab12;
+lab11 : 
+  kload(reg1,7);
+  ANrmerge();    /* !&rmerge */
+lab12 : 
+  value(urwelt[31]) = reg1;
+  kload(reg1,8);
+  if (null(reg1)) goto lab13;
+  reg1 = cdr(value(urwelt[25]));
+  value(urwelt[25]) = reg1;
+lab13 : 
+  kload(reg1,2);
+  value(urwelt[23]) = reg1;
+  reg1 = NIL;
+  kpop(9);
+  return;
+}
+
+void ANcomcond()     /* !&comcond */
+{
+  kalloc(9);
+  zbind(urwelt[23],NIL);
+  zbind(urwelt[38],NIL);
+  zbind(urwelt[31],NIL);
+  zbind(urwelt[36],NIL);
+  kset(4,NIL);
+  kset(5,NIL);
+  kset(6,NIL);
+  reg1 = cdr(reg1);
+  kset0(reg1);
+  kset(1,reg2);
+  ANgenlbl();    /* !&genlbl */
+  kset(2,reg1);
+  reg2 = Sexp(&ZERO);
+  kload(reg1,1);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab1;
+  ANclrregs();    /* !&clrregs */
+lab1 : 
+  kload0(reg1);
+  goto lab7;
+lab2 : 
+  kset(7,reg1);
+  reg1 = car(reg1);
+  kset(8,reg1);
+  ANgenlbl();    /* !&genlbl */
+  kset(3,reg1);
+  value(urwelt[23]) = NIL;
+  reg1 = cdr(local(8));
+  if (null(reg1)) goto lab3;
+  kload(reg2,3);
+  reg1 = car(local(8));
+  ANcomtst();    /* !&comtst */
+  goto lab4;
+lab3 : 
+  reg2 = Sexp(&ONE);
+  reg1 = car(local(8));
+  ANcomval();    /* !&comval */
+  reg2 = car(local(3));
+  reg1 = urwelt[81];
+  List2();    /* list2 */
+  ANattach();    /* !&attach */
+  reg1 = value(urwelt[39]);
+  ANaddjmp();    /* !&addjmp */
+  reg1 = value(urwelt[37]);
+  value(urwelt[36]) = reg1;
+  zconsc(urwelt[82],cdr(car(value(urwelt[32]))));
+  zcons3c(Sexp(&ONE));
+  zcons2c(cdr(value(urwelt[32])));
+  value(urwelt[31]) = reg1;
+lab4 : 
+  kload(reg1,6);
+  if (!null(reg1)) goto lab5;
+  zconsc(NIL,value(urwelt[25]));
+  value(urwelt[25]) = reg1;
+  reg1 = T;
+  kset(6,reg1);
+lab5 : 
+  kload(reg2,1);
+  reg1 = car(cdr(local(8)));
+  ANcomval();    /* !&comval */
+  reg1 = car(value(urwelt[39]));
+  ANtransferp();    /* !&transferp */
+  if (!null(reg1)) goto lab6;
+  kload(reg1,2);
+  ANattjmp();    /* !&attjmp */
+  zconsc(value(urwelt[37]),local(5));
+  kset(5,reg1);
+  zconsc(value(urwelt[32]),local(4));
+  kset(4,reg1);
+lab6 : 
+  reg1 = value(urwelt[31]);
+  value(urwelt[32]) = reg1;
+  reg1 = value(urwelt[36]);
+  value(urwelt[37]) = reg1;
+  value(urwelt[36]) = NIL;
+  kload(reg1,3);
+  ANattlbl();    /* !&attlbl */
+  reg1 = cdr(local(7));
+lab7 : 
+  if (!null(reg1)) goto lab2;
+  reg1 = value(urwelt[38]);
+  if (!null(reg1)) goto lab8;
+  reg2 = Sexp(&TWO);
+  kload(reg1,1);
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab8;
+  kload(reg2,1);
+  reg1 = urwelt[82];
+  ANlreg1();    /* !&lreg1 */
+  goto lab9;
+lab8 : 
+  kload(reg1,4);
+  if (null(reg1)) goto lab10;
+lab9 : 
+  kload(reg2,5);
+  reg1 = value(urwelt[37]);
+  ANrmerge1();    /* !&rmerge1 */
+  value(urwelt[37]) = reg1;
+  kload(reg2,4);
+  reg1 = value(urwelt[32]);
+  ANrmerge1();    /* !&rmerge1 */
+  value(urwelt[32]) = reg1;
+lab10 : 
+  kload(reg1,2);
+  ANattlbl();    /* !&attlbl */
+  kload(reg1,6);
+  if (null(reg1)) goto lab11;
+  reg1 = cdr(value(urwelt[25]));
+  value(urwelt[25]) = reg1;
+lab11 : 
+  reg1 = NIL;
+  zunbind(4);
+  kpop(9);
+  return;
+}
+
+void ANrmerge()     /* !&rmerge */
+{
+  if (null(reg1)) goto lab1;
+  reg2 = cdr(reg1);
+  reg1 = car(reg1);
+  ANrmerge1();    /* !&rmerge1 */
+lab1 : 
+  return;
+}
+
+void ANrmerge1()     /* !&rmerge1 */
+{
+  kalloc(2);
+lab1 : 
+  kset0(reg1);
+  reg1 = reg2;
+  if (null(reg1)) goto lab2;
+  kset(1,reg2);
+  reg2 = car(reg1);
+  kload0(reg1);
+  ANrmerge2();    /* !&rmerge2 */
+  reg2 = cdr(local(1));
+  goto lab1;
+lab2 : 
+  kload0(reg1);
+  kpop(2);
+  return;
+}
+
+void ANrmerge2()     /* !&rmerge2 */
+{
+  kalloc(4);
+lab1 : 
+  kset0(reg1);
+  kset(1,reg2);
+  if (null(reg1)) goto lab3;
+  reg1 = reg2;
+  if (null(reg1)) goto lab3;
+  reg1 = car(car(local(0)));
+  Assoc();    /* assoc */
+  kset(2,reg1);
+  if (!null(reg1)) goto lab2;
+  kload(reg2,1);
+  reg1 = cdr(local(0));
+  goto lab1;
+lab2 : 
+  reg2 = cdr(reg1);
+  reg1 = cdr(car(local(0)));
+  Xn();    /* xn */
+  zcons3c(car(car(local(0))));
+  kset(3,reg1);
+  kload(reg2,1);
+  kload(reg1,2);
+  Delete();    /* delete */
+  reg2 = reg1;
+  reg1 = cdr(local(0));
+  ANrmerge2();    /* !&rmerge2 */
+  zcons3c(local(3));
+lab3 : 
+  kpop(4);
+  return;
+}
+
+void ANcomcons()     /* !&comcons */
+{
+  kalloc(2);
+  kset(1,reg2);
+  reg1 = cdr(reg1);
+  kset0(reg1);
+  if (null(reg1)) goto lab1;
+  reg1 = cdr(reg1);
+  if (null(reg1)) goto lab1;
+  reg1 = cdr(reg1);
+  if (null(reg1)) goto lab2;
+lab1 : 
+  reg1 = urwelt[84];
+  kpop(2);
+  Lprie();    /* lprie */
+  return;
+lab2 : 
+  reg2 = urwelt[82];
+  reg1 = car(cdr(local(0)));
+  Equal();    /* equal */
+  if (null(reg1)) goto lab3;
+  reg1 = car(local(0));
+  Ncons();    /* ncons */
+  kload(reg3,1);
+  reg2 = reg1;
+  reg1 = urwelt[85];
+  goto lab5;
+lab3 : 
+  reg2 = value(urwelt[32]);
+  reg1 = car(cdr(local(0)));
+  ANrassoc();    /* !&rassoc */
+  reg2 = Sexp(&ONE);
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab4;
+  reg2 = NIL;
+  reg1 = car(local(0));
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab4;
+  kload0(reg1);
+  Reverse();    /* reverse */
+  ANcomlis();    /* !&comlis */
+  goto lab7;
+lab4 : 
+  reg2 = NIL;
+  reg1 = car(cdr(local(0)));
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab6;
+  kload(reg3,1);
+  kload0(reg2);
+  reg1 = urwelt[86];
+lab5 : 
+  kpop(2);
+  ANcall();    /* !&call */
+  return;
+lab6 : 
+  kload0(reg1);
+  ANcomlis();    /* !&comlis */
+  Reversip();    /* reversip */
+lab7 : 
+  kload(reg3,1);
+  reg2 = reg1;
+  reg1 = urwelt[87];
+  kpop(2);
+  ANcall1();    /* !&call1 */
+  return;
+  }
+
+void ANcomgo()     /* !&comgo */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  ANclrregs();    /* !&clrregs */
+  reg2 = Sexp(&TWO);
+  kload(reg1,1);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab1;
+  reg1 = car(cdr(local(0)));
+  ANgetlbl();    /* !&getlbl */
+  ANattjmp();    /* !&attjmp */
+  reg1 = NIL;
+  value(urwelt[28]) = reg1;
+  goto lab2;
+lab1 : 
+  reg2 = urwelt[88];
+  kload0(reg1);
+  List2();    /* list2 */
+  Lprie();    /* lprie */
+lab2 : 
+  kpop(2);
+  return;
+}
+
+void ANcomlist()     /* !&comlist */
+{
+  kalloc(4);
+  reg1 = cdr(reg1);
+  kset0(reg1);
+  kset(1,reg2);
+  reg2 = Sexp(&FIVE);
+  reg1 = value(urwelt[42]);
+  Min2();    /* min2 */
+  kset(2,reg1);
+  kload0(reg1);
+  Length();    /* length */
+  kset(3,reg1);
+  Zerop();    /* zerop */
+  if (null(reg1)) goto lab1;
+  kload(reg2,1);
+  reg1 = urwelt[82];
+  ANlreg1();    /* !&lreg1 */
+  goto lab8;
+lab1 : 
+  kload(reg2,2);
+  kload(reg1,3);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab2;
+  kload0(reg1);
+  ANcomlist1();    /* !&comlist1 */
+  kload(reg2,1);
+  ANcomval();    /* !&comval */
+  goto lab8;
+lab2 : 
+  kload(reg1,3);
+  Onep();    /* onep */
+  if (null(reg1)) goto lab3;
+  reg1 = urwelt[85];
+  goto lab7;
+lab3 : 
+  reg2 = Sexp(&TWO);
+  kload(reg1,3);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab4;
+  reg1 = urwelt[89];
+  goto lab7;
+lab4 : 
+  reg2 = Sexp(&THREE);
+  kload(reg1,3);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab5;
+  reg1 = urwelt[90];
+  goto lab7;
+lab5 : 
+  reg2 = Sexp(&FOUR);
+  kload(reg1,3);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab6;
+  reg1 = urwelt[91];
+  goto lab7;
+lab6 : 
+  reg1 = urwelt[92];
+lab7 : 
+  kload(reg3,1);
+  kload0(reg2);
+  ANcall();    /* !&call */
+lab8 : 
+  reg1 = NIL;
+  kpop(4);
+  return;
+}
+
+void ANcomlist1()     /* !&comlist1 */
+{
+  kalloc(1);
+  if (!null(reg1)) goto lab1;
+  reg1 = urwelt[82];
+  goto lab2;
+lab1 : 
+  kset0(reg1);
+  zconsc(urwelt[53],cdr(reg1));
+  reg3 = reg1;
+  reg2 = car(local(0));
+  reg1 = urwelt[86];
+  List3();    /* list3 */
+lab2 : 
+  kpop(1);
+  return;
+}
+
+void ANpamap()     /* !&pamap */
+{
+  kalloc(4);
+  kset0(reg1);
+  kset(1,reg2);
+  reg2 = urwelt[93];
+  reg1 = car(cdr(cdr(reg1)));
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab2;
+  reg1 = car(cdr(car(cdr(cdr(local(0))))));
+  kset(2,reg1);
+  kload(reg2,1);
+  reg1 = car(cdr(local(0)));
+  ANpa1();    /* !&pa1 */
+  kset(3,reg1);
+  kload(reg1,2);
+  if (atom(reg1)) goto lab1;
+  kload(reg2,1);
+  ANpa1();    /* !&pa1 */
+lab1 : 
+  Mkquote();    /* mkquote */
+  reg3 = reg1;
+  kload(reg2,3);
+  reg1 = car(local(0));
+  kpop(4);
+  List3();    /* list3 */
+  return;
+lab2 : 
+  kload(reg2,1);
+  reg1 = cdr(local(0));
+  ANpalis();    /* !&palis */
+  zcons3c(car(local(0)));
+  kpop(4);
+  return;
+}
+
+void ANcommap()     /* !&commap */
+{
+  kalloc(13);
+  kset(6,NIL);
+  kset(7,NIL);
+  kset(9,NIL);
+  kset0(reg1);
+  reg1 = car(cdr(reg1));
+  kset(2,reg1);
+  reg1 = car(cdr(cdr(local(0))));
+  kset(3,reg1);
+  ANgenlbl();    /* !&genlbl */
+  kset(4,reg1);
+  ANgenlbl();    /* !&genlbl */
+  kset(5,reg1);
+  reg2 = urwelt[94];
+  reg1 = car(local(0));
+  Memq();    /* memq */
+  if (null(reg1)) goto lab1;
+  reg1 = urwelt[86];
+  goto lab2;
+lab1 : 
+  reg2 = urwelt[95];
+  reg1 = car(local(0));
+  Memq();    /* memq */
+  if (null(reg1)) goto lab2;
+  ANgenlbl();    /* !&genlbl */
+  kset(6,reg1);
+  reg1 = urwelt[96];
+lab2 : 
+  kset(8,reg1);
+  ANclrregs();    /* !&clrregs */
+  kload(reg1,8);
+  if (null(reg1)) goto lab3;
+  Gensym();    /* gensym */
+  kset(9,reg1);
+  ANframe();    /* !&frame */
+  kload(reg1,6);
+  if (!null(reg1)) goto lab3;
+  reg2 = NIL;
+  kload(reg1,9);
+  ANstore0();    /* !&store0 */
+lab3 : 
+  Gensym();    /* gensym */
+  kset(11,reg1);
+  ANframe();    /* !&frame */
+  reg2 = Sexp(&ONE);
+  kload(reg1,2);
+  ANcomval();    /* !&comval */
+  kload(reg2,11);
+  reg1 = Sexp(&ONE);
+  List2();    /* list2 */
+  Ncons();    /* ncons */
+  value(urwelt[32]) = reg1;
+  kload(reg1,6);
+  if (null(reg1)) goto lab4;
+  reg2 = Sexp(&ONE);
+  kload(reg1,11);
+  ANstore0();    /* !&store0 */
+  Gensym();    /* gensym */
+  kset(7,reg1);
+  ANframe();    /* !&frame */
+  reg2 = Sexp(&ONE);
+  reg1 = urwelt[97];
+  ANcomval();    /* !&comval */
+  reg2 = Sexp(&ONE);
+  kload(reg1,9);
+  ANstore0();    /* !&store0 */
+  reg2 = Sexp(&ONE);
+  kload(reg1,7);
+  ANstore0();    /* !&store0 */
+  reg2 = Sexp(&ONE);
+  kload(reg1,11);
+  ANlreg1();    /* !&lreg1 */
+lab4 : 
+  kload(reg1,5);
+  ANattjmp();    /* !&attjmp */
+  kload(reg1,4);
+  ANattlbl();    /* !&attlbl */
+  reg2 = Sexp(&ONE);
+  kload(reg1,11);
+  ANstore0();    /* !&store0 */
+  reg2 = urwelt[98];
+  reg1 = car(local(0));
+  Memq();    /* memq */
+  if (null(reg1)) goto lab5;
+  kload(reg1,11);
+  goto lab6;
+lab5 : 
+  kload(reg2,11);
+  reg1 = urwelt[99];
+  List2();    /* list2 */
+lab6 : 
+  kset(12,reg1);
+  reg2 = urwelt[5];
+  kload(reg1,3);
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab7;
+  reg1 = car(cdr(local(3)));
+  kset(3,reg1);
+lab7 : 
+  reg1 = value(urwelt[28]);
+  kset(10,reg1);
+  kload(reg2,12);
+  kload(reg1,3);
+  List2();    /* list2 */
+  kset(1,reg1);
+  kload(reg1,8);
+  if (null(reg1)) goto lab8;
+  reg1 = Sexp(&ONE);
+  goto lab9;
+lab8 : 
+  reg1 = Sexp(&THREE);
+lab9 : 
+  reg2 = reg1;
+  kload(reg1,1);
+  ANcomval();    /* !&comval */
+  kload(reg1,8);
+  if (null(reg1)) goto lab12;
+  kload(reg1,6);
+  if (null(reg1)) goto lab10;
+  reg2 = car(reg1);
+  reg1 = urwelt[81];
+  List2();    /* list2 */
+  ANattach();    /* !&attach */
+  reg1 = value(urwelt[39]);
+  ANaddjmp();    /* !&addjmp */
+  reg1 = urwelt[100];
+  ANattach();    /* !&attach */
+  reg2 = Sexp(&ONE);
+  kload(reg1,7);
+  ANlreg1();    /* !&lreg1 */
+  reg2 = Sexp(&TWO);
+  kload(reg1,7);
+  ANstore0();    /* !&store0 */
+  reg1 = urwelt[101];
+  ANattach();    /* !&attach */
+  kload(reg1,6);
+  ANattlbl();    /* !&attlbl */
+  goto lab11;
+lab10 : 
+  reg4 = Sexp(&ONE);
+  reg3 = NIL;
+  kload(reg2,9);
+  reg1 = Sexp(&TWO);
+  ANlreg();    /* !&lreg */
+  reg1 = urwelt[102];
+  ANattach();    /* !&attach */
+  reg2 = Sexp(&ONE);
+  kload(reg1,9);
+  ANstore0();    /* !&store0 */
+lab11 : 
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  Ncons();    /* ncons */
+  value(urwelt[32]) = reg1;
+lab12 : 
+  kload(reg2,10);
+  reg1 = value(urwelt[28]);
+  Xn();    /* xn */
+  value(urwelt[28]) = reg1;
+  kload(reg2,11);
+  reg1 = urwelt[103];
+  List2();    /* list2 */
+  reg2 = Sexp(&ONE);
+  ANcomval();    /* !&comval */
+  kload(reg1,5);
+  ANattlbl();    /* !&attlbl */
+  reg2 = car(local(4));
+  reg1 = urwelt[80];
+  List2();    /* list2 */
+  ANattach();    /* !&attach */
+  reg1 = value(urwelt[39]);
+  ANaddjmp();    /* !&addjmp */
+  kload(reg1,8);
+  if (null(reg1)) goto lab15;
+  kload(reg1,6);
+  if (null(reg1)) goto lab13;
+  reg1 = urwelt[103];
+  goto lab14;
+lab13 : 
+  reg1 = urwelt[104];
+lab14 : 
+  kload(reg2,9);
+  List2();    /* list2 */
+  reg2 = Sexp(&ONE);
+  ANcomval();    /* !&comval */
+  goto lab16;
+lab15 : 
+  Mkquote();    /* mkquote */
+  reg2 = reg1;
+  reg1 = Sexp(&ONE);
+  List2();    /* list2 */
+  Ncons();    /* ncons */
+  value(urwelt[32]) = reg1;
+lab16 : 
+  reg1 = NIL;
+  kpop(13);
+  return;
+}
+
+void Xn()     /* xn */
+{
+  kalloc(2);
+lab1 : 
+  if (null(reg1)) goto lab3;
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = car(reg1);
+  Member();    /* member */
+  kload(reg2,1);
+  if (!null(reg1)) goto lab2;
+  reg1 = cdr(local(0));
+  goto lab1;
+lab2 : 
+  reg1 = car(local(0));
+  Delete();    /* delete */
+  reg2 = reg1;
+  reg1 = cdr(local(0));
+  Xn();    /* xn */
+  zcons3c(car(local(0)));
+lab3 : 
+  kpop(2);
+  return;
+}
+
+void ANcomprog()     /* !&comprog */
+{
+  kalloc(7);
+  zbind(urwelt[29],NIL);
+  zbind(urwelt[105],NIL);
+  zbind(urwelt[30],NIL);
+  kset0(reg1);
+  reg1 = Sexp(&ZERO);
+  kset(4,reg1);
+  reg1 = car(cdr(local(0)));
+  kset(3,reg1);
+  reg1 = cdr(cdr(local(0)));
+  kset0(reg1);
+  kset(1,reg2);
+  ANgenlbl();    /* !&genlbl */
+  value(urwelt[29]) = reg1;
+  kload(reg1,3);
+  ANremvarl();    /* !&remvarl */
+  kset(2,reg1);
+  kload(reg1,3);
+  goto lab2;
+lab1 : 
+  kset(5,reg1);
+  reg1 = car(reg1);
+  ANframe();    /* !&frame */
+  reg1 = cdr(local(5));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  reg2 = NIL;
+  kload(reg1,3);
+  ANfreebind();    /* !&freebind */
+  value(urwelt[30]) = reg1;
+  kload(reg1,3);
+  goto lab5;
+lab3 : 
+  kset(5,reg1);
+  reg1 = car(reg1);
+  kset(6,reg1);
+  Nonlocal();    /* nonlocal */
+  if (!null(reg1)) goto lab4;
+  reg2 = NIL;
+  kload(reg1,6);
+  ANstore0();    /* !&store0 */
+lab4 : 
+  reg1 = cdr(local(5));
+lab5 : 
+  if (!null(reg1)) goto lab3;
+  kload0(reg1);
+  goto lab8;
+lab6 : 
+  kset(5,reg1);
+  reg1 = car(reg1);
+  kset(6,reg1);
+  if (pairp(reg1)) goto lab7;
+  ANgenlbl();    /* !&genlbl */
+  zcons3c(local(6));
+  zcons2c(value(urwelt[105]));
+  value(urwelt[105]) = reg1;
+lab7 : 
+  reg1 = cdr(local(5));
+lab8 : 
+  if (!null(reg1)) goto lab6;
+  kload0(reg1);
+lab9 : 
+  if (null(reg1)) goto lab17;
+  reg1 = car(reg1);
+  if (pairp(reg1)) goto lab10;
+  ANclrregs();    /* !&clrregs */
+  reg1 = car(local(0));
+  ANgetlbl();    /* !&getlbl */
+  ANattlbl();    /* !&attlbl */
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  Ncons();    /* ncons */
+  value(urwelt[32]) = reg1;
+  goto lab13;
+lab10 : 
+  reg2 = Sexp(&TWO);
+  kload(reg1,1);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab11;
+  reg1 = Sexp(&FOUR);
+  goto lab12;
+lab11 : 
+  reg1 = Sexp(&THREE);
+lab12 : 
+  reg2 = reg1;
+  reg1 = car(local(0));
+  ANcomval();    /* !&comval */
+lab13 : 
+  reg1 = cdr(local(0));
+  if (!null(reg1)) goto lab15;
+  reg2 = Sexp(&TWO);
+  kload(reg1,1);
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab15;
+  reg1 = car(local(0));
+  if (atom(reg1)) goto lab14;
+  reg2 = urwelt[106];
+  reg1 = car(reg1);
+  Memq();    /* memq */
+  if (!null(reg1)) goto lab15;
+lab14 : 
+  reg1 = urwelt[107];
+  Ncons();    /* ncons */
+  goto lab16;
+lab15 : 
+  reg1 = cdr(local(0));
+lab16 : 
+  kset0(reg1);
+  goto lab9;
+lab17 : 
+  reg1 = value(urwelt[29]);
+  ANattlbl();    /* !&attlbl */
+  reg1 = value(urwelt[29]);
+  ANfindlbl();    /* !&findlbl */
+  Cdr();    /* cdr */
+  if (null(reg1)) goto lab18;
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  Ncons();    /* ncons */
+  value(urwelt[32]) = reg1;
+lab18 : 
+  kload(reg2,1);
+  reg1 = value(urwelt[30]);
+  ANfreerst();    /* !&freerst */
+  kload(reg2,2);
+  kload(reg1,3);
+  ANrstvarl();    /* !&rstvarl */
+  reg1 = NIL;
+  zunbind(3);
+  kpop(7);
+  return;
+}
+
+void ANremvarl()     /* !&remvarl */
+{
+  kalloc(2);
+  kset(1,NIL);
+  goto lab2;
+lab1 : 
+  kset0(reg1);
+  reg1 = car(reg1);
+  ANremvar();    /* !&remvar */
+  kload(reg2,1);
+  Cons();    /* cons */
+  kset(1,reg1);
+  reg1 = cdr(local(0));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  kload(reg1,1);
+  kpop(2);
+  Reversip();    /* reversip */
+  return;
+  }
+
+void ANremvar()     /* !&remvar */
+{
+  kalloc(1);
+  kset0(reg1);
+  ANremstores();    /* !&remstores */
+  kload0(reg1);
+  kpop(1);
+  ANprotect();    /* !&protect */
+  return;
+  }
+
+void ANremstores()     /* !&remstores */
+{
+  kalloc(3);
+  kset0(reg1);
+  reg1 = value(urwelt[37]);
+  goto lab3;
+lab1 : 
+  kset(1,reg1);
+  reg1 = car(reg1);
+  kset(2,reg1);
+  kload0(reg1);
+  if (reg1 != car(cdr(local(2)))) goto lab2;
+  reg2 = car(local(2));
+  reg1 = car(cdr(local(2)));
+  ANstore0();    /* !&store0 */
+  reg2 = value(urwelt[37]);
+  kload(reg1,2);
+  Delete();    /* delete */
+  value(urwelt[37]) = reg1;
+lab2 : 
+  reg1 = cdr(local(1));
+lab3 : 
+  if (!null(reg1)) goto lab1;
+  reg1 = value(urwelt[32]);
+  goto lab7;
+lab4 : 
+  kset(1,reg1);
+  reg1 = car(reg1);
+  kset(2,reg1);
+lab5 : 
+  reg2 = cdr(local(2));
+  kload0(reg1);
+  Member();    /* member */
+  if (null(reg1)) goto lab6;
+  reg2 = cdr(local(2));
+  kload0(reg1);
+  ANdeleq();    /* !&deleq */
+  cdr(local(2)) = reg1;
+  kload(reg1,2);
+  goto lab5;
+lab6 : 
+  reg1 = cdr(local(1));
+lab7 : 
+  if (!null(reg1)) goto lab4;
+  kpop(3);
+  return;
+}
+
+void ANprotect()     /* !&protect */
+{
+  kalloc(1);
+  reg2 = value(urwelt[28]);
+  Atsoc();    /* atsoc */
+  kset0(reg1);
+  if (null(reg1)) goto lab1;
+  reg2 = value(urwelt[28]);
+  ANdeleq();    /* !&deleq */
+  value(urwelt[28]) = reg1;
+lab1 : 
+  kload0(reg1);
+  kpop(1);
+  return;
+}
+
+void ANrstvarl()     /* !&rstvarl */
+{
+  kalloc(3);
+  kset(1,reg2);
+  goto lab2;
+lab1 : 
+  kset(2,reg1);
+  reg1 = car(reg1);
+  kset0(reg1);
+  ANremstores();    /* !&remstores */
+  kload0(reg1);
+  ANclrstr();    /* !&clrstr */
+  reg1 = car(local(1));
+  ANunprotect();    /* !&unprotect */
+  reg1 = cdr(local(1));
+  kset(1,reg1);
+  reg1 = cdr(local(2));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  kpop(3);
+  return;
+}
+
+void ANunprotect()     /* !&unprotect */
+{
+  if (null(reg1)) goto lab1;
+  zcons2c(value(urwelt[28]));
+  value(urwelt[28]) = reg1;
+lab1 : 
+  return;
+}
+
+void ANcomprogn()     /* !&comprogn */
+{
+  kalloc(2);
+  reg1 = cdr(reg1);
+  kset0(reg1);
+  kset(1,reg2);
+  if (null(reg1)) goto lab5;
+lab1 : 
+  reg1 = cdr(local(0));
+  if (null(reg1)) goto lab4;
+  reg2 = Sexp(&TWO);
+  kload(reg1,1);
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab2;
+  reg1 = Sexp(&TWO);
+  goto lab3;
+lab2 : 
+  kload(reg1,1);
+lab3 : 
+  reg2 = reg1;
+  reg1 = car(local(0));
+  ANcomval();    /* !&comval */
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  goto lab1;
+lab4 : 
+  kload(reg2,1);
+  reg1 = car(local(0));
+  ANcomval();    /* !&comval */
+  reg1 = NIL;
+lab5 : 
+  kpop(2);
+  return;
+}
+
+void ANcomreturn()     /* !&comreturn */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg2 = Sexp(&FOUR);
+  kload(reg1,1);
+  Lessp();    /* lessp */
+  if (!null(reg1)) goto lab1;
+  reg2 = NIL;
+  reg1 = car(cdr(local(0)));
+  ANanyreg();    /* !&anyreg */
+  if (!null(reg1)) goto lab2;
+lab1 : 
+  reg1 = car(cdr(local(0)));
+  Ncons();    /* ncons */
+  ANcomlis();    /* !&comlis */
+  Car();    /* car */
+  kload(reg2,1);
+  ANlreg1();    /* !&lreg1 */
+lab2 : 
+  reg1 = value(urwelt[29]);
+  kpop(2);
+  ANattjmp();    /* !&attjmp */
+  return;
+  }
+
+void ANcomsetq()     /* !&comsetq */
+{
+  kalloc(2);
+  reg1 = cdr(reg1);
+  kset0(reg1);
+  kset(1,reg2);
+  reg2 = Sexp(&ONE);
+  kload(reg1,1);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab2;
+  reg1 = car(cdr(local(0)));
+  if (null(reg1)) goto lab1;
+  reg2 = urwelt[82];
+  Equal();    /* equal */
+  if (null(reg1)) goto lab2;
+lab1 : 
+  reg2 = NIL;
+  reg1 = car(local(0));
+  ANstore2();    /* !&store2 */
+  goto lab4;
+lab2 : 
+  reg2 = Sexp(&ONE);
+  reg1 = car(cdr(local(0)));
+  ANcomval();    /* !&comval */
+  reg2 = Sexp(&ONE);
+  reg1 = car(local(0));
+  ANstore2();    /* !&store2 */
+  reg2 = value(urwelt[37]);
+  reg1 = car(local(0));
+  ANrassoc();    /* !&rassoc */
+  if (null(reg1)) goto lab3;
+  reg2 = value(urwelt[37]);
+  Delete();    /* delete */
+  value(urwelt[37]) = reg1;
+lab3 : 
+  zconsc(car(local(0)),cdr(car(value(urwelt[32]))));
+  zcons3c(Sexp(&ONE));
+  zcons2c(cdr(value(urwelt[32])));
+  value(urwelt[32]) = reg1;
+lab4 : 
+  reg1 = NIL;
+  kpop(2);
+  return;
+}
+
+void ANremsetvar()     /* !&remsetvar */
+{
+  kalloc(3);
+  kset0(reg1);
+  reg1 = reg2;
+  if (null(reg1)) goto lab1;
+  kset(1,reg2);
+  reg2 = cdr(car(reg1));
+  kload0(reg1);
+  ANrems1();    /* !&rems1 */
+  zcons3c(car(car(local(1))));
+  kset(2,reg1);
+  reg2 = cdr(local(1));
+  kload0(reg1);
+  ANremsetvar();    /* !&remsetvar */
+  zcons3c(local(2));
+lab1 : 
+  kpop(3);
+  return;
+}
+
+void ANrems1()     /* !&rems1 */
+{
+  kalloc(2);
+lab1 : 
+  kset0(reg1);
+  reg1 = reg2;
+  if (null(reg1)) goto lab3;
+  kset(1,reg2);
+  reg2 = car(reg1);
+  kload0(reg1);
+  Smemq();    /* smemq */
+  reg2 = cdr(local(1));
+  if (null(reg1)) goto lab2;
+  kload0(reg1);
+  goto lab1;
+lab2 : 
+  kload0(reg1);
+  ANrems1();    /* !&rems1 */
+  zcons3c(car(local(1)));
+lab3 : 
+  kpop(2);
+  return;
+}
+
+void Smemq()     /* smemq */
+{
+  kalloc(2);
+lab1 : 
+  kset0(reg1);
+  kset(1,reg2);
+  if (pairp(reg2)) goto lab2;
+  kpop(2);
+  Eq();    /* eq */
+  return;
+lab2 : 
+  reg1 = car(reg2);
+  if (reg1 == urwelt[5]) goto lab3;
+  reg2 = reg1;
+  kload0(reg1);
+  Smemq();    /* smemq */
+  if (!null(reg1)) goto lab4;
+  reg2 = cdr(local(1));
+  kload0(reg1);
+  goto lab1;
+lab3 : 
+  reg1 = NIL;
+lab4 : 
+  kpop(2);
+  return;
+}
+
+void ANstore2()     /* !&store2 */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg2 = value(urwelt[32]);
+  ANremsetvar();    /* !&remsetvar */
+  value(urwelt[32]) = reg1;
+  kload0(reg1);
+  Nonlocal();    /* nonlocal */
+  if (null(reg1)) goto lab1;
+  kload0(reg2);
+  List2();    /* list2 */
+  goto lab2;
+lab1 : 
+  reg2 = value(urwelt[26]);
+  kload0(reg1);
+  Atsoc();    /* atsoc */
+  if (!null(reg1)) goto lab3;
+  kload0(reg1);
+  Mknonlocal();    /* mknonlocal */
+lab2 : 
+  reg3 = reg1;
+  kload(reg2,1);
+  reg1 = urwelt[75];
+  List3();    /* list3 */
+  ANattach();    /* !&attach */
+  goto lab4;
+lab3 : 
+  kload(reg2,1);
+  kload0(reg1);
+  ANstore0();    /* !&store0 */
+lab4 : 
+  reg1 = NIL;
+  kpop(2);
+  return;
+}
+
+void ANcomeq()     /* !&comeq */
+{
+  kalloc(6);
+  kset(4,NIL);
+  kset0(reg1);
+  reg1 = car(cdr(reg1));
+  kset(2,reg1);
+  reg1 = car(cdr(cdr(local(0))));
+  kset(3,reg1);
+  kset(1,reg2);
+  reg2 = cdr(car(value(urwelt[32])));
+  kload(reg1,2);
+  Member();    /* member */
+  if (null(reg1)) goto lab1;
+  kload(reg2,2);
+  kload(reg1,3);
+  goto lab2;
+lab1 : 
+  reg2 = cdr(car(value(urwelt[32])));
+  kload(reg1,3);
+  Member();    /* member */
+  if (null(reg1)) goto lab3;
+  kload(reg2,3);
+  kload(reg1,2);
+lab2 : 
+  ANcomeq1();    /* !&comeq1 */
+  goto lab6;
+lab3 : 
+  reg2 = NIL;
+  kload(reg1,3);
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab4;
+  reg2 = Sexp(&ONE);
+  kload(reg1,2);
+  ANcomval();    /* !&comval */
+  kload(reg1,3);
+  ANlocate();    /* !&locate */
+  goto lab6;
+lab4 : 
+  kload(reg1,3);
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  kload(reg1,2);
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab5;
+  reg2 = Sexp(&ONE);
+  kload(reg1,3);
+  ANcomval();    /* !&comval */
+  kload(reg1,2);
+  ANlocate();    /* !&locate */
+  goto lab6;
+lab5 : 
+  reg1 = cdr(local(0));
+  ANcomlis();    /* !&comlis */
+  reg1 = car(cdr(reg1));
+  ANlocate();    /* !&locate */
+lab6 : 
+  kset(4,reg1);
+  reg1 = value(urwelt[23]);
+  if (null(reg1)) goto lab7;
+  reg1 = urwelt[108];
+  goto lab8;
+lab7 : 
+  reg1 = urwelt[109];
+lab8 : 
+  kset(5,reg1);
+  zconsc(car(local(1)),local(4));
+  zcons3c(local(5));
+  ANattach();    /* !&attach */
+  reg1 = value(urwelt[37]);
+  value(urwelt[36]) = reg1;
+  reg1 = value(urwelt[32]);
+  value(urwelt[31]) = reg1;
+  reg1 = value(urwelt[39]);
+  ANaddjmp();    /* !&addjmp */
+  reg1 = NIL;
+  kpop(6);
+  return;
+}
+
+void ANcomeq1()     /* !&comeq1 */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = reg2;
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  kload0(reg1);
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab1;
+  kload0(reg1);
+  goto lab2;
+lab1 : 
+  reg2 = Sexp(&ONE);
+  kload0(reg1);
+  ANcomval();    /* !&comval */
+  kload(reg1,1);
+lab2 : 
+  kpop(2);
+  ANlocate();    /* !&locate */
+  return;
+  }
+
+void ANtestfn()     /* !&testfn */
+{
+  kalloc(4);
+  kset0(reg1);
+  kset(1,reg2);
+  reg2 = value(urwelt[32]);
+  reg1 = car(cdr(reg1));
+  ANrassoc();    /* !&rassoc */
+  kset(2,reg1);
+  if (!null(reg1)) goto lab1;
+  reg2 = Sexp(&ONE);
+  reg1 = car(cdr(local(0)));
+  ANcomval();    /* !&comval */
+lab1 : 
+  ANclrregs();    /* !&clrregs */
+  reg1 = value(urwelt[23]);
+  if (null(reg1)) goto lab2;
+  reg1 = urwelt[110];
+  goto lab3;
+lab2 : 
+  reg1 = urwelt[111];
+lab3 : 
+  kset(3,reg1);
+  kload(reg1,2);
+  if (null(reg1)) goto lab4;
+  reg1 = car(reg1);
+  goto lab5;
+lab4 : 
+  reg1 = Sexp(&ONE);
+lab5 : 
+  reg4 = car(local(0));
+  reg3 = reg1;
+  reg2 = car(local(1));
+  kload(reg1,3);
+  List4();    /* list4 */
+  ANattach();    /* !&attach */
+  reg1 = value(urwelt[32]);
+  value(urwelt[31]) = reg1;
+  reg1 = value(urwelt[39]);
+  ANaddjmp();    /* !&addjmp */
+  reg1 = NIL;
+  kpop(4);
+  return;
+}
+
+void ANmemlis()     /* !&memlis */
+{
+  kalloc(2);
+lab1 : 
+  kset0(reg1);
+  reg1 = reg2;
+  if (null(reg1)) goto lab2;
+  kset(1,reg2);
+  reg2 = car(reg1);
+  kload0(reg1);
+  ANmemb();    /* !&memb */
+  if (!null(reg1)) goto lab2;
+  reg2 = cdr(local(1));
+  kload0(reg1);
+  goto lab1;
+lab2 : 
+  kpop(2);
+  return;
+}
+
+void ANmemb()     /* !&memb */
+{
+lab1 : 
+  if (pairp(reg2)) goto lab2;
+  Eq();    /* eq */
+  return;
+lab2 : 
+  reg2 = car(cdr(reg2));
+  goto lab1;
+  return;
+}
+
+void ANrassoc()     /* !&rassoc */
+{
+lab1 : 
+  reg3 = reg1;
+  reg1 = reg2;
+  if (null(reg1)) goto lab3;
+  reg4 = reg2;
+  reg2 = cdr(car(reg1));
+  reg1 = reg3;
+  Member();    /* member */
+  if (!null(reg1)) goto lab2;
+  reg2 = cdr(reg4);
+  reg1 = reg3;
+  goto lab1;
+lab2 : 
+  reg1 = car(reg4);
+lab3 : 
+  return;
+}
+
+void ANrepasc()     /* !&repasc */
+{
+  kalloc(3);
+  kset0(reg1);
+  reg1 = reg3;
+  if (!null(reg1)) goto lab1;
+  kset(1,reg2);
+  kset(2,reg3);
+  kload0(reg1);
+  List2();    /* list2 */
+  kpop(3);
+  Ncons();    /* ncons */
+  return;
+lab1 : 
+  kset(1,reg2);
+  kset(2,reg3);
+  reg2 = car(car(reg1));
+  kload0(reg1);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab2;
+  kload(reg2,1);
+  kload0(reg1);
+  List2();    /* list2 */
+  zcons2c(cdr(reg3));
+  goto lab3;
+lab2 : 
+  reg3 = cdr(reg3);
+  kload(reg2,1);
+  kload0(reg1);
+  ANrepasc();    /* !&repasc */
+  zcons3c(car(local(2)));
+lab3 : 
+  kpop(3);
+  return;
+}
+
+void ANclrregs()     /* !&clrregs */
+{
+lab1 : 
+  reg1 = value(urwelt[37]);
+  if (null(reg1)) goto lab2;
+  reg2 = car(car(reg1));
+  reg1 = car(cdr(car(reg1)));
+  ANstore0();    /* !&store0 */
+  reg1 = cdr(value(urwelt[37]));
+  value(urwelt[37]) = reg1;
+  goto lab1;
+lab2 : 
+  return;
+}
+
+void ANcfntype()     /* !&cfntype */
+{
+  reg3 = reg1;
+  if (pairp(reg1)) goto lab2;
+  reg2 = urwelt[19];
+  Get();    /* get */
+  if (!null(reg1)) goto lab1;
+  reg1 = reg3;
+  Getd();    /* getd */
+  if (null(reg1)) goto lab2;
+lab1 : 
+  reg1 = car(reg1);
+  goto lab3;
+lab2 : 
+  reg1 = urwelt[12];
+lab3 : 
+  return;
+}
+
+void ANgenlbl()     /* !&genlbl */
+{
+  Gensym();    /* gensym */
+  reg3 = reg1;
+  Ncons();    /* ncons */
+  zcons2c(value(urwelt[34]));
+  value(urwelt[34]) = reg1;
+  reg1 = reg3;
+  Ncons();    /* ncons */
+  return;
+  }
+
+void ANgetlbl()     /* !&getlbl */
+{
+  kalloc(2);
+  kset0(reg1);
+  reg2 = value(urwelt[105]);
+  Atsoc();    /* atsoc */
+  kset(1,reg1);
+  if (!null(reg1)) goto lab1;
+  reg2 = urwelt[112];
+  kload0(reg1);
+  List2();    /* list2 */
+  Lprie();    /* lprie */
+lab1 : 
+  reg1 = cdr(local(1));
+  kpop(2);
+  return;
+}
+
+void ANfindlbl()     /* !&findlbl */
+{
+  reg2 = value(urwelt[34]);
+  reg1 = car(reg1);
+  Assoc();    /* assoc */
+  return;
+  }
+
+void ANrechain()     /* !&rechain */
+{
+  kalloc(6);
+  kset0(reg1);
+  kset(1,reg2);
+  ANfindlbl();    /* !&findlbl */
+  kset(2,reg1);
+  kload(reg1,1);
+  ANfindlbl();    /* !&findlbl */
+  kset(3,reg1);
+  car(local(0)) = car(local(1));
+  kload0(reg1);
+  reg1 = cdr(local(2));
+  kset(4,reg1);
+  cdr(local(2)) = NIL;
+  kload(reg1,2);
+  reg2 = cdr(local(3));
+  kload(reg1,4);
+  Append();    /* append */
+  cdr(local(3)) = reg1;
+  kload(reg1,3);
+  kload(reg1,4);
+  goto lab2;
+lab1 : 
+  kset(5,reg1);
+  reg1 = car(reg1);
+  car(cdr(reg1)) = car(local(1));
+  reg1 = cdr(reg1);
+  reg1 = cdr(local(5));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  kpop(6);
+  return;
+}
+
+void ANmoveup()     /* !&moveup */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = car(car(cdr(reg1)));
+  if (reg1 != urwelt[113]) goto lab1;
+  reg2 = value(urwelt[35]);
+  reg1 = cdr(local(0));
+  ANdeleq();    /* !&deleq */
+  value(urwelt[35]) = reg1;
+  reg2 = cdr(local(0));
+  kload0(reg1);
+  Rplacw();    /* rplacw */
+  zconsc(local(0),value(urwelt[35]));
+  value(urwelt[35]) = reg1;
+  goto lab2;
+lab1 : 
+  reg2 = cdr(local(0));
+  kload0(reg1);
+  Rplacw();    /* rplacw */
+lab2 : 
+  kpop(1);
+  return;
+}
+
+void ANattlbl()     /* !&attlbl */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = car(car(value(urwelt[39])));
+  if (reg1 != urwelt[68]) goto lab1;
+  reg2 = cdr(car(value(urwelt[39])));
+  kload0(reg1);
+  kpop(1);
+  ANrechain();    /* !&rechain */
+  return;
+lab1 : 
+  zconsc(urwelt[68],local(0));
+  kpop(1);
+  ANattach();    /* !&attach */
+  return;
+  }
+
+void ANattjmp()     /* !&attjmp */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = car(car(value(urwelt[39])));
+  if (reg1 != urwelt[68]) goto lab1;
+  kload0(reg2);
+  reg1 = cdr(car(value(urwelt[39])));
+  ANrechain();    /* !&rechain */
+  reg1 = cdr(value(urwelt[39]));
+  value(urwelt[39]) = reg1;
+lab1 : 
+  reg1 = car(value(urwelt[39]));
+  ANtransferp();    /* !&transferp */
+  if (!null(reg1)) goto lab2;
+  zconsc(urwelt[113],local(0));
+  ANattach();    /* !&attach */
+  reg1 = value(urwelt[39]);
+  ANaddjmp();    /* !&addjmp */
+lab2 : 
+  reg1 = NIL;
+  kpop(1);
+  return;
+}
+
+void ANtransferp()     /* !&transferp */
+{
+  reg3 = reg1;
+  reg1 = car(reg1);
+  if (reg1 != urwelt[64]) goto lab1;
+  reg1 = car(cdr(reg3));
+lab1 : 
+  reg2 = urwelt[114];
+  Flagp();    /* flagp */
+  return;
+  }
+
+void ANaddjmp()     /* !&addjmp */
+{
+  kalloc(2);
+  kset0(reg1);
+  reg1 = cdr(car(reg1));
+  ANfindlbl();    /* !&findlbl */
+  kset(1,reg1);
+  zconsc(car(local(0)),cdr(reg1));
+  cdr(local(1)) = reg1;
+  kload(reg1,1);
+  zconsc(local(0),value(urwelt[35]));
+  value(urwelt[35]) = reg1;
+  reg1 = NIL;
+  kpop(2);
+  return;
+}
+
+void ANremjmp()     /* !&remjmp */
+{
+  kalloc(2);
+  kset0(reg1);
+  reg1 = cdr(car(reg1));
+  ANfindlbl();    /* !&findlbl */
+  kset(1,reg1);
+  reg2 = cdr(reg1);
+  reg1 = car(local(0));
+  ANdeleq();    /* !&deleq */
+  cdr(local(1)) = reg1;
+  kload(reg1,1);
+  reg2 = value(urwelt[35]);
+  kload0(reg1);
+  ANdeleq();    /* !&deleq */
+  value(urwelt[35]) = reg1;
+  kload0(reg1);
+  ANmoveup();    /* !&moveup */
+  reg1 = NIL;
+  kpop(2);
+  return;
+}
+
+void ANdeleq()     /* !&deleq */
+{
+  kalloc(2);
+  kset0(reg1);
+  reg1 = reg2;
+  if (null(reg1)) goto lab2;
+  kload0(reg1);
+  if (reg1 != car(reg2)) goto lab1;
+  reg1 = cdr(reg2);
+  goto lab2;
+lab1 : 
+  kset(1,reg2);
+  reg2 = cdr(reg2);
+  ANdeleq();    /* !&deleq */
+  zcons3c(car(local(1)));
+lab2 : 
+  kpop(2);
+  return;
+}
+
+void ANframe()     /* !&frame */
+{
+  reg3 = reg1;
+  reg1 = car(cdr(car(value(urwelt[26]))));
+  Sub1();    /* sub1 */
+  reg4 = reg1;
+  reg2 = reg1;
+  reg1 = reg3;
+  List2();    /* list2 */
+  zcons2c(value(urwelt[26]));
+  value(urwelt[26]) = reg1;
+  reg2 = car(value(urwelt[33]));
+  reg1 = reg4;
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab1;
+  car(value(urwelt[33])) = reg4;
+  reg1 = value(urwelt[33]);
+lab1 : 
+  reg1 = NIL;
+  return;
+}
+
+void ANgetfrm()     /* !&getfrm */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg2 = value(urwelt[26]);
+  Atsoc();    /* atsoc */
+  if (null(reg1)) goto lab1;
+  reg1 = cdr(reg1);
+  goto lab2;
+lab1 : 
+  kload0(reg2);
+  reg1 = urwelt[115];
+  List2();    /* list2 */
+  Lprie();    /* lprie */
+lab2 : 
+  kpop(1);
+  return;
+}
+
+void ANgetffrm()     /* !&getffrm */
+{
+  kalloc(1);
+  ANgetfrm();    /* !&getfrm */
+  kset0(reg1);
+  zcons2c(value(urwelt[24]));
+  value(urwelt[24]) = reg1;
+  kload0(reg1);
+  kpop(1);
+  return;
+}
+
+void ANpass3()     /* !&pass3 */
+{
+  kalloc(2);
+  zbind(urwelt[38],NIL);
+  reg1 = urwelt[116];
+  Informuser();    /* informuser */
+  reg1 = value(urwelt[28]);
+  goto lab2;
+lab1 : 
+  kset0(reg1);
+  reg1 = car(reg1);
+  kset(1,reg1);
+  reg2 = value(urwelt[27]);
+  reg1 = car(cdr(reg1));
+  ANdeleq();    /* !&deleq */
+  value(urwelt[27]) = reg1;
+  car(car(cdr(local(1)))) = urwelt[76];
+  reg1 = car(cdr(local(1)));
+  reg1 = cdr(local(0));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  ANfixchains();    /* !&fixchains */
+  ANfixlinks();    /* !&fixlinks */
+  ANfixfrm();    /* !&fixfrm */
+  reg1 = value(urwelt[29]);
+  ANattlbl();    /* !&attlbl */
+  reg1 = value(urwelt[38]);
+  if (null(reg1)) goto lab4;
+  reg1 = value(urwelt[117]);
+  if (!null(reg1)) goto lab3;
+  reg1 = car(car(value(urwelt[39])));
+  if (reg1 != urwelt[68]) goto lab3;
+  reg1 = car(car(cdr(value(urwelt[39]))));
+  if (reg1 != urwelt[118]) goto lab3;
+  reg1 = value(urwelt[39]);
+  Cadadr();    /* cadadr */
+  reg4 = car(cdr(cdr(cdr(car(cdr(value(urwelt[39])))))));
+  reg3 = car(cdr(cdr(car(cdr(value(urwelt[39]))))));
+  reg2 = reg1;
+  reg1 = urwelt[64];
+  List4();    /* list4 */
+  car(cdr(value(urwelt[39]))) = reg1;
+  reg1 = cdr(value(urwelt[39]));
+lab3 : 
+  zconsc(urwelt[119],value(urwelt[33]));
+  ANattach();    /* !&attach */
+  reg1 = urwelt[120];
+  Ncons();    /* ncons */
+  ANattach();    /* !&attach */
+lab4 : 
+  ANpeepholeopt();    /* !&peepholeopt */
+  ANfixrest();    /* !&fixrest */
+  reg1 = NIL;
+  zunbind(1);
+  kpop(2);
+  return;
+}
+
+void ANfixchains()     /* !&fixchains */
+{
+  kalloc(4);
+  kset(1,NIL);
+  kset(2,NIL);
+  kset(3,NIL);
+  zconsc(urwelt[68],value(urwelt[29]));
+  reg2 = reg1;
+  reg1 = car(value(urwelt[39]));
+  Equal();    /* equal */
+  if (!null(reg1)) goto lab1;
+  reg1 = value(urwelt[29]);
+  ANattlbl();    /* !&attlbl */
+lab1 : 
+  reg1 = cdr(value(urwelt[39]));
+  value(urwelt[39]) = reg1;
+  zconsc(urwelt[113],value(urwelt[29]));
+  reg2 = reg1;
+  reg1 = car(value(urwelt[39]));
+  Equal();    /* equal */
+  if (!null(reg1)) goto lab2;
+  reg1 = value(urwelt[29]);
+  ANattjmp();    /* !&attjmp */
+lab2 : 
+  reg1 = value(urwelt[35]);
+  Reverse();    /* reverse */
+  kset0(reg1);
+lab3 : 
+  kload0(reg1);
+  if (null(reg1)) goto lab6;
+  reg1 = car(reg1);
+  kset(2,reg1);
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  reg1 = car(car(local(2)));
+  if (reg1 != urwelt[113]) goto lab3;
+  kload0(reg1);
+  kset(1,reg1);
+lab4 : 
+  kload(reg1,1);
+  if (null(reg1)) goto lab3;
+  reg2 = car(car(reg1));
+  reg1 = car(local(2));
+  Equal();    /* equal */
+  if (null(reg1)) goto lab5;
+  reg2 = car(cdr(car(local(1))));
+  reg1 = car(cdr(local(2)));
+  Equal();    /* equal */
+  if (null(reg1)) goto lab5;
+  kload(reg1,2);
+  ANremjmp();    /* !&remjmp */
+  reg2 = cdr(car(local(1)));
+  kload(reg1,2);
+  ANfixchn();    /* !&fixchn */
+  kset(1,NIL);
+  goto lab4;
+lab5 : 
+  reg1 = cdr(local(1));
+  kset(1,reg1);
+  goto lab4;
+lab6 : 
+  reg1 = NIL;
+  kpop(4);
+  return;
+}
+
+void ANfixlinks()     /* !&fixlinks */
+{
+  kalloc(4);
+  kset(1,NIL);
+  kset(2,NIL);
+  reg1 = value(urwelt[35]);
+  kset0(reg1);
+  reg1 = value(urwelt[117]);
+  if (!null(reg1)) goto lab4;
+lab1 : 
+  kload0(reg1);
+  if (null(reg1)) goto lab5;
+  reg1 = car(reg1);
+  kset(1,reg1);
+  reg1 = cdr(reg1);
+  kset(2,reg1);
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  reg1 = car(cdr(car(local(1))));
+  if (reg1 != car(value(urwelt[29]))) goto lab1;
+  reg1 = car(car(local(1)));
+  if (reg1 != urwelt[113]) goto lab2;
+  reg1 = car(car(local(2)));
+  if (reg1 == urwelt[64]) goto lab3;
+lab2 : 
+  reg1 = T;
+  value(urwelt[38]) = reg1;
+  goto lab1;
+lab3 : 
+  kload(reg1,2);
+  Caddar();    /* caddar */
+  kset(3,reg1);
+  zconsc(car(cdr(cdr(cdr(car(local(2)))))),value(urwelt[33]));
+  zcons3c(local(3));
+  zcons3c(car(cdr(car(local(2)))));
+  zcons3c(urwelt[118]);
+  reg2 = reg1;
+  reg1 = car(local(2));
+  Rplacw();    /* rplacw */
+  kload(reg1,1);
+  ANremjmp();    /* !&remjmp */
+  goto lab1;
+lab4 : 
+  reg1 = T;
+  value(urwelt[38]) = reg1;
+lab5 : 
+  reg1 = NIL;
+  kpop(4);
+  return;
+}
+
+void ANfindblk()     /* !&findblk */
+{
+  kalloc(2);
+lab1 : 
+  kset0(reg1);
+  reg1 = cdr(reg1);
+  if (null(reg1)) goto lab5;
+  kset(1,reg2);
+  reg1 = car(car(reg1));
+  if (reg1 != urwelt[68]) goto lab2;
+  reg1 = car(cdr(cdr(local(0))));
+  ANtransferp();    /* !&transferp */
+  if (!null(reg1)) goto lab4;
+lab2 : 
+  reg2 = urwelt[121];
+  reg1 = car(car(cdr(local(0))));
+  Get();    /* get */
+  if (null(reg1)) goto lab3;
+  kload0(reg1);
+  Cadadr();    /* cadadr */
+  if (reg1 == local(1)) goto lab4;
+lab3 : 
+  kload(reg2,1);
+  reg1 = cdr(local(0));
+  goto lab1;
+lab4 : 
+  kload0(reg1);
+lab5 : 
+  kpop(2);
+  return;
+}
+
+void ANlblopt()     /* !&lblopt */
+{
+  kalloc(2);
+  kset(1,NIL);
+  kset0(reg1);
+  Cadadr();    /* cadadr */
+  if (reg1 != car(cdr(car(local(0))))) goto lab1;
+  reg1 = cdr(local(0));
+  kpop(2);
+  ANremjmp();    /* !&remjmp */
+  return;
+lab1 : 
+  reg1 = car(car(cdr(local(0))));
+  if (reg1 != urwelt[113]) goto lab2;
+  kload0(reg1);
+  Caaddr();    /* caaddr */
+  reg2 = urwelt[121];
+  Get();    /* get */
+  kset(1,reg1);
+  if (null(reg1)) goto lab2;
+  reg1 = car(cdr(car(local(0))));
+  if (reg1 != car(cdr(car(cdr(cdr(local(0))))))) goto lab2;
+  kload0(reg1);
+  Cadadr();    /* cadadr */
+  zcons2c(cdr(cdr(car(cdr(cdr(local(0)))))));
+  zcons3c(local(1));
+  kset(1,reg1);
+  reg1 = cdr(local(0));
+  ANremjmp();    /* !&remjmp */
+  reg1 = cdr(local(0));
+  ANremjmp();    /* !&remjmp */
+  zconsc(car(cdr(local(0))),cdr(cdr(local(0))));
+  zcons3c(local(1));
+  cdr(local(0)) = reg1;
+  kload0(reg1);
+  reg1 = cdr(local(0));
+  ANaddjmp();    /* !&addjmp */
+  reg1 = T;
+  goto lab3;
+lab2 : 
+  reg1 = NIL;
+lab3 : 
+  kpop(2);
+  return;
+}
+
+void ANpeepholeopt()     /* !&peepholeopt */
+{
+  kalloc(2);
+  kset0(NIL);
+  reg1 = value(urwelt[39]);
+  kset(1,reg1);
+lab1 : 
+  kload(reg1,1);
+  if (null(reg1)) goto lab3;
+  reg2 = urwelt[122];
+  reg1 = car(car(reg1));
+  Get();    /* get */
+  kset0(reg1);
+  if (null(reg1)) goto lab2;
+  kload(reg1,1);
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  kload0(reg1);
+  Apply();    /* apply */
+  if (!null(reg1)) goto lab1;
+lab2 : 
+  reg1 = cdr(local(1));
+  kset(1,reg1);
+  goto lab1;
+lab3 : 
+  reg1 = NIL;
+  kpop(2);
+  return;
+}
+
+void ANfixrest()     /* !&fixrest */
+{
+  kalloc(7);
+  kset0(NIL);
+  kset(1,NIL);
+  kset(2,NIL);
+  kset(3,NIL);
+  kset(4,NIL);
+lab1 : 
+  reg1 = value(urwelt[39]);
+  if (null(reg1)) goto lab20;
+  reg1 = car(car(reg1));
+  if (reg1 != urwelt[68]) goto lab5;
+  reg1 = value(urwelt[39]);
+  ANlblopt();    /* !&lblopt */
+  reg1 = cdr(car(value(urwelt[39])));
+  ANfindlbl();    /* !&findlbl */
+  kset(4,reg1);
+  Cdr();    /* cdr */
+  if (null(reg1)) goto lab19;
+  zconsc(car(value(urwelt[39])),local(3));
+  kset(3,reg1);
+  reg1 = cdr(cdr(local(4)));
+  if (!null(reg1)) goto lab3;
+  reg1 = car(cdr(local(4)));
+  ANtransferp();    /* !&transferp */
+  if (null(reg1)) goto lab3;
+  reg1 = car(car(cdr(local(3))));
+  if (reg1 != urwelt[70]) goto lab3;
+  reg2 = value(urwelt[35]);
+  reg1 = car(cdr(local(4)));
+  Atsoc();    /* atsoc */
+  Cdr();    /* cdr */
+  reg2 = reg1;
+  reg1 = cdr(car(cdr(local(3))));
+  ANnoloadp();    /* !&noloadp */
+  if (null(reg1)) goto lab3;
+  reg2 = cdr(value(urwelt[39]));
+  reg1 = cdr(car(cdr(local(3))));
+  ANnoloadp();    /* !&noloadp */
+  if (!null(reg1)) goto lab2;
+  zconsc(car(cdr(value(urwelt[39]))),cdr(cdr(value(urwelt[39]))));
+  zcons3c(car(cdr(local(3))));
+  reg2 = reg1;
+  reg1 = cdr(value(urwelt[39]));
+  Rplacw();    /* rplacw */
+lab2 : 
+  reg2 = cdr(cdr(local(3)));
+  reg1 = cdr(local(3));
+  Rplacw();    /* rplacw */
+  goto lab19;
+lab3 : 
+  reg1 = cdr(cdr(local(4)));
+  if (!null(reg1)) goto lab4;
+  reg1 = car(car(cdr(value(urwelt[39]))));
+  if (reg1 != urwelt[113]) goto lab4;
+  reg2 = urwelt[121];
+  reg1 = car(car(cdr(local(4))));
+  Get();    /* get */
+  if (null(reg1)) goto lab4;
+  zconsc(car(cdr(local(4))),local(3));
+  zcons2c(local(0));
+  kset0(reg1);
+lab4 : 
+  reg1 = car(cdr(value(urwelt[39])));
+  ANtransferp();    /* !&transferp */
+  if (null(reg1)) goto lab19;
+  zconsc(car(cdr(car(local(3)))),local(3));
+  zcons2c(local(1));
+  kset(1,reg1);
+  goto lab19;
+lab5 : 
+  reg2 = urwelt[121];
+  Get();    /* get */
+  if (null(reg1)) goto lab9;
+  kload0(reg2);
+  reg1 = car(value(urwelt[39]));
+  Atsoc();    /* atsoc */
+  kset(4,reg1);
+  if (null(reg1)) goto lab9;
+  reg1 = car(value(urwelt[39]));
+  kset(2,reg1);
+  reg1 = cdr(value(urwelt[39]));
+  value(urwelt[39]) = reg1;
+  reg1 = cdr(cdr(local(4)));
+  kset(4,reg1);
+lab6 : 
+  reg2 = car(local(4));
+  reg1 = car(local(3));
+  Equal();    /* equal */
+  if (null(reg1)) goto lab8;
+  reg1 = car(car(local(3)));
+  if (reg1 == urwelt[75]) goto lab7;
+  if (reg1 != urwelt[70]) goto lab8;
+  reg1 = car(cdr(car(local(3))));
+  Onep();    /* onep */
+  if (!null(reg1)) goto lab8;
+lab7 : 
+  zconsc(car(local(3)),value(urwelt[39]));
+  value(urwelt[39]) = reg1;
+  zconsc(car(cdr(local(4))),cdr(cdr(local(4))));
+  reg2 = reg1;
+  kload(reg1,4);
+  Rplacw();    /* rplacw */
+  reg1 = cdr(local(3));
+  kset(3,reg1);
+  goto lab6;
+lab8 : 
+  zconsc(local(2),value(urwelt[39]));
+  value(urwelt[39]) = reg1;
+  zconsc(local(2),local(3));
+  goto lab18;
+lab9 : 
+  reg1 = car(car(value(urwelt[39])));
+  if (reg1 != urwelt[113]) goto lab17;
+  kload(reg2,1);
+  reg1 = car(cdr(car(value(urwelt[39]))));
+  Atsoc();    /* atsoc */
+  kset(4,reg1);
+  if (null(reg1)) goto lab17;
+  reg1 = car(car(local(3)));
+  if (reg1 != urwelt[68]) goto lab10;
+  reg1 = car(cdr(car(local(3))));
+  goto lab11;
+lab10 : 
+  reg1 = NIL;
+lab11 : 
+  reg2 = reg1;
+  reg1 = cdr(value(urwelt[39]));
+  ANfindblk();    /* !&findblk */
+  kset(2,reg1);
+  if (null(reg1)) goto lab17;
+  kset(5,NIL);
+  reg1 = car(car(cdr(reg1)));
+  if (reg1 == urwelt[68]) goto lab13;
+  reg1 = car(car(local(2)));
+  if (reg1 == urwelt[68]) goto lab12;
+  ANgenlbl();    /* !&genlbl */
+  zcons3c(urwelt[68]);
+  zcons2c(cdr(local(2)));
+  cdr(local(2)) = reg1;
+  kload(reg1,2);
+  Cdr();    /* cdr */
+  kset(2,reg1);
+lab12 : 
+  reg2 = urwelt[121];
+  reg1 = car(car(cdr(local(2))));
+  Get();    /* get */
+  kset(6,reg1);
+  kload(reg1,2);
+  Cddadr();    /* cddadr */
+  zcons3c(car(cdr(car(local(2)))));
+  zcons3c(local(6));
+  kset(5,reg1);
+  reg1 = cdr(local(2));
+  ANremjmp();    /* !&remjmp */
+  zconsc(car(cdr(local(2))),cdr(cdr(local(2))));
+  zcons3c(local(5));
+  cdr(local(2)) = reg1;
+  kload(reg1,2);
+  reg1 = cdr(local(2));
+  ANaddjmp();    /* !&addjmp */
+  goto lab14;
+lab13 : 
+  reg1 = cdr(local(2));
+  kset(2,reg1);
+lab14 : 
+  kset(5,NIL);
+  zconsc(car(local(3)),local(5));
+  kset(5,reg1);
+  reg1 = cdr(local(3));
+  kset(3,reg1);
+lab15 : 
+  if (reg1 == cdr(local(4))) goto lab16;
+  zconsc(car(reg1),local(5));
+  kset(5,reg1);
+  reg1 = cdr(local(3));
+  kset(3,reg1);
+  goto lab15;
+lab16 : 
+  reg2 = cdr(local(2));
+  kload(reg1,5);
+  Nconc();    /* nconc */
+  cdr(local(2)) = reg1;
+  kload(reg1,2);
+  reg1 = value(urwelt[39]);
+  ANremjmp();    /* !&remjmp */
+  kset(1,NIL);
+  zconsc(car(local(3)),value(urwelt[39]));
+  zcons3c(NIL);
+  value(urwelt[39]) = reg1;
+  reg1 = cdr(local(3));
+  goto lab18;
+lab17 : 
+  zconsc(car(value(urwelt[39])),local(3));
+lab18 : 
+  kset(3,reg1);
+lab19 : 
+  reg1 = cdr(value(urwelt[39]));
+  value(urwelt[39]) = reg1;
+  goto lab1;
+lab20 : 
+  kload(reg1,3);
+  value(urwelt[39]) = reg1;
+  reg1 = NIL;
+  kpop(7);
+  return;
+}
+
+void ANnoloadp()     /* !&noloadp */
+{
+  kalloc(2);
+lab1 : 
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = car(cdr(reg1));
+  Atom();    /* atom */
+  if (null(reg1)) goto lab3;
+  reg2 = urwelt[70];
+  reg1 = car(car(local(1)));
+  Eq();    /* eq */
+  if (null(reg1)) goto lab2;
+  kload0(reg2);
+  reg1 = cdr(car(local(1)));
+  Equal();    /* equal */
+lab2 : 
+  if (!null(reg1)) goto lab3;
+  reg2 = urwelt[75];
+  reg1 = car(car(local(1)));
+  Eq();    /* eq */
+  if (null(reg1)) goto lab3;
+  kload0(reg2);
+  reg1 = cdr(car(local(1)));
+  Equal();    /* equal */
+  if (!null(reg1)) goto lab3;
+  kload(reg1,1);
+  Caddar();    /* caddar */
+  reg2 = car(cdr(local(0)));
+  Equal();    /* equal */
+  Null();    /* null */
+  if (null(reg1)) goto lab3;
+  reg2 = cdr(local(1));
+  kload0(reg1);
+  goto lab1;
+lab3 : 
+  kpop(2);
+  return;
+}
+
+void ANfixchn()     /* !&fixchn */
+{
+  kalloc(4);
+  kset(2,NIL);
+  kset0(reg1);
+  kset(1,reg2);
+lab1 : 
+  reg2 = car(local(1));
+  reg1 = car(local(0));
+  Equal();    /* equal */
+  if (null(reg1)) goto lab2;
+  kload0(reg1);
+  ANmoveup();    /* !&moveup */
+  reg1 = cdr(local(1));
+  kset(1,reg1);
+  goto lab1;
+lab2 : 
+  ANgenlbl();    /* !&genlbl */
+  kset(2,reg1);
+  reg1 = car(car(local(1)));
+  if (reg1 != urwelt[68]) goto lab3;
+  reg2 = cdr(car(local(1)));
+  kload(reg1,2);
+  ANrechain();    /* !&rechain */
+  goto lab4;
+lab3 : 
+  zconsc(urwelt[68],local(2));
+  kset(3,reg1);
+  zconsc(car(local(1)),cdr(local(1)));
+  zcons3c(local(3));
+  reg2 = reg1;
+  kload(reg1,1);
+  Rplacw();    /* rplacw */
+lab4 : 
+  reg1 = car(car(local(0)));
+  if (reg1 != urwelt[68]) goto lab5;
+  kload(reg2,2);
+  reg1 = cdr(car(local(0)));
+  ANrechain();    /* !&rechain */
+  kload0(reg1);
+  ANmoveup();    /* !&moveup */
+lab5 : 
+  reg1 = car(car(local(0)));
+  if (reg1 == urwelt[113]) goto lab6;
+  zconsc(urwelt[113],local(2));
+  kset(3,reg1);
+  zconsc(car(local(0)),cdr(local(0)));
+  zcons3c(local(3));
+  reg2 = reg1;
+  kload0(reg1);
+  Rplacw();    /* rplacw */
+  kload0(reg1);
+  ANaddjmp();    /* !&addjmp */
+lab6 : 
+  reg1 = NIL;
+  kpop(4);
+  return;
+}
+
+void ANfixfrm()     /* !&fixfrm */
+{
+  kalloc(9);
+  kset0(NIL);
+  kset(1,NIL);
+  kset(2,NIL);
+  kset(3,NIL);
+  kset(4,NIL);
+  reg1 = Sexp(&ZERO);
+  reg1 = value(urwelt[27]);
+  if (!null(reg1)) goto lab1;
+  reg1 = value(urwelt[24]);
+  if (!null(reg1)) goto lab1;
+  car(value(urwelt[33])) = Sexp(&ONE);
+  reg1 = value(urwelt[33]);
+  goto lab32;
+lab1 : 
+  reg1 = Sexp(&ZERO);
+  kset(5,reg1);
+lab2 : 
+  reg2 = car(value(urwelt[33]));
+  kload(reg1,5);
+  Lessp();    /* lessp */
+  if (!null(reg1)) goto lab11;
+  kset(3,NIL);
+  reg1 = value(urwelt[27]);
+  goto lab5;
+lab3 : 
+  kset(6,reg1);
+  reg1 = car(reg1);
+  kset(7,reg1);
+  reg2 = car(cdr(cdr(reg1)));
+  kload(reg1,5);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab4;
+  zconsc(cdr(cdr(local(7))),local(3));
+  kset(3,reg1);
+lab4 : 
+  reg1 = cdr(local(6));
+lab5 : 
+  if (!null(reg1)) goto lab3;
+  reg1 = value(urwelt[24]);
+  goto lab8;
+lab6 : 
+  kset(6,reg1);
+  reg1 = car(reg1);
+  kset(7,reg1);
+  reg2 = car(reg1);
+  kload(reg1,5);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab7;
+  zconsc(local(7),local(3));
+  kset(3,reg1);
+lab7 : 
+  reg1 = cdr(local(6));
+lab8 : 
+  if (!null(reg1)) goto lab6;
+  kload(reg1,3);
+  if (!null(reg1)) goto lab9;
+  zconsc(local(5),local(0));
+  kset0(reg1);
+  goto lab10;
+lab9 : 
+  zcons3c(local(5));
+  zcons2c(local(4));
+  kset(4,reg1);
+lab10 : 
+  kload(reg1,5);
+  Sub1();    /* sub1 */
+  kset(5,reg1);
+  goto lab2;
+lab11 : 
+  kload(reg1,4);
+  kset(3,reg1);
+  reg2 = car(value(urwelt[33]));
+  reg1 = car(car(reg1));
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab12;
+  car(value(urwelt[33])) = car(car(local(4)));
+  reg1 = value(urwelt[33]);
+lab12 : 
+  kload0(reg1);
+  if (null(reg1)) goto lab20;
+  kload0(reg1);
+lab13 : 
+  if (null(reg1)) goto lab14;
+  reg2 = car(value(urwelt[33]));
+  reg1 = car(reg1);
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab14;
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  goto lab13;
+lab14 : 
+  kload0(reg1);
+  if (null(reg1)) goto lab12;
+  Reversip();    /* reversip */
+  kset0(reg1);
+  reg1 = cdr(car(local(4)));
+  goto lab16;
+lab15 : 
+  kset(6,reg1);
+  reg1 = car(reg1);
+  kset(7,reg1);
+  car(reg1) = car(local(0));
+  reg1 = cdr(local(6));
+lab16 : 
+  if (!null(reg1)) goto lab15;
+  reg1 = cdr(local(4));
+  if (null(reg1)) goto lab17;
+  reg2 = car(car(reg1));
+  reg1 = car(local(0));
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab18;
+lab17 : 
+  reg1 = car(local(0));
+  goto lab19;
+lab18 : 
+  reg1 = reg2;
+lab19 : 
+  car(value(urwelt[33])) = reg1;
+  reg1 = value(urwelt[33]);
+  reg1 = cdr(local(0));
+  Reversip();    /* reversip */
+  kset0(reg1);
+  reg1 = cdr(local(4));
+  kset(4,reg1);
+  goto lab12;
+lab20 : 
+  reg2 = Sexp(&THREE);
+  reg1 = value(urwelt[22]);
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab21;
+  reg1 = Sexp(&THREE);
+  goto lab22;
+lab21 : 
+  reg1 = value(urwelt[22]);
+  Add1();    /* add1 */
+lab22 : 
+  kset(5,reg1);
+  reg1 = value(urwelt[24]);
+  if (!null(reg1)) goto lab31;
+  reg1 = value(urwelt[39]);
+  ANregp();    /* !&regp */
+  if (null(reg1)) goto lab31;
+  reg2 = value(urwelt[42]);
+  kload(reg1,5);
+  Difference();    /* difference */
+  reg2 = reg1;
+  reg1 = car(value(urwelt[33]));
+  Lessp();    /* lessp */
+  if (!null(reg1)) goto lab31;
+  reg1 = value(urwelt[27]);
+  goto lab25;
+lab23 : 
+  kset(6,reg1);
+  reg1 = car(reg1);
+  kset(7,reg1);
+  reg2 = car(cdr(cdr(reg1)));
+  kload(reg1,5);
+  Difference();    /* difference */
+  kset(8,reg1);
+  reg1 = car(cdr(local(7)));
+  if (!null(reg1)) goto lab24;
+  reg1 = urwelt[82];
+lab24 : 
+  reg3 = reg1;
+  kload(reg2,8);
+  reg1 = urwelt[70];
+  List3();    /* list3 */
+  reg2 = reg1;
+  kload(reg1,7);
+  Rplacw();    /* rplacw */
+  reg1 = cdr(local(6));
+lab25 : 
+  if (!null(reg1)) goto lab23;
+  kload(reg1,3);
+lab26 : 
+  if (null(reg1)) goto lab30;
+  reg1 = cdr(car(reg1));
+  goto lab29;
+lab27 : 
+  kset(6,reg1);
+  reg1 = car(reg1);
+  kset(7,reg1);
+  reg2 = Sexp(&ZERO);
+  reg1 = car(reg1);
+  Greaterp();    /* greaterp */
+  if (!null(reg1)) goto lab28;
+  reg2 = car(local(7));
+  kload(reg1,5);
+  Difference();    /* difference */
+  car(local(7)) = reg1;
+  kload(reg1,7);
+lab28 : 
+  reg1 = cdr(local(6));
+lab29 : 
+  if (!null(reg1)) goto lab27;
+  reg1 = cdr(local(3));
+  kset(3,reg1);
+  goto lab26;
+lab30 : 
+  car(value(urwelt[33])) = Sexp(&ONE);
+  reg1 = value(urwelt[33]);
+lab31 : 
+  reg1 = NIL;
+lab32 : 
+  kpop(9);
+  return;
+}
+
+void ANregp()     /* !&regp */
+{
+  kalloc(1);
+lab1 : 
+  kset0(reg1);
+  reg1 = cdr(reg1);
+  if (!null(reg1)) goto lab2;
+  reg1 = T;
+  goto lab7;
+lab2 : 
+  reg2 = urwelt[123];
+  reg1 = car(car(local(0)));
+  Memq();    /* memq */
+  if (null(reg1)) goto lab3;
+  reg1 = car(cdr(car(local(0))));
+  if (!numberp(reg1)) goto lab3;
+  reg2 = Sexp(&TWO);
+  Greaterp();    /* greaterp */
+  if (!null(reg1)) goto lab6;
+lab3 : 
+  reg2 = urwelt[124];
+  reg1 = car(car(cdr(local(0))));
+  Flagp();    /* flagp */
+  if (null(reg1)) goto lab5;
+  kload0(reg1);
+  Cadadr();    /* cadadr */
+  if (!idp(reg1)) goto lab4;
+  kload0(reg1);
+  Cadadr();    /* cadadr */
+  reg2 = urwelt[65];
+  Flagp();    /* flagp */
+  if (!null(reg1)) goto lab5;
+  kload0(reg1);
+  Cadadr();    /* cadadr */
+  reg2 = urwelt[66];
+  Flagp();    /* flagp */
+  if (!null(reg1)) goto lab5;
+lab4 : 
+  zconsc(urwelt[113],value(urwelt[29]));
+  reg2 = reg1;
+  reg1 = car(local(0));
+  Equal();    /* equal */
+  if (null(reg1)) goto lab7;
+lab5 : 
+  reg1 = cdr(local(0));
+  goto lab1;
+lab6 : 
+  reg1 = NIL;
+lab7 : 
+  kpop(1);
+  return;
+}
+
+void AScode()     /* !*code */
+{
+  Eval();    /* eval */
+  return;
+  }
+
+void ANpaplus2()     /* !&paplus2 */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = car(cdr(cdr(reg1)));
+  Onep();    /* onep */
+  if (null(reg1)) goto lab1;
+  reg1 = car(cdr(local(0)));
+  goto lab2;
+lab1 : 
+  reg1 = car(cdr(local(0)));
+  Onep();    /* onep */
+  if (null(reg1)) goto lab3;
+  reg1 = car(cdr(cdr(local(0))));
+lab2 : 
+  ANpa1();    /* !&pa1 */
+  reg2 = reg1;
+  reg1 = urwelt[125];
+  kpop(1);
+  List2();    /* list2 */
+  return;
+lab3 : 
+  reg1 = cdr(local(0));
+  ANpalis();    /* !&palis */
+  zcons3c(urwelt[126]);
+  kpop(1);
+  return;
+}
+
+void ANpadiff()     /* !&padiff */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = car(cdr(cdr(reg1)));
+  Onep();    /* onep */
+  if (null(reg1)) goto lab1;
+  reg1 = car(cdr(local(0)));
+  ANpa1();    /* !&pa1 */
+  reg2 = reg1;
+  reg1 = urwelt[127];
+  kpop(1);
+  List2();    /* list2 */
+  return;
+lab1 : 
+  reg1 = cdr(local(0));
+  ANpalis();    /* !&palis */
+  zcons3c(urwelt[128]);
+  kpop(1);
+  return;
+}
+
+void ANpalessp()     /* !&palessp */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = car(cdr(cdr(reg1)));
+  Zerop();    /* zerop */
+  if (null(reg1)) goto lab1;
+  reg1 = car(cdr(local(0)));
+  ANpa1();    /* !&pa1 */
+  reg2 = reg1;
+  reg1 = urwelt[129];
+  kpop(1);
+  List2();    /* list2 */
+  return;
+lab1 : 
+  reg1 = cdr(local(0));
+  ANpalis();    /* !&palis */
+  zcons3c(urwelt[130]);
+  kpop(1);
+  return;
+}
+
+void ANpaminus()     /* !&paminus */
+{
+  kalloc(1);
+  reg1 = car(cdr(reg1));
+  ANpa1();    /* !&pa1 */
+  kset0(reg1);
+  reg2 = urwelt[5];
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab1;
+  reg1 = car(cdr(local(0)));
+  if (!numberp(reg1)) goto lab1;
+  Minus();    /* minus */
+  kpop(1);
+  Mkquote();    /* mkquote */
+  return;
+lab1 : 
+  kload0(reg2);
+  reg1 = urwelt[131];
+  kpop(1);
+  List2();    /* list2 */
+  return;
+  }
+
+void Storefunc()     /* storefunc */
+{
+  reg4 = reg1;
+  zcons2c(cdr(reg3));
+  zcons3c(urwelt[13]);
+  zcons2c(value(urwelt[132]));
+  value(urwelt[132]) = reg1;
+  reg1 = reg4;
+  return;
+}
+
+void Output1()     /* output1 */
+{
+  goto lab6;
+lab1 : 
+  reg3 = reg1;
+  reg1 = car(reg1);
+  if (!null(reg1)) goto lab2;
+  Terpri();    /* terpri */
+  reg1 = urwelt[133];
+  goto lab4;
+lab2 : 
+  if (reg1 != T) goto lab3;
+  Terpri();    /* terpri */
+  goto lab5;
+lab3 : 
+  Eval();    /* eval */
+lab4 : 
+  Prin2();    /* prin2 */
+lab5 : 
+  reg1 = cdr(reg3);
+lab6 : 
+  if (!null(reg1)) goto lab1;
+  return;
+}
+
+void Span()     /* span */
+{
+  reg4 = NIL;
+  Sub1();    /* sub1 */
+  reg3 = reg1;
+  reg1 = Sexp(&ZERO);
+  reg5 = reg1;
+lab1 : 
+  reg2 = reg3;
+  reg1 = reg5;
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab2;
+  reg1 = reg4;
+  Reversip();    /* reversip */
+  return;
+lab2 : 
+  reg1 = reg5;
+  Minus();    /* minus */
+  zcons2c(reg4);
+  reg4 = reg1;
+  reg1 = reg5;
+  Add1();    /* add1 */
+  reg5 = reg1;
+  goto lab1;
+  return;
+}
+
+void Setdiff()     /* setdiff */
+{
+  reg4 = reg2;
+  reg6 = reg1;
+  reg1 = NIL;
+  Ncons();    /* ncons */
+  reg5 = reg1;
+  reg7 = reg1;
+  reg1 = reg6;
+  goto lab5;
+lab1 : 
+  reg6 = reg1;
+  reg1 = car(reg1);
+  reg3 = reg1;
+  reg2 = reg4;
+  Member();    /* member */
+  if (null(reg1)) goto lab2;
+  reg1 = NIL;
+  goto lab3;
+lab2 : 
+  reg1 = reg3;
+  Ncons();    /* ncons */
+lab3 : 
+  if (null(reg1)) goto lab4;
+  reg2 = reg1;
+  reg1 = reg7;
+  reg7 = reg2;
+  Nconc();    /* nconc */
+lab4 : 
+  reg1 = cdr(reg6);
+lab5 : 
+  if (!null(reg1)) goto lab1;
+  reg1 = cdr(reg5);
+  return;
+}
+
+void Del()     /* del */
+{
+  kalloc(2);
+lab1 : 
+  kset0(reg1);
+  reg1 = reg2;
+  if (null(reg1)) goto lab3;
+  kset(1,reg2);
+  reg2 = car(reg1);
+  kload0(reg1);
+  Equal();    /* equal */
+  reg2 = cdr(local(1));
+  if (null(reg1)) goto lab2;
+  kload0(reg1);
+  goto lab1;
+lab2 : 
+  kload0(reg1);
+  Del();    /* del */
+  zcons3c(car(local(1)));
+lab3 : 
+  kpop(2);
+  return;
+}
+
+void Makelocal()     /* makelocal */
+{
+  Explode();    /* explode */
+  reg2 = urwelt[134];
+  Nconc();    /* nconc */
+  reg2 = reg1;
+  reg1 = urwelt[135];
+  Append();    /* append */
+  Compress();    /* compress */
+  return;
+  }
+
+void Locs()     /* locs */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = value(urwelt[136]);
+  if (null(reg1)) goto lab1;
+  reg2 = reg1;
+  kload0(reg1);
+  Assoc();    /* assoc */
+  Cdr();    /* cdr */
+  kset0(reg1);
+lab1 : 
+  kload0(reg1);
+  Abs();    /* abs */
+  reg2 = urwelt[137];
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab2;
+  kload0(reg1);
+  Abs();    /* abs */
+  kpop(1);
+  Makelocal();    /* makelocal */
+  return;
+lab2 : 
+  kload0(reg1);
+  Abs();    /* abs */
+  reg2 = reg1;
+  reg1 = value(urwelt[138]);
+  kpop(1);
+  Getv();    /* getv */
+  return;
+  }
+
+void Inurwelt()     /* inurwelt */
+{
+  reg3 = reg1;
+  reg2 = value(urwelt[139]);
+  Member();    /* member */
+  if (null(reg1)) goto lab1;
+  Length();    /* length */
+  Sub1();    /* sub1 */
+  return;
+lab1 : 
+  zconsc(reg3,value(urwelt[139]));
+  value(urwelt[139]) = reg1;
+  reg1 = value(urwelt[140]);
+  Add1();    /* add1 */
+  value(urwelt[140]) = reg1;
+  return;
+}
+
+void Pexp()     /* pexp */
+{
+  kalloc(1);
+  kset0(reg1);
+  if (atom(reg1)) goto lab1;
+  reg1 = cdr(reg1);
+  if (!null(reg1)) goto lab1;
+  reg1 = car(local(0));
+  kset0(reg1);
+lab1 : 
+  kload0(reg1);
+  if (null(reg1)) goto lab2;
+  reg2 = urwelt[82];
+  Equal();    /* equal */
+  if (null(reg1)) goto lab3;
+lab2 : 
+  reg1 = urwelt[141];
+  goto lab20;
+lab3 : 
+  kload0(reg1);
+  if (reg1 == T) goto lab4;
+  reg2 = urwelt[79];
+  Equal();    /* equal */
+  if (null(reg1)) goto lab5;
+lab4 : 
+  reg1 = urwelt[142];
+  goto lab20;
+lab5 : 
+  kload0(reg1);
+  if (!numberp(reg1)) goto lab7;
+  reg2 = Sexp(&ZERO);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab6;
+  kload0(reg2);
+  reg1 = value(urwelt[143]);
+  Getv();    /* getv */
+  goto lab20;
+lab6 : 
+  kload0(reg1);
+  Locs();    /* locs */
+  goto lab20;
+lab7 : 
+  reg2 = urwelt[144];
+  reg1 = car(reg1);
+  Memq();    /* memq */
+  if (null(reg1)) goto lab8;
+  reg1 = urwelt[145];
+  Prin2();    /* prin2 */
+  reg1 = car(cdr(local(0)));
+  Inurwelt();    /* inurwelt */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[146];
+  goto lab20;
+lab8 : 
+  reg1 = car(local(0));
+  if (reg1 != urwelt[5]) goto lab19;
+  reg1 = car(cdr(local(0)));
+  kset0(reg1);
+  if (!fixp(reg1)) goto lab9;
+  reg2 = Sexp(&SEVEN);
+  Greaterp();    /* greaterp */
+  if (!null(reg1)) goto lab9;
+  reg2 = Sexp(&M_ONE);
+  kload0(reg1);
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab10;
+lab9 : 
+  reg1 = urwelt[147];
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Inurwelt();    /* inurwelt */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[148];
+  goto lab20;
+lab10 : 
+  kload0(reg1);
+  Zerop();    /* zerop */
+  if (null(reg1)) goto lab11;
+  reg1 = urwelt[149];
+  goto lab20;
+lab11 : 
+  kload0(reg1);
+  Onep();    /* onep */
+  if (null(reg1)) goto lab12;
+  reg1 = urwelt[150];
+  goto lab20;
+lab12 : 
+  reg2 = Sexp(&TWO);
+  kload0(reg1);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab13;
+  reg1 = urwelt[151];
+  goto lab20;
+lab13 : 
+  reg2 = Sexp(&THREE);
+  kload0(reg1);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab14;
+  reg1 = urwelt[152];
+  goto lab20;
+lab14 : 
+  reg2 = Sexp(&FOUR);
+  kload0(reg1);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab15;
+  reg1 = urwelt[153];
+  goto lab20;
+lab15 : 
+  reg2 = Sexp(&M_ONE);
+  kload0(reg1);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab16;
+  reg1 = urwelt[154];
+  goto lab20;
+lab16 : 
+  reg2 = Sexp(&FIVE);
+  kload0(reg1);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab17;
+  reg1 = urwelt[155];
+  goto lab20;
+lab17 : 
+  reg2 = Sexp(&SIX);
+  kload0(reg1);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab18;
+  reg1 = urwelt[156];
+  goto lab20;
+lab18 : 
+  reg2 = Sexp(&SEVEN);
+  kload0(reg1);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab21;
+  reg1 = urwelt[157];
+  goto lab20;
+lab19 : 
+  Prin2();    /* prin2 */
+  reg1 = urwelt[158];
+  Prin2();    /* prin2 */
+  reg1 = car(cdr(local(0)));
+  Pexp();    /* pexp */
+  reg1 = urwelt[159];
+lab20 : 
+  Prin2();    /* prin2 */
+lab21 : 
+  kpop(1);
+  return;
+}
+
+void Ersinize()     /* ersinize */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = value(urwelt[160]);
+  if (null(reg1)) goto lab1;
+  kload0(reg1);
+  Explode();    /* explode */
+  Length();    /* length */
+  reg2 = value(urwelt[160]);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab1;
+  kload0(reg1);
+  kpop(1);
+  Genfname();    /* genfname */
+  return;
+lab1 : 
+  reg2 = urwelt[161];
+  kload0(reg1);
+  Flagp();    /* flagp */
+  if (null(reg1)) goto lab2;
+  kload0(reg1);
+  Explode();    /* explode */
+  reg2 = urwelt[162];
+  Nconc();    /* nconc */
+  goto lab3;
+lab2 : 
+  kload0(reg1);
+  Explode();    /* explode */
+  Killunlem();    /* killunlem */
+lab3 : 
+  kset0(reg1);
+  reg2 = urwelt[163];
+  reg1 = car(reg1);
+  Memq();    /* memq */
+  if (null(reg1)) goto lab4;
+  kload0(reg2);
+  reg1 = urwelt[164];
+  Append();    /* append */
+  goto lab5;
+lab4 : 
+  reg2 = value(urwelt[165]);
+  reg1 = car(local(0));
+  Assoc();    /* assoc */
+  Cdr();    /* cdr */
+  zcons2c(cdr(local(0)));
+lab5 : 
+  kpop(1);
+  Compress();    /* compress */
+  return;
+  }
+
+void Genfname()     /* genfname */
+{
+  reg3 = reg1;
+  reg2 = value(urwelt[166]);
+  Assoc();    /* assoc */
+  if (null(reg1)) goto lab1;
+  reg1 = cdr(reg1);
+  goto lab2;
+lab1 : 
+  reg1 = value(urwelt[167]);
+  Add1();    /* add1 */
+  value(urwelt[167]) = reg1;
+  Explode();    /* explode */
+  reg2 = reg1;
+  reg1 = urwelt[168];
+  Append();    /* append */
+  Compress();    /* compress */
+  reg4 = reg1;
+  zcons3c(reg3);
+  zcons2c(value(urwelt[166]));
+  value(urwelt[166]) = reg1;
+  reg1 = reg4;
+lab2 : 
+  return;
+}
+
+void Killunlem()     /* killunlem */
+{
+  kalloc(2);
+  if (null(reg1)) goto lab2;
+  kset0(reg1);
+  reg1 = car(reg1);
+  if (reg1 != urwelt[169]) goto lab1;
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  reg2 = value(urwelt[170]);
+  reg1 = car(reg1);
+  Assoc();    /* assoc */
+  Cdr();    /* cdr */
+  kset(1,reg1);
+  reg1 = cdr(local(0));
+  Killunlem();    /* killunlem */
+  reg2 = reg1;
+  kload(reg1,1);
+  kpop(2);
+  Append();    /* append */
+  return;
+lab1 : 
+  reg1 = cdr(local(0));
+  Killunlem();    /* killunlem */
+  zcons3c(car(local(0)));
+lab2 : 
+  kpop(2);
+  return;
+}
+
+void Last()     /* last */
+{
+  reg4 = reg1;
+  reg3 = reg1;
+lab1 : 
+  reg1 = cdr(reg4);
+  if (!null(reg1)) goto lab2;
+  reg1 = car(reg4);
+  goto lab3;
+lab2 : 
+  reg4 = reg1;
+  goto lab1;
+  reg1 = NIL;
+lab3 : 
+  return;
+}
+
+void Fetchlab()     /* fetchlab */
+{
+  kalloc(2);
+  goto lab3;
+lab1 : 
+  kset(1,reg1);
+  reg1 = car(reg1);
+  kset0(reg1);
+  reg1 = car(reg1);
+  if (reg1 != urwelt[68]) goto lab2;
+  reg1 = car(cdr(local(0)));
+  Newlab();    /* newlab */
+  Ncons();    /* ncons */
+  cdr(local(0)) = reg1;
+  kload0(reg1);
+lab2 : 
+  reg1 = cdr(local(1));
+lab3 : 
+  if (!null(reg1)) goto lab1;
+  kpop(2);
+  return;
+}
+
+void Delrep()     /* delrep */
+{
+  kalloc(1);
+lab1 : 
+  if (null(reg1)) goto lab3;
+  kset0(reg1);
+  reg2 = cdr(reg1);
+  reg1 = car(reg1);
+  Member();    /* member */
+  if (null(reg1)) goto lab2;
+  reg1 = cdr(local(0));
+  goto lab1;
+lab2 : 
+  reg1 = cdr(local(0));
+  Delrep();    /* delrep */
+  zcons3c(car(local(0)));
+lab3 : 
+  kpop(1);
+  return;
+}
+
+void Compactify()     /* compactify */
+{
+  kalloc(8);
+  kset(2,NIL);
+  kset0(reg1);
+  reg2 = reg1;
+  reg1 = urwelt[41];
+  Assoc();    /* assoc */
+  kset(3,reg1);
+  if (null(reg1)) goto lab1;
+  reg1 = car(cdr(reg1));
+  Zerop();    /* zerop */
+  if (null(reg1)) goto lab2;
+lab1 : 
+  value(urwelt[136]) = NIL;
+  goto lab16;
+lab2 : 
+  kload0(reg1);
+  goto lab7;
+lab3 : 
+  kset(4,reg1);
+  reg1 = car(reg1);
+  kset(5,reg1);
+  reg1 = car(reg1);
+  if (reg1 != urwelt[74]) goto lab6;
+  kset(6,NIL);
+  reg1 = car(cdr(local(5)));
+  goto lab5;
+lab4 : 
+  kset(7,reg1);
+  reg1 = car(reg1);
+  Cadr();    /* cadr */
+  kload(reg2,6);
+  Cons();    /* cons */
+  kset(6,reg1);
+  reg1 = cdr(local(7));
+lab5 : 
+  if (!null(reg1)) goto lab4;
+  kload(reg1,6);
+  Reversip();    /* reversip */
+  reg2 = reg1;
+  kload(reg1,2);
+  Nconc();    /* nconc */
+  kset(2,reg1);
+lab6 : 
+  reg1 = cdr(local(4));
+lab7 : 
+  if (!null(reg1)) goto lab3;
+  kload(reg1,2);
+  if (null(reg1)) goto lab14;
+  Length();    /* length */
+  kset(1,reg1);
+  reg2 = Sexp(&TWO);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab8;
+  reg2 = car(cdr(local(2)));
+  reg1 = car(local(2));
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab10;
+  reg1 = cdr(local(2));
+  goto lab9;
+lab8 : 
+  kload(reg1,1);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab10;
+  kload(reg1,2);
+  Delrep();    /* delrep */
+lab9 : 
+  kset(2,reg1);
+lab10 : 
+  kload0(reg1);
+  goto lab13;
+lab11 : 
+  kset(4,reg1);
+  reg1 = car(reg1);
+  kset(5,reg1);
+  reg1 = car(reg1);
+  if (reg1 != urwelt[75]) goto lab12;
+  kload(reg2,2);
+  reg1 = car(cdr(cdr(local(5))));
+  Member();    /* member */
+  if (null(reg1)) goto lab12;
+  kload(reg2,2);
+  reg1 = car(cdr(cdr(local(5))));
+  Delete();    /* delete */
+  kset(2,reg1);
+lab12 : 
+  reg1 = cdr(local(4));
+lab13 : 
+  if (!null(reg1)) goto lab11;
+  kload(reg1,2);
+  if (!null(reg1)) goto lab15;
+lab14 : 
+  value(urwelt[136]) = NIL;
+  goto lab17;
+lab15 : 
+  reg1 = car(cdr(local(3)));
+  kset(3,reg1);
+  kload(reg1,2);
+  Length();    /* length */
+  reg2 = reg1;
+  kload(reg1,3);
+  Difference();    /* difference */
+  kset(1,reg1);
+  kload(reg1,3);
+  Span();    /* span */
+  kload(reg2,2);
+  Setdiff();    /* setdiff */
+  kset(4,reg1);
+  kload(reg1,1);
+  Span();    /* span */
+  reg2 = reg1;
+  kload(reg1,4);
+  Pair();    /* pair */
+  value(urwelt[136]) = reg1;
+  kload(reg1,1);
+  Ncons();    /* ncons */
+  kset(1,reg1);
+  kload0(reg2);
+  reg1 = urwelt[41];
+  Assoc();    /* assoc */
+  cdr(reg1) = local(1);
+  kload0(reg2);
+  reg1 = urwelt[119];
+  Assoc();    /* assoc */
+  cdr(reg1) = local(1);
+lab16 : 
+  reg1 = NIL;
+lab17 : 
+  kpop(8);
+  return;
+}
+
+void Newlab()     /* newlab */
+{
+  zcons2c(car(value(urwelt[171])));
+  zcons2c(value(urwelt[172]));
+  value(urwelt[172]) = reg1;
+  reg1 = cdr(value(urwelt[171]));
+  value(urwelt[171]) = reg1;
+  reg1 = cdr(car(value(urwelt[172])));
+  return;
+}
+
+void Initlab()     /* initlab */
+{
+  reg1 = value(urwelt[173]);
+  value(urwelt[171]) = reg1;
+  reg1 = NIL;
+  value(urwelt[172]) = reg1;
+  return;
+}
+
+void Getlab()     /* getlab */
+{
+  reg2 = value(urwelt[172]);
+  Assoc();    /* assoc */
+  Cdr();    /* cdr */
+  return;
+  }
+
+void Lap()     /* lap */
+{
+  kalloc(2);
+  kset0(reg1);
+  reg1 = value(urwelt[173]);
+  value(urwelt[171]) = reg1;
+  kload0(reg1);
+  Fetchlab();    /* fetchlab */
+  kload0(reg1);
+  Compactify();    /* compactify */
+  kload0(reg1);
+  goto lab2;
+lab1 : 
+  kset(1,reg1);
+  reg1 = car(reg1);
+  Lap1();    /* lap1 */
+  reg1 = cdr(local(1));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  kpop(2);
+  return;
+}
+
+void Lap1()     /* lap1 */
+{
+  reg3 = reg1;
+  reg4 = NIL;
+  reg1 = cdr(reg1);
+  goto lab4;
+lab1 : 
+  reg5 = reg1;
+  reg1 = car(reg1);
+  if (pairp(reg1)) goto lab2;
+  if (!idp(reg1)) goto lab3;
+lab2 : 
+  reg2 = reg1;
+  reg1 = urwelt[5];
+  List2();    /* list2 */
+lab3 : 
+  reg2 = reg4;
+  Cons();    /* cons */
+  reg4 = reg1;
+  reg1 = cdr(reg5);
+lab4 : 
+  if (!null(reg1)) goto lab1;
+  reg1 = reg4;
+  Reversip();    /* reversip */
+  zcons3c(car(reg3));
+  Eval();    /* eval */
+  return;
+  }
+
+void ASentry()     /* !*entry */
+{
+  zbind(urwelt[22],reg3);
+  zbind(urwelt[7],reg1);
+  Terpri();    /* terpri */
+  reg1 = urwelt[174];
+  Prin2();    /* prin2 */
+  reg1 = value(urwelt[7]);
+  Ersinize();    /* ersinize */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[175];
+  Output1();    /* output1 */
+  reg1 = value(urwelt[7]);
+  Prin1();    /* prin1 */
+  reg1 = urwelt[176];
+  Output1();    /* output1 */
+  zunbind(2);
+  return;
+}
+
+void ASalloc()     /* !*alloc */
+{
+  kalloc(1);
+  kset0(reg1);
+  Zerop();    /* zerop */
+  if (!null(reg1)) goto lab1;
+  reg1 = urwelt[177];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Prin2();    /* prin2 */
+  reg1 = urwelt[178];
+  kpop(1);
+  Prin2();    /* prin2 */
+  return;
+lab1 : 
+  reg1 = NIL;
+  kpop(1);
+  return;
+}
+
+void ASdealloc()     /* !*dealloc */
+{
+  kalloc(1);
+  kset0(reg1);
+  Zerop();    /* zerop */
+  if (!null(reg1)) goto lab1;
+  reg1 = urwelt[179];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Prin2();    /* prin2 */
+  reg1 = urwelt[178];
+  kpop(1);
+  Prin2();    /* prin2 */
+  return;
+lab1 : 
+  reg1 = NIL;
+  kpop(1);
+  return;
+}
+
+void ASjump()     /* !*jump */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = urwelt[180];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Getlab();    /* getlab */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[181];
+  kpop(1);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASjumpnil()     /* !*jumpnil */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = urwelt[182];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Getlab();    /* getlab */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[181];
+  kpop(1);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASjumpt()     /* !*jumpt */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = urwelt[183];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Getlab();    /* getlab */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[181];
+  kpop(1);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASjumpe()     /* !*jumpe */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = urwelt[184];
+  Output1();    /* output1 */
+  kload(reg1,1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[185];
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Getlab();    /* getlab */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[181];
+  kpop(2);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASjumpn()     /* !*jumpn */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = urwelt[186];
+  Output1();    /* output1 */
+  kload(reg1,1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[185];
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Getlab();    /* getlab */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[181];
+  kpop(2);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASjumpc()     /* !*jumpc */
+{
+  kalloc(2);
+  zbind(urwelt[7],reg3);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = urwelt[187];
+  Output1();    /* output1 */
+  reg1 = value(urwelt[7]);
+  Prin2();    /* prin2 */
+  reg1 = urwelt[158];
+  Prin2();    /* prin2 */
+  kload(reg2,1);
+  reg1 = value(urwelt[143]);
+  Getv();    /* getv */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[188];
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Getlab();    /* getlab */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[181];
+  Prin2();    /* prin2 */
+  zunbind(1);
+  kpop(2);
+  return;
+}
+
+void ASjumpnc()     /* !*jumpnc */
+{
+  kalloc(2);
+  zbind(urwelt[7],reg3);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = urwelt[189];
+  Output1();    /* output1 */
+  reg1 = value(urwelt[7]);
+  Prin2();    /* prin2 */
+  reg1 = urwelt[158];
+  Prin2();    /* prin2 */
+  kload(reg2,1);
+  reg1 = value(urwelt[143]);
+  Getv();    /* getv */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[188];
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Getlab();    /* getlab */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[181];
+  Prin2();    /* prin2 */
+  zunbind(1);
+  kpop(2);
+  return;
+}
+
+void ASlbl()     /* !*lbl */
+{
+  reg3 = reg1;
+  Terpri();    /* terpri */
+  reg1 = reg3;
+  Prin2();    /* prin2 */
+  reg1 = urwelt[190];
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASstore()     /* !*store */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = urwelt[191];
+  Output1();    /* output1 */
+  kload(reg1,1);
+  if (!fixp(reg1)) goto lab4;
+  reg1 = value(urwelt[136]);
+  if (null(reg1)) goto lab1;
+  reg2 = reg1;
+  kload(reg1,1);
+  Assoc();    /* assoc */
+  Cdr();    /* cdr */
+  kset(1,reg1);
+lab1 : 
+  kload(reg1,1);
+  Zerop();    /* zerop */
+  if (null(reg1)) goto lab2;
+  reg1 = urwelt[192];
+  goto lab3;
+lab2 : 
+  reg1 = urwelt[193];
+  Prin2();    /* prin2 */
+  kload(reg1,1);
+  Abs();    /* abs */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[194];
+lab3 : 
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[178];
+  goto lab5;
+lab4 : 
+  Pexp();    /* pexp */
+  reg1 = urwelt[195];
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[181];
+lab5 : 
+  kpop(2);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASload()     /* !*load */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  Equal();    /* equal */
+  if (!null(reg1)) goto lab1;
+  kload(reg1,1);
+  if (atom(reg1)) goto lab2;
+  reg2 = car(reg1);
+  kload0(reg1);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab2;
+lab1 : 
+  reg1 = NIL;
+  goto lab9;
+lab2 : 
+  reg1 = urwelt[191];
+  Output1();    /* output1 */
+  kload(reg1,1);
+  if (atom(reg1)) goto lab3;
+  reg1 = cdr(reg1);
+  if (!null(reg1)) goto lab3;
+  reg1 = car(local(1));
+  kset(1,reg1);
+lab3 : 
+  kload(reg1,1);
+  if (!numberp(reg1)) goto lab7;
+  reg2 = Sexp(&ZERO);
+  Greaterp();    /* greaterp */
+  if (!null(reg1)) goto lab7;
+  reg1 = value(urwelt[136]);
+  if (null(reg1)) goto lab4;
+  reg2 = reg1;
+  kload(reg1,1);
+  Assoc();    /* assoc */
+  Cdr();    /* cdr */
+  kset(1,reg1);
+lab4 : 
+  kload(reg1,1);
+  Zerop();    /* zerop */
+  if (null(reg1)) goto lab5;
+  reg1 = urwelt[196];
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Pexp();    /* pexp */
+  goto lab6;
+lab5 : 
+  reg1 = urwelt[197];
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[194];
+  Prin2();    /* prin2 */
+  kload(reg1,1);
+  Abs();    /* abs */
+  Prin2();    /* prin2 */
+lab6 : 
+  reg1 = urwelt[178];
+  goto lab8;
+lab7 : 
+  kload0(reg1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[195];
+  Prin2();    /* prin2 */
+  kload(reg1,1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[181];
+lab8 : 
+  Prin2();    /* prin2 */
+lab9 : 
+  kpop(2);
+  return;
+}
+
+void ASlink()     /* !*link */
+{
+  kalloc(2);
+  zbind(urwelt[7],reg1);
+  kset0(reg2);
+  kset(1,reg3);
+  reg2 = value(urwelt[198]);
+  Memq();    /* memq */
+  if (!null(reg1)) goto lab1;
+  zconsc(value(urwelt[7]),value(urwelt[198]));
+  value(urwelt[198]) = reg1;
+lab1 : 
+  reg1 = urwelt[191];
+  Output1();    /* output1 */
+  reg1 = value(urwelt[7]);
+  Ersinize();    /* ersinize */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[199];
+  Prin2();    /* prin2 */
+  reg1 = urwelt[200];
+  Output1();    /* output1 */
+  reg1 = value(urwelt[7]);
+  Prin1();    /* prin1 */
+  reg1 = urwelt[201];
+  Output1();    /* output1 */
+  reg2 = value(urwelt[202]);
+  reg1 = value(urwelt[7]);
+  Memq();    /* memq */
+  if (!null(reg1)) goto lab2;
+  reg2 = value(urwelt[203]);
+  reg1 = value(urwelt[7]);
+  Assoc();    /* assoc */
+  if (!null(reg1)) goto lab2;
+  kload(reg3,1);
+  kload0(reg2);
+  reg1 = value(urwelt[7]);
+  List3();    /* list3 */
+  zcons2c(value(urwelt[203]));
+  value(urwelt[203]) = reg1;
+  goto lab3;
+lab2 : 
+  reg1 = NIL;
+lab3 : 
+  zunbind(1);
+  kpop(2);
+  return;
+}
+
+void ASlinke()     /* !*linke */
+{
+  kalloc(2);
+  zbind(urwelt[7],reg1);
+  kset0(reg2);
+  kset(1,reg3);
+  reg1 = reg4;
+  ASdealloc();    /* !*dealloc */
+  kload(reg3,1);
+  kload0(reg2);
+  reg1 = value(urwelt[7]);
+  ASlink();    /* !*link */
+  reg1 = urwelt[204];
+  Output1();    /* output1 */
+  zunbind(1);
+  kpop(2);
+  return;
+}
+
+void ASlambind()     /* !*lambind */
+{
+  kalloc(3);
+  zbind(urwelt[32],reg1);
+  kset0(reg2);
+  goto lab2;
+lab1 : 
+  kset(1,reg1);
+  reg1 = car(reg1);
+  kset(2,reg1);
+  reg1 = urwelt[205];
+  Output1();    /* output1 */
+  reg1 = car(car(local(0)));
+  Inurwelt();    /* inurwelt */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[206];
+  Prin2();    /* prin2 */
+  kload(reg2,2);
+  reg1 = value(urwelt[143]);
+  Getv();    /* getv */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[178];
+  Prin2();    /* prin2 */
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  reg1 = cdr(local(1));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  zunbind(1);
+  kpop(3);
+  return;
+}
+
+void ASprogbind()     /* !*progbind */
+{
+  kalloc(2);
+  kset0(reg1);
+  goto lab2;
+lab1 : 
+  kset(1,reg1);
+  reg1 = car(reg1);
+  reg1 = urwelt[205];
+  Output1();    /* output1 */
+  reg1 = car(car(local(0)));
+  Inurwelt();    /* inurwelt */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[207];
+  Prin2();    /* prin2 */
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  reg1 = cdr(local(1));
+lab2 : 
+  if (!null(reg1)) goto lab1;
+  kpop(2);
+  return;
+}
+
+void ASfreerstr()     /* !*freerstr */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = urwelt[208];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Length();    /* length */
+  Prin2();    /* prin2 */
+  reg1 = urwelt[178];
+  kpop(1);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ANexpandus()     /* !&expandus */
+{
+  kalloc(4);
+  kset0(reg1);
+  reg1 = cdr(reg3);
+  kset(2,reg1);
+  kset(1,reg2);
+  kset(3,reg4);
+  Length();    /* length */
+  reg2 = Sexp(&TWO);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab1;
+  zconsc(local(0),cdr(local(2)));
+  reg3 = reg1;
+  reg2 = car(local(2));
+  kload(reg1,1);
+  List3();    /* list3 */
+  kload(reg2,3);
+  kpop(4);
+  ANcomval();    /* !&comval */
+  return;
+lab1 : 
+  reg3 = reg4;
+  kload(reg2,2);
+  kload(reg1,1);
+  kpop(4);
+  ANcall();    /* !&call */
+  return;
+  }
+
+void ANcomtimes()     /* !&comtimes */
+{
+  reg4 = reg2;
+  reg3 = reg1;
+  reg2 = urwelt[209];
+  reg1 = urwelt[210];
+  ANexpandus();    /* !&expandus */
+  return;
+  }
+
+void ANcomplus()     /* !&complus */
+{
+  reg4 = reg2;
+  reg3 = reg1;
+  reg2 = urwelt[126];
+  reg1 = urwelt[211];
+  ANexpandus();    /* !&expandus */
+  return;
+  }
+
+void ANcommax()     /* !&commax */
+{
+  reg4 = reg2;
+  reg3 = reg1;
+  reg2 = urwelt[212];
+  reg1 = urwelt[213];
+  ANexpandus();    /* !&expandus */
+  return;
+  }
+
+void ANcommin()     /* !&commin */
+{
+  reg4 = reg2;
+  reg3 = reg1;
+  reg2 = urwelt[214];
+  reg1 = urwelt[215];
+  ANexpandus();    /* !&expandus */
+  return;
+  }
+
+void Comrpla()     /* comrpla */
+{
+  kalloc(4);
+  kset0(reg1);
+  reg1 = car(reg1);
+  kset(1,reg1);
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  reg1 = car(reg1);
+  kset(2,reg1);
+  reg1 = car(cdr(local(0)));
+  kset(3,reg1);
+  ANclrregs();    /* !&clrregs */
+  kload(reg1,3);
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  kload(reg1,2);
+  ANanyreg();    /* !&anyreg */
+  reg2 = NIL;
+  if (null(reg1)) goto lab2;
+  kload(reg1,3);
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab1;
+  kload(reg1,2);
+  ANlocate();    /* !&locate */
+  kset(2,reg1);
+  kload(reg1,3);
+  ANlocate();    /* !&locate */
+  goto lab4;
+lab1 : 
+  reg2 = Sexp(&ONE);
+  kload(reg1,3);
+  ANcomval();    /* !&comval */
+  kload(reg1,2);
+  ANlocate();    /* !&locate */
+  kset(2,reg1);
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  goto lab4;
+lab2 : 
+  kload(reg1,3);
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab3;
+  reg2 = Sexp(&ONE);
+  kload(reg1,2);
+  ANcomval();    /* !&comval */
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  kset(2,reg1);
+  kload(reg1,3);
+  ANlocate();    /* !&locate */
+  goto lab4;
+lab3 : 
+  kload0(reg1);
+  ANcomlis();    /* !&comlis */
+  kset(2,reg1);
+  reg1 = car(cdr(reg1));
+  ANlocate();    /* !&locate */
+  kset(2,reg1);
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+lab4 : 
+  kset(3,reg1);
+  kload(reg1,1);
+  if (reg1 != urwelt[216]) goto lab5;
+  reg1 = urwelt[217];
+  goto lab6;
+lab5 : 
+  reg1 = urwelt[218];
+lab6 : 
+  kload(reg3,3);
+  kload(reg2,2);
+  List3();    /* list3 */
+  ANattach();    /* !&attach */
+  kload(reg3,2);
+  reg2 = Sexp(&ONE);
+  reg1 = urwelt[70];
+  List3();    /* list3 */
+  ANattach();    /* !&attach */
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  zcons2c(cdr(value(urwelt[32])));
+  value(urwelt[32]) = reg1;
+  reg1 = NIL;
+  kpop(4);
+  return;
+}
+
+void ASrplaca()     /* !*rplaca */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = urwelt[219];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[220];
+  Prin2();    /* prin2 */
+  kload(reg1,1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[181];
+  kpop(2);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASrplacd()     /* !*rplacd */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = urwelt[221];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[220];
+  Prin2();    /* prin2 */
+  kload(reg1,1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[181];
+  kpop(2);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASjumpncopt()     /* !*jumpncopt */
+{
+  kalloc(1);
+  kset0(reg1);
+  Cdddar();    /* cdddar */
+  Car();    /* car */
+  if (reg1 != urwelt[222]) goto lab1;
+  kload0(reg1);
+  Caddar();    /* caddar */
+  reg4 = urwelt[223];
+  goto lab2;
+lab1 : 
+  kload0(reg1);
+  Cdddar();    /* cdddar */
+  Car();    /* car */
+  if (reg1 != urwelt[223]) goto lab3;
+  kload0(reg1);
+  Caddar();    /* caddar */
+  reg4 = urwelt[222];
+lab2 : 
+  reg3 = reg1;
+  reg2 = car(cdr(car(local(0))));
+  reg1 = urwelt[110];
+  List4();    /* list4 */
+  car(local(0)) = reg1;
+  kload0(reg1);
+  goto lab4;
+lab3 : 
+  reg1 = NIL;
+lab4 : 
+  kpop(1);
+  return;
+}
+
+void ASfreerstropt()     /* !*freerstropt */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = car(car(cdr(reg1)));
+  if (reg1 != urwelt[72]) goto lab1;
+  kload0(reg1);
+  Cddadr();    /* cddadr */
+  Car();    /* car */
+  reg2 = reg1;
+  reg1 = car(cdr(car(local(0))));
+  Equal();    /* equal */
+  if (null(reg1)) goto lab1;
+  reg2 = cdr(cdr(local(0)));
+  kload0(reg1);
+  kpop(1);
+  Rplacw();    /* rplacw */
+  return;
+lab1 : 
+  reg1 = NIL;
+  kpop(1);
+  return;
+}
+
+void ANcomcons1()     /* !&comcons1 */
+{
+  kalloc(4);
+  kset(1,reg2);
+  reg1 = cdr(reg1);
+  kset0(reg1);
+  if (null(reg1)) goto lab1;
+  reg1 = cdr(reg1);
+  if (null(reg1)) goto lab1;
+  reg2 = urwelt[82];
+  reg1 = car(reg1);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab2;
+  reg1 = car(local(0));
+  Ncons();    /* ncons */
+  kload(reg3,1);
+  reg2 = reg1;
+  reg1 = urwelt[85];
+  kpop(4);
+  ANcall();    /* !&call */
+  return;
+lab1 : 
+  reg1 = urwelt[84];
+  Lprie();    /* lprie */
+lab2 : 
+  reg1 = car(local(0));
+  kset(2,reg1);
+  reg1 = car(cdr(local(0)));
+  kset(3,reg1);
+  ANclrregs();    /* !&clrregs */
+  kload(reg1,3);
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  kload(reg1,2);
+  ANanyreg();    /* !&anyreg */
+  reg2 = NIL;
+  if (null(reg1)) goto lab4;
+  kload(reg1,3);
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab3;
+  kload(reg1,2);
+  ANlocate();    /* !&locate */
+  kset(2,reg1);
+  kload(reg1,3);
+  ANlocate();    /* !&locate */
+  goto lab6;
+lab3 : 
+  reg2 = Sexp(&ONE);
+  kload(reg1,3);
+  ANcomval();    /* !&comval */
+  kload(reg1,2);
+  ANlocate();    /* !&locate */
+  kset(2,reg1);
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  goto lab6;
+lab4 : 
+  kload(reg1,3);
+  ANanyreg();    /* !&anyreg */
+  if (null(reg1)) goto lab5;
+  reg2 = Sexp(&ONE);
+  kload(reg1,2);
+  ANcomval();    /* !&comval */
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  kset(2,reg1);
+  kload(reg1,3);
+  ANlocate();    /* !&locate */
+  goto lab6;
+lab5 : 
+  kload0(reg1);
+  ANcomlis();    /* !&comlis */
+  kset(2,reg1);
+  reg1 = car(cdr(reg1));
+  ANlocate();    /* !&locate */
+  kset(2,reg1);
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+lab6 : 
+  kset(3,reg1);
+  reg2 = urwelt[162];
+  kload(reg1,2);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab7;
+  reg2 = urwelt[224];
+  kload(reg1,3);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab7;
+  reg4 = Sexp(&TWO);
+  reg3 = urwelt[12];
+  reg2 = urwelt[86];
+  goto lab8;
+lab7 : 
+  reg2 = urwelt[224];
+  kload(reg1,2);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab9;
+  reg2 = urwelt[162];
+  kload(reg1,3);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab9;
+  reg4 = Sexp(&TWO);
+  reg3 = urwelt[12];
+  reg2 = urwelt[87];
+lab8 : 
+  reg1 = urwelt[64];
+  List4();    /* list4 */
+  goto lab12;
+lab9 : 
+  reg2 = urwelt[162];
+  kload(reg1,2);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab10;
+  kload(reg2,3);
+  reg1 = urwelt[225];
+  List2();    /* list2 */
+  goto lab12;
+lab10 : 
+  reg2 = urwelt[162];
+  kload(reg1,3);
+  Equal();    /* equal */
+  if (null(reg1)) goto lab11;
+  kload(reg2,2);
+  reg1 = urwelt[226];
+  List2();    /* list2 */
+  goto lab12;
+lab11 : 
+  kload(reg3,3);
+  kload(reg2,2);
+  reg1 = urwelt[227];
+  List3();    /* list3 */
+lab12 : 
+  ANattach();    /* !&attach */
+  reg1 = Sexp(&ONE);
+  Ncons();    /* ncons */
+  zcons2c(cdr(value(urwelt[32])));
+  value(urwelt[32]) = reg1;
+  reg1 = NIL;
+  kpop(4);
+  return;
+}
+
+void ASzcons()     /* !*zcons */
+{
+  kalloc(2);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = urwelt[228];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[194];
+  Prin2();    /* prin2 */
+  kload(reg1,1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[178];
+  kpop(2);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASzcons2()     /* !*zcons2 */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = urwelt[229];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[178];
+  kpop(1);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void ASzcons3()     /* !*zcons3 */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg1 = urwelt[230];
+  Output1();    /* output1 */
+  kload0(reg1);
+  Pexp();    /* pexp */
+  reg1 = urwelt[178];
+  kpop(1);
+  Prin2();    /* prin2 */
+  return;
+  }
+
+void Informuser()     /* informuser */
+{
+  reg3 = reg1;
+  reg1 = value(urwelt[231]);
+  Wrs();    /* wrs */
+  reg4 = reg1;
+  reg1 = reg3;
+  Prin2();    /* prin2 */
+  reg1 = reg4;
+  Wrs();    /* wrs */
+  reg1 = NIL;
+  return;
+}
+
+void Compilefile()     /* compilefile */
+{
+  kalloc(10);
+  zbind(urwelt[7],NIL);
+  kset(2,NIL);
+  kset(3,NIL);
+  kset(7,NIL);
+  kset(8,NIL);
+  kset0(reg1);
+  kset(1,reg2);
+  reg1 = value(urwelt[202]);
+  Length();    /* length */
+  Sub1();    /* sub1 */
+  value(urwelt[232]) = reg1;
+  reg1 = reg2;
+  if (null(reg1)) goto lab1;
+  kload0(reg1);
+  if (!null(reg1)) goto lab2;
+lab1 : 
+  reg1 = urwelt[233];
+  goto lab33;
+lab2 : 
+  value(urwelt[198]) = NIL;
+  reg1 = reg2;
+  Explode();    /* explode */
+  kset(4,reg1);
+  reg1 = Sexp(&ZERO);
+  kset(5,reg1);
+  reg2 = urwelt[234];
+  kload(reg1,4);
+  Append();    /* append */
+  Compress();    /* compress */
+  value(urwelt[7]) = reg1;
+  reg2 = urwelt[235];
+  Open1();    /* open */
+  value(urwelt[236]) = reg1;
+  reg1 = urwelt[237];
+  Output1();    /* output1 */
+  reg2 = urwelt[238];
+  kload(reg1,4);
+  Append();    /* append */
+  Compress();    /* compress */
+  value(urwelt[7]) = reg1;
+  reg2 = urwelt[235];
+  Open1();    /* open */
+  value(urwelt[239]) = reg1;
+  reg1 = urwelt[240];
+  Output1();    /* output1 */
+  reg2 = urwelt[241];
+  kload(reg1,4);
+  Append();    /* append */
+  Compress();    /* compress */
+  value(urwelt[7]) = reg1;
+  reg2 = urwelt[235];
+  Open1();    /* open */
+  value(urwelt[242]) = reg1;
+  reg1 = urwelt[243];
+  Output1();    /* output1 */
+  reg2 = urwelt[244];
+  kload(reg1,4);
+  Append();    /* append */
+  Compress();    /* compress */
+  value(urwelt[7]) = reg1;
+  reg2 = urwelt[235];
+  Open1();    /* open */
+  value(urwelt[245]) = reg1;
+  reg1 = urwelt[246];
+  Output1();    /* output1 */
+  reg2 = urwelt[247];
+  kload(reg1,4);
+  Append();    /* append */
+  Compress();    /* compress */
+  value(urwelt[7]) = reg1;
+  reg2 = urwelt[235];
+  Open1();    /* open */
+  value(urwelt[248]) = reg1;
+  reg1 = urwelt[249];
+  Output1();    /* output1 */
+  reg1 = value(urwelt[250]);
+  if (null(reg1)) goto lab3;
+  reg1 = urwelt[120];
+  Getd();    /* getd */
+  kset(9,reg1);
+  reg1 = urwelt[251];
+  goto lab4;
+lab3 : 
+  reg1 = urwelt[120];
+  Getd();    /* getd */
+  kset(9,reg1);
+  reg1 = urwelt[252];
+lab4 : 
+  Getd();    /* getd */
+  Cdr();    /* cdr */
+  cdr(local(9)) = reg1;
+  kload(reg1,9);
+  reg1 = value(urwelt[250]);
+  value(urwelt[117]) = reg1;
+  reg1 = Sexp(&TWO);
+  kset(6,reg1);
+  reg2 = urwelt[253];
+  kload0(reg1);
+  Open1();    /* open */
+  value(urwelt[254]) = reg1;
+  reg1 = NIL;
+  Wrs();    /* wrs */
+  value(urwelt[231]) = reg1;
+  Wrs();    /* wrs */
+lab5 : 
+  reg1 = value(urwelt[254]);
+  Rds();    /* rds */
+lab6 : 
+  reg1 = value(urwelt[132]);
+  if (null(reg1)) goto lab7;
+  reg1 = car(reg1);
+  kset(2,reg1);
+  reg1 = cdr(value(urwelt[132]));
+  value(urwelt[132]) = reg1;
+  goto lab8;
+lab7 : 
+  Read1();    /* read */
+  kset(2,reg1);
+lab8 : 
+  kload(reg1,2);
+  if (atom(reg1)) goto lab26;
+  reg2 = urwelt[255];
+  reg1 = car(reg1);
+  Memq();    /* memq */
+  if (null(reg1)) goto lab26;
+  reg2 = urwelt[256];
+  reg1 = car(cdr(local(2)));
+  Flagp();    /* flagp */
+  if (!null(reg1)) goto lab26;
+  reg1 = car(cdr(local(2)));
+  value(urwelt[7]) = reg1;
+  reg1 = value(urwelt[231]);
+  Wrs();    /* wrs */
+  reg2 = urwelt[257];
+  reg1 = value(urwelt[7]);
+  Flagp();    /* flagp */
+  if (null(reg1)) goto lab9;
+  reg1 = urwelt[258];
+  goto lab10;
+lab9 : 
+  reg2 = value(urwelt[202]);
+  reg1 = value(urwelt[7]);
+  Memq();    /* memq */
+  if (null(reg1)) goto lab11;
+  reg1 = urwelt[259];
+lab10 : 
+  Output1();    /* output1 */
+  goto lab6;
+lab11 : 
+  reg1 = urwelt[260];
+  Output1();    /* output1 */
+  reg1 = value(urwelt[231]);
+  if (null(reg1)) goto lab12;
+  reg1 = NIL;
+  Wrs();    /* wrs */
+  reg1 = urwelt[261];
+  Output1();    /* output1 */
+  reg1 = value(urwelt[231]);
+  Wrs();    /* wrs */
+lab12 : 
+  reg2 = value(urwelt[203]);
+  reg1 = value(urwelt[7]);
+  Assoc();    /* assoc */
+  kset(8,reg1);
+  if (null(reg1)) goto lab13;
+  reg2 = value(urwelt[203]);
+  Delete();    /* delete */
+  value(urwelt[203]) = reg1;
+lab13 : 
+  zconsc(value(urwelt[7]),value(urwelt[202]));
+  value(urwelt[202]) = reg1;
+  zconsc(value(urwelt[7]),value(urwelt[262]));
+  value(urwelt[262]) = reg1;
+  reg1 = value(urwelt[232]);
+  Add1();    /* add1 */
+  value(urwelt[232]) = reg1;
+  reg1 = car(cdr(cdr(local(2))));
+  Length();    /* length */
+  kset(7,reg1);
+  reg2 = urwelt[263];
+  reg1 = car(local(2));
+  Assoc();    /* assoc */
+  Cdr();    /* cdr */
+  kset(3,reg1);
+  if (reg1 != urwelt[14]) goto lab14;
+  reg3 = urwelt[264];
+  reg2 = urwelt[19];
+  reg1 = value(urwelt[7]);
+  Put();    /* put */
+lab14 : 
+  kload(reg1,2);
+  Cadddr();    /* cadddr */
+  reg3 = reg1;
+  reg2 = car(cdr(cdr(local(2))));
+  reg1 = urwelt[52];
+  List3();    /* list3 */
+  reg2 = value(urwelt[7]);
+  ANcomproc();    /* !&comproc */
+  kset(2,reg1);
+  reg1 = value(urwelt[250]);
+  if (null(reg1)) goto lab15;
+  kload(reg3,7);
+  reg2 = value(urwelt[232]);
+  reg1 = urwelt[265];
+  List3();    /* list3 */
+  zcons2c(local(2));
+  kset(2,reg1);
+  Last();    /* last */
+  kset(9,reg1);
+  reg1 = value(urwelt[232]);
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  kload(reg1,9);
+  Nconc();    /* nconc */
+  goto lab20;
+lab15 : 
+  kload(reg1,2);
+  Last();    /* last */
+  kset(8,reg1);
+  reg2 = urwelt[118];
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab16;
+  reg1 = urwelt[266];
+  goto lab17;
+lab16 : 
+  reg2 = urwelt[267];
+  kload(reg1,8);
+  Equal();    /* equal */
+  if (!null(reg1)) goto lab18;
+  reg1 = urwelt[267];
+lab17 : 
+  Ncons();    /* ncons */
+  reg2 = reg1;
+  kload(reg1,2);
+  Nconc();    /* nconc */
+lab18 : 
+  reg1 = value(urwelt[268]);
+  if (!null(reg1)) goto lab19;
+  reg2 = urwelt[269];
+  reg1 = value(urwelt[7]);
+  Flagp();    /* flagp */
+  if (null(reg1)) goto lab20;
+lab19 : 
+  kload(reg3,7);
+  reg2 = value(urwelt[232]);
+  reg1 = urwelt[270];
+  List3();    /* list3 */
+  zcons2c(local(2));
+  kset(2,reg1);
+lab20 : 
+  kload(reg1,3);
+  if (reg1 != urwelt[12]) goto lab21;
+  reg4 = Sexp(&ONE);
+  reg3 = urwelt[271];
+  goto lab22;
+lab21 : 
+  if (reg1 != urwelt[14]) goto lab23;
+  reg4 = Sexp(&ONE);
+  reg3 = urwelt[272];
+lab22 : 
+  reg2 = value(urwelt[7]);
+  reg1 = urwelt[20];
+  List4();    /* list4 */
+  zcons2c(local(2));
+  goto lab24;
+lab23 : 
+  reg1 = NIL;
+lab24 : 
+  kset(2,reg1);
+  reg1 = value(urwelt[21]);
+  if (null(reg1)) goto lab25;
+  reg1 = value(urwelt[231]);
+  Wrs();    /* wrs */
+  kload(reg1,2);
+  Print();    /* print */
+lab25 : 
+  kload(reg1,2);
+  Length();    /* length */
+  reg2 = reg1;
+  kload(reg1,5);
+  Plus2();    /* plus2 */
+  kset(5,reg1);
+  reg1 = value(urwelt[236]);
+  Wrs();    /* wrs */
+  kload(reg1,2);
+  Lap();    /* lap */
+  kload(reg3,3);
+  kload(reg2,7);
+  reg1 = value(urwelt[7]);
+  Priname();    /* priname */
+  reg2 = value(urwelt[273]);
+  kload(reg1,5);
+  Greaterp();    /* greaterp */
+  if (null(reg1)) goto lab6;
+  reg1 = value(urwelt[248]);
+  Wrs();    /* wrs */
+  Dumpxtrn();    /* dumpxtrn */
+  reg1 = value(urwelt[231]);
+  Wrs();    /* wrs */
+  reg1 = value(urwelt[236]);
+  Close1();    /* close */
+  reg1 = value(urwelt[245]);
+  Close1();    /* close */
+  reg1 = value(urwelt[248]);
+  Close1();    /* close */
+  kload(reg1,6);
+  Explode();    /* explode */
+  reg2 = reg1;
+  reg1 = urwelt[274];
+  Append();    /* append */
+  reg2 = reg1;
+  kload(reg1,4);
+  Append();    /* append */
+  Compress();    /* compress */
+  value(urwelt[7]) = reg1;
+  reg2 = urwelt[235];
+  Open1();    /* open */
+  value(urwelt[248]) = reg1;
+  reg1 = Sexp(&ZERO);
+  kset(5,reg1);
+  kload(reg1,6);
+  Explode();    /* explode */
+  reg2 = reg1;
+  reg1 = urwelt[275];
+  Append();    /* append */
+  reg2 = reg1;
+  kload(reg1,4);
+  Append();    /* append */
+  Compress();    /* compress */
+  value(urwelt[7]) = reg1;
+  reg2 = urwelt[235];
+  Open1();    /* open */
+  value(urwelt[236]) = reg1;
+  kload(reg1,6);
+  Explode();    /* explode */
+  reg2 = reg1;
+  reg1 = urwelt[276];
+  Append();    /* append */
+  reg2 = reg1;
+  kload(reg1,4);
+  Append();    /* append */
+  Compress();    /* compress */
+  value(urwelt[7]) = reg1;
+  reg2 = urwelt[235];
+  Open1();    /* open */
+  value(urwelt[245]) = reg1;
+  kload(reg1,6);
+  Add1();    /* add1 */
+  kset(6,reg1);
+  goto lab6;
+lab26 : 
+  reg2 = urwelt[277];
+  kload(reg1,2);
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab27;
+  reg1 = value(urwelt[254]);
+  Close1();    /* close */
+  kload(reg1,2);
+  Eval();    /* eval */
+  goto lab28;
+lab27 : 
+  kload(reg1,2);
+  if (reg1 == urwelt[278]) goto lab32;
+  if (reg1 != value(urwelt[279])) goto lab29;
+  reg1 = NIL;
+  Wrs();    /* wrs */
+  reg1 = NIL;
+  Rds();    /* rds */
+  Terpri();    /* terpri */
+  reg1 = urwelt[280];
+  Prin2();    /* prin2 */
+  Read1();    /* read */
+  kset(2,reg1);
+  reg1 = value(urwelt[254]);
+  Close1();    /* close */
+  kload(reg1,2);
+  if (reg1 == urwelt[278]) goto lab32;
+  reg2 = urwelt[253];
+  Open1();    /* open */
+lab28 : 
+  value(urwelt[254]) = reg1;
+  goto lab5;
+lab29 : 
+  if (null(reg1)) goto lab30;
+  reg2 = urwelt[281];
+  reg1 = car(reg1);
+  Flagp();    /* flagp */
+  if (!null(reg1)) goto lab30;
+  reg1 = value(urwelt[239]);
+  Wrs();    /* wrs */
+  kload(reg1,2);
+  Printq();    /* printq */
+  reg1 = value(urwelt[231]);
+  Wrs();    /* wrs */
+lab30 : 
+  kload(reg1,2);
+  if (atom(reg1)) goto lab6;
+  reg2 = urwelt[282];
+  reg1 = car(reg1);
+  Flagp();    /* flagp */
+  if (!null(reg1)) goto lab31;
+  reg2 = urwelt[281];
+  reg1 = car(local(2));
+  Flagp();    /* flagp */
+  if (null(reg1)) goto lab6;
+lab31 : 
+  kload(reg1,2);
+  Eval();    /* eval */
+  goto lab6;
+lab32 : 
+  Finalize();    /* finalize */
+lab33 : 
+  zunbind(1);
+  kpop(10);
+  return;
+}
+
+void Dumpxtrn()     /* dumpxtrn */
+{
+  kalloc(3);
+  kset0(NIL);
+  kset(1,NIL);
+  reg1 = value(urwelt[198]);
+  if (null(reg1)) goto lab6;
+lab1 : 
+  reg1 = car(value(urwelt[198]));
+  kset(2,reg1);
+  reg2 = value(urwelt[262]);
+  Memq();    /* memq */
+  if (!null(reg1)) goto lab2;
+  zconsc(local(2),local(1));
+  kset(1,reg1);
+lab2 : 
+  reg1 = cdr(value(urwelt[198]));
+  value(urwelt[198]) = reg1;
+  if (!null(reg1)) goto lab1;
+  value(urwelt[262]) = NIL;
+  kload(reg1,1);
+  if (null(reg1)) goto lab6;
+  reg1 = Sexp(&ZERO);
+  kset0(reg1);
+lab3 : 
+  kload0(reg1);
+  Add1();    /* add1 */
+  kset0(reg1);
+  reg2 = Sexp(&SIX);
+  Remainder();    /* remainder */
+  reg2 = Sexp(&ZERO);
+  Eqn();    /* eqn */
+  if (null(reg1)) goto lab4;
+  Terpri();    /* terpri */
+lab4 : 
+  reg1 = car(local(1));
+  Ersinize();    /* ersinize */
+  Prin1();    /* prin1 */
+  reg1 = cdr(local(1));
+  kset(1,reg1);
+  if (null(reg1)) goto lab5;
+  reg1 = urwelt[283];
+  Prin2();    /* prin2 */
+  goto lab3;
+lab5 : 
+  reg1 = urwelt[199];
+  Prin2();    /* prin2 */
+  reg1 = NIL;
+lab6 : 
+  kpop(3);
+  return;
+}
+
+void Finalize()     /* finalize */
+{
+  kalloc(3);
+  zbind(urwelt[22],NIL);
+  kset0(NIL);
+  kset(1,NIL);
+lab1 : 
+  reg1 = value(urwelt[203]);
+  if (null(reg1)) goto lab2;
+  reg1 = value(urwelt[231]);
+  Wrs();    /* wrs */
+  reg1 = urwelt[284];
+  Output1();    /* output1 */
+  reg1 = value(urwelt[232]);
+  Add1();    /* add1 */
+  value(urwelt[232]) = reg1;
+  reg1 = car(value(urwelt[203]));
+  kset(1,reg1);
+  reg1 = car(cdr(reg1));
+  kset0(reg1);
+  reg1 = car(cdr(cdr(local(1))));
+  value(urwelt[22]) = reg1;
+  reg1 = car(local(1));
+  kset(1,reg1);
+  reg1 = value(urwelt[236]);
+  Wrs();    /* wrs */
+  reg3 = Sexp(&ONE);
+  kload0(reg2);
+  kload(reg1,1);
+  ASentry();    /* !*entry */
+  reg1 = urwelt[285];
+  Output1();    /* output1 */
+  kload0(reg3);
+  reg2 = value(urwelt[22]);
+  kload(reg1,1);
+  Priname();    /* priname */
+  reg1 = cdr(value(urwelt[203]));
+  value(urwelt[203]) = reg1;
+  zconsc(local(1),value(urwelt[262]));
+  value(urwelt[262]) = reg1;
+  goto lab1;
+lab2 : 
+  reg1 = urwelt[286];
+  Setpchar();    /* setpchar */
+  reg1 = value(urwelt[242]);
+  Wrs();    /* wrs */
+  reg1 = value(urwelt[140]);
+  Add1();    /* add1 */
+  Print();    /* print */
+  reg1 = value(urwelt[139]);
+  Reversip();    /* reversip */
+  value(urwelt[139]) = reg1;
+  goto lab4;
+lab3 : 
+  kset(2,reg1);
+  reg1 = car(reg1);
+  Print();    /* print */
+  reg1 = cdr(local(2));
+lab4 : 
+  if (!null(reg1)) goto lab3;
+  Print();    /* print */
+  reg1 = value(urwelt[248]);
+  Wrs();    /* wrs */
+  Dumpxtrn();    /* dumpxtrn */
+  reg1 = value(urwelt[231]);
+  Wrs();    /* wrs */
+  reg1 = value(urwelt[236]);
+  Close1();    /* close */
+  reg1 = value(urwelt[239]);
+  Close1();    /* close */
+  reg1 = value(urwelt[242]);
+  Close1();    /* close */
+  reg1 = value(urwelt[245]);
+  Close1();    /* close */
+  reg1 = value(urwelt[254]);
+  Close1();    /* close */
+  reg1 = value(urwelt[248]);
+  Close1();    /* close */
+  reg1 = urwelt[287];
+  zunbind(1);
+  kpop(3);
+  return;
+}

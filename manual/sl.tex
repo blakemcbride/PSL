@@ -1,0 +1,2262 @@
+\documentstyle[11pt,reduce]{article}
+\title{The Standard Lisp Report}
+\date{}
+\author{Jed Marti \\ A. C. Hearn \\ M. L. Griss \\ C. Griss}
+
+%%% Function/method definition.
+%%% de{fname}{arglist}{type}{text}          For short arg lists.
+%%% DE{fname}{arglist}{type}{text}          For long arg lists.
+\newlength{\argwidth}                  % Width of argument box.
+\setlength{\argwidth}{4in}
+\newlength{\dewidth}
+\setlength{\dewidth}{4.5in}             % Width of text box.
+
+\newcommand{\de}[4]
+{\vspace{.25in} \noindent
+\begin{minipage}[t]{\textwidth} \index{#1} {\f{#1}}{#2}\hfill{\em #3} \\
+\hspace*{.25in}\begin{minipage}[t]{\dewidth} #4 \end{minipage}
+\end{minipage} }
+
+%%% Global/fluid variable description.
+%%% variable{name}{initial value}{type}{text}
+\newcommand{\variable}[4]
+{\vspace{.25in} \noindent
+\begin{minipage}[t]{\textwidth} \index{#1 (#3)} {\bf #1} = #2 \hfill {\em #3}
+ \\
+\hspace*{.25in} \ \begin{minipage}[t]{\dewidth} #4 \end{minipage}
+\end{minipage}}
+
+%%% Command to display an error or warning message in teletype format. Also
+%%% leaves blank vertical space around it.
+\newcommand{\errormessage}[1]
+{\vspace{.1in} \noindent {\tt #1} \\ \vspace{.1in}}
+
+
+%%% \p is a parameter name (or argument). Just do this as bf.
+\newcommand{\p}[1] {{\bf #1}}
+%%% \ty is a type - do as italics.
+\newcommand{\ty}[1] {{\em #1}}
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Although the programming language LISP was first formulated in
+1960~\cite{LISP1.5}, a widely accepted standard has never appeared. As
+a result, various dialects of LISP were
+produced~\cite{CDC-LISP,LISP/360,MACLISP,Interlisp,LISPF1,LISP1.6} in
+some cases several on the same machine! Consequently, a user often
+faces considerable difficulty in moving programs from one system to
+another. In addition, it is difficult to write and use programs which
+depend on the structure of the source code such as translators,
+editors and cross-reference programs.
+
+In 1969, a model for such a standard was produced~\cite{Hearn:69} as
+part of a general effort to make a large LISP based algebraic
+manipulation program, REDUCE~\cite{REDUCE3.3}, as portable as
+possible.  The goal of this work was to define a uniform subset of
+LISP 1.5 and its variants so that programs written in this subset
+could run on any reasonable LISP system.
+
+In the intervening years, two deficiencies in the approach taken in
+Ref.~\cite{Hearn:69} have emerged. First in order to be as general as
+possible, the specific semantics and values of several key functions
+were left undefined. Consequently, programs built on this subset could
+not make any assumptions about the form of the values of such
+functions. The second deficiency related to the proposed method of
+implementation of this language. The model considered in effect two
+versions of LISP on any given machine, namely Standard LISP and the
+LISP of the host machine (which we shall refer to as Target LISP).
+This meant that if any definition was stored in interpretive form, it
+would vary from implementation to implementation, and consequently one
+could not write programs in Standard LISP which needed to assume any
+knowledge about the structure of such forms. This deficiency became
+apparent during recent work on the development of a portable compiler
+for LISP~\cite{PLC}. Clearly a compiler has to know precisely the
+structure of its source code; we concluded that the appropriate source
+was Standard LISP and not Target LISP.
+
+With these thoughts in mind we decided to attempt again a definition
+of Standard LISP. However, our approach this time is more aggressive.
+In this document we define a standard for a reasonably large subset of
+LISP with as precise as possible a statement about the semantics of
+each function. Secondly, we now require that the target machine
+interpreter be modified or written to support this standard, rather
+than mapping Standard LISP onto Target LISP as previously.
+
+We have spent countless hours in discussion over many of the
+definitions given in this report. We have also drawn on the help and
+advice of a lot of friends whose names are given in the
+Acknowledgements. Wherever possible, we have used the definition of a
+function as given in the LISP 1.5 Programmer's Manual~\cite{LISP1.5}
+and have only deviated where we felt it desirable in the light of LISP
+programming experience since that time. In particular, we have given
+considerable thought to the question of variable bindings and the
+definition of the evaluator functions EVAL and APPLY. We have also
+abandoned the previous definition of LISP arrays in favor of the more
+accepted idea of a vector which most modern LISP systems support.
+These are the places where we have strayed furthest from the
+conventional definitions, but we feel that the consistency which
+results from our approach is worth the redefinition.
+
+We have avoided entirely in this report problems which arise from
+environment passing, such as those represented by the FUNARG problem.
+We do not necessarily exclude these considerations from our standard,
+but in this report have decided to avoid the controversy which they
+create. The semantic differences between compiled and interpreted
+functions is the topic of another paper~\cite{PLC}. Only functions
+which affect the compiler in a general way make reference to it.
+
+This document is not intended as an introduction to LISP rather it is
+assumed that the reader is already familiar with some version.  The
+document is thus intended as an arbiter of the syntax and semantics of
+Standard LISP. However, since it is not intended as an implementation
+description, we deliberately leave unspecified many of the details on
+which an actual implementation depends. For example, while we assume
+the existence of a symbol table for atoms (the "object list" in LISP
+terminology), we do not specify its structure, since conventional LISP
+programming does not require this information. Our ultimate goal,
+however, is to remedy this by defining an interpreter for Standard
+LISP which is sufficiently complete that its implementation on any
+given computer will be straightforward and precise. At that time, we
+shall produce an implementation level specification for Standard LISP
+which will extend the description of the primitive functions defined
+herein by introducing a new set of lower level primitive functions in
+which the structure of the symbol table, heap and so on may be
+defined.
+
+The plan of this chapter is as follows. In Section~\ref{dtypes} we
+describe the various data types used in Standard LISP. In
+Section~\ref{slfns}, a description of all Standard LISP functions is
+presented, organized by type. These functions are defined in an RLISP
+syntax which is easier to read than LISP S-expressions.
+Section~\ref{slglobals} describes global variables which control the
+operation of Standard LISP.
+
+
+\section{Preliminaries}
+\label{dtypes}
+\subsection{Primitive Data Types}
+\label{pdat}
+\begin{description}
+\item[integer] Integers are also called "fixed" numbers. The magnitude of
+an integer is unrestricted. Integers in the LISP input stream are
+\index{integer ! input} \index{integer ! magnitude}
+recognized by the grammar:
+
+\begin{tabbing}
+\s{digit} ::= 0$\mid$1$\mid$2$\mid$3$\mid$4$\mid$5$\mid$6$\mid$7$\mid$8$\mid$9
+\\
+\s{unsigned-integer} ::= \s{digit}$\mid$\s{unsigned-integer}\s{digit} \\
+\s{integer} ::= \= \s{unsigned-integer} $\mid$ \\
+\> +\s{unsigned-integer} $\mid$ \\
+\> ---\s{unsigned-integer}
+\end{tabbing}
+
+\item[floating] - Any floating point number. The precision of floating point
+\index{floating ! input}
+numbers is determined solely by the implementation. In BNF floating
+point numbers are recognized by the grammar:
+
+\begin{tabbing}
+\s{base} ::=  \= \s{unsigned-integer}.$\mid$.\s{unsigned-integer}$\mid$ \\
+\> \s{unsigned-integer}.\s{unsigned-integer} \\
+\> \s{unsigned-floating} ::= \s{base}$\mid$ \\
+\> \s{base}E\s{unsigned-integer}$\mid$ \\
+\> \s{base}E-\s{unsigned-integer}$\mid$ \\
+\> \s{base}E+\s{unsigned-integer} \\
+\s{floating} ::= \= \s{unsigned-floating}$\mid$ \\
+\> +\s{unsigned-floating}$\mid$-\s{unsigned-floating}
+\end{tabbing}
+
+\item[id] An identifier is a string of characters which may have the
+\index{id ! input} \index{identifier (see id)}
+following items associated with it.
+
+\begin{description}
+\item[print name] \index{print name} The characters of the identifier.
+
+\item[flags] An identifier may be tagged with a flag. Access is by the
+FLAG, REMFLAG, and FLAGP functions defined in section~\ref{plist} on
+page~\pageref{plist}. \index{FLAG} \index{REMFLAG} \index{FLAGP}
+
+\item[properties] \index{properties} An identifier may have an
+indicator-value pair associated with it. Access is by the PUT, GET,
+and REMPROP functions defined in section~\ref{plist} on
+page~\pageref{plist}.
+\index{PUT} \index{GET} \index{REMPROP}
+
+\item[values/functions] An identifier may have a value associated with
+\index{values} \index{functions} it. Access to values is by SET and SETQ
+defined in \index{SET} \index{SETQ} section~\ref{varsandbinds} on
+page~\pageref{varsandbinds}. The method by which the value is attached
+to the identifier is known as the binding type, being one of LOCAL,
+GLOBAL, or FLUID. Access to the binding type is by the GLOBAL,
+GLOBALP, FLUID, FLUIDP, and UNFLUID functions.
+\index{GLOBAL} \index{GLOBALP} \index{FLUID} \index{FUIDP} \index{UNFLUID}
+
+An identifier may have a function or macro associated with it. Access
+is by the PUTD, GETD, and REMD functions (see ``Function Definition'',
+section~\ref{fdef}, on page~\pageref{fdef}). \index{PUTD} \index{GETD}
+\index{REMD} An identifier may not have both a function and a value
+associated with it.
+
+\item[OBLIST entry] \index{OBLIST entry} An identifier may be entered and
+removed from a structure called the OBLIST. Its presence on the OBLIST
+does not directly affect the other properties. Access to the OBLIST is
+by the INTERN, REMOB, and READ functions. \index{INTERN} \index{REMOB}
+\index{READ}
+\end{description}
+
+The maximum length of a Standard LISP identifier is 24 characters
+\index{id ! maximum length}
+(excluding occurrences of the escape character !) but an
+\index{id ! escape character}
+implementation may allow more. Special characters (digits in the first
+position and punctuation) must be prefixed with an escape character,
+an ! in Standard LISP. In BNF identifiers are recognized by the
+grammar:
+
+
+\begin{tabbing}
+\s{special-character} ::= !\s{any-character} \\
+\s{alphabetic} ::= \\
+\hspace*{.25in} \= A$\mid$B$\mid$C$\mid$D$\mid$E$\mid$F$\mid$G$\mid$H$
+\mid$I$\mid$J$\mid$K$\mid$L$\mid$M$\mid$N$\mid$O$\mid$P$\mid$Q$\mid$R$
+\mid$S$\mid$T$\mid$U$\mid$V$\mid$W$\mid$X$\mid$Y$\mid$Z$\mid$ \\
+\> a$\mid$b$\mid$c$\mid$d$\mid$e$\mid$f$\mid$g$\mid$h$\mid$i$\mid$j$
+\mid$k$\mid$l$\mid$m$\mid$n$\mid$o$\mid$p$\mid$q$\mid$r$\mid$s$\mid$t$
+\mid$u$\mid$v$\mid$w$\mid$x$\mid$y$\mid$z \\
+\s{lead-character} ::= \s{special-character}$\mid$\s{alphabetic} \\
+\s{regular-character} ::= \s{lead-character}$\mid$\s{digit} \\
+\s{last-part} ::= \= \s{regular-character} $\mid$ \\
+\> \s{last-part}\s{regular-character} \\
+\s{id} ::= \s{lead-character}$\mid$\s{lead-character}\s{last-part}
+\end{tabbing}
+
+Note: Using lower case letters in identifiers may cause portability
+problems. Lower case letters are automatically converted to upper case
+when the !*RAISE flag is T. \index{*RAISE (global)}
+
+
+\item[string] \index{string} A set of characters enclosed in double quotes as
+in "THIS IS A STRING". A quote is included by doubling it as in "HE
+SAID, ""LISP""". The maximum size of strings is 80 characters but an
+implementation may allow more. Strings are not part of the OBLIST and
+are considered constants like numbers, vectors, and function-pointers.
+
+\item[dotted-pair] A primitive structure which has a left and right part.
+\index{dotted-pair} \index{dot-notation}
+A notation called {\em dot-notation} is used for dotted pairs and
+takes the form:
+
+\begin{tabbing}
+(\s{left-part} . \s{right-part})
+\end{tabbing}
+
+The \s{left-part} is known as the CAR portion and the \s{right-part}
+as the CDR portion. The left and right parts may be of any type.
+Spaces are used to resolve ambiguity with floating point numbers.
+
+
+\item[vector] \index{vector} A primitive uniform structure in which
+an integer index is used to access random values in the structure. The
+individual elements of a vector may be of any type. Access to vectors
+is restricted to functions defined in ``Vectors''
+section~\ref{vectors} on page~\pageref{vectors}. A notation for
+vectors, {\em vector-notation}, has the elements of a vector
+surrounded
+\index{vector-notation}
+by square brackets\footnote{Vector elements are not separated by
+commas as in the published version of this document.}
+
+
+\begin{tabbing}
+\s{elements} ::= \s{any}$\mid$\s{any} \s{elements} \\
+\s{vector} ::= [\s{elements}]
+\end{tabbing}
+
+\item[function-pointer] \index{function-pointer} An implementation may have
+functions which deal with specific data types other than those listed.
+The use of these entities is to be avoided with the exception of a
+restricted use of the function-pointer, an access method to compiled
+EXPRs and FEXPRs. A particular function-pointer must remain valid
+\index{EXPR} \index{FEXPR}
+throughout execution. Systems which change the location of a function
+must use either an indirect reference or change all occurrences of the
+associated value. There are two classes of use of function-pointers,
+those which are supported by Standard LISP but are not well defined,
+and those which are well defined.
+
+\begin{description}
+\item[Not well defined] Function pointers may be displayed by the print
+functions or expanded by EXPLODE. \index{EXPLODE} The value appears in
+the convention of the implementation site. The value is not defined in
+Standard LISP. Function pointers may be created by COMPRESS
+\index{COMPRESS} in the format used for printing but the value used is
+not defined in Standard LISP. Function pointers may be created by
+functions which deal with compiled function loading. Again, the values
+created are not well defined in Standard LISP.
+
+\item[Well defined] The function pointer associated with an EXPR or
+FEXPR may be retrieved by GETD \index{GETD} and is valid as long as
+Standard LISP is in execution. Function pointers may be stored using
+\index{PUTD} \index{PUT} \index{SETQ} PUTD, PUT, SETQ and the like or by
+being bound to variables.  Function pointers may be checked for
+equivalence by EQ. \index{EQ ! of function-pointers} The value may be
+checked for being a function pointer by the CODEP function.
+\index{CODEP}
+\end{description}
+\end{description}
+
+
+\subsection{Classes of Primitive Data Types}
+\label{pclasses}
+The classes of primitive types are a notational convenience for
+describing the properties of functions.
+
+
+\begin{description}
+\item[boolean] \index{boolean} The set of global variables \{T,NIL\},
+or their respective values, \{T, NIL\}. \index{T (global)} \index{NIL
+(global)}
+
+\item[extra-boolean] \index{extra-boolean} Any value in the system.
+Anything that is not NIL \index{NIL (global)} has the boolean
+interpretation T. \index{T (global)}
+
+\item[ftype] \index{ftype} The class of definable function types. The
+set of ids \{EXPR, FEXPR, MACRO\}. \index{EXPR} \index{FEXPR}
+\index{MACRO}
+
+\item[number] \index{number} The set of \{integer, floating\}.
+
+\item[constant] \index{constant} The set of \{integer, floating,
+string, vector, function-pointer\}. Constants evaluate to themselves
+(see the definition of EVAL in ``The Interpreter'',
+section~\ref{interpreter} on page~\pageref{interpreter}). \index{EVAL
+! of constants}
+
+
+\item[any] \index{any} The set of \{integer, floating, string, id,
+dotted-pair, vector, function-pointer\}. An S-expression is another
+term for any. All Standard LISP entities have some value unless an
+ERROR occurs during evaluation or the function causes transfer of
+control (such as GO and RETURN).
+
+
+\item[atom] \index{atom} The set \{any\}-\{dotted-pair\}.
+\end{description}
+
+\subsection{Structures}
+\index{data structures} \index{structures}
+Structures are entities created out of the primitive types by the use
+of dotted-pairs. Lists are structures very commonly required as actual
+parameters to functions. Where a list of homogeneous entities is
+required by a function this class will be denoted by
+\s{{\bf xxx}-list} where {\bf \em xxx} is the name of a class of primitives
+or structures. Thus a list of ids is an {\em id-list}, a list of
+integers an {\em integer-list} and so on. \index{id-list}
+\index{integer-list}
+\index{-list}
+
+\begin{description}
+\item[list] \index{list} A list is recursively defined as NIL or the
+\index{list-notation} \index{NIL (global)}
+dotted-pair (any~.~list). A special notation called {\em
+list-notation} is used to represent lists. List-notation eliminates
+extra parentheses and dots. The list (a . (b . (c . NIL))) in list
+notation is (a b c).
+\index{dot-notation}
+List-notation and dot-notation may be mixed as in (a b . c) or (a (b .
+c) d) which are (a . (b . c)) and (a . ((b . c) . (d .  NIL))). In BNF
+lists are recognized by the grammar:
+
+\begin{tabbing}
+\s{left-part} ::= ( $\mid$ \s{left-part} \s{any} \\
+\s{list} ::= \s{left-part}) $\mid$ \s{left-part} . \s{any})
+\end{tabbing}
+
+Note: () is an alternate input representation of NIL. \index{()}
+
+
+\item[alist] \index{alist} An association list; each element of the list
+is a dotted-pair, the CAR part being a key associated with the value
+in the CDR part. \index{association list}
+
+
+\item[cond-form] \index{cond-form} A cond-form is a list of 2 element lists
+of the form:
+
+(\p{ANTECEDENT}:{\em any} \p{CONSEQUENT}:{\em any})
+
+The first element will henceforth be known as the antecedent and
+\index{antecedent (cond-form)} \index{consequent (cond-form)}
+the second as the consequent. The antecedent must have a value.  The
+consequent may have a value or an occurrence of GO or RETURN
+\index{GO} \index{RETURN}
+as described in the ``Program Feature Functions'', section~\ref{prog}
+on page~\pageref{prog}.
+
+
+\item[lambda] \index{LAMBDA} A LAMBDA expression which must have the form
+(in list notation): (LAMBDA parameters body). ``parameters'' is a list
+of formal parameters for ``body'' an S-expression to be evaluated. The
+semantics of the evaluation are defined with the EVAL function (see
+``The Interpreter'', section~\ref{interpreter} on \index{EVAL ! lambda
+expressions} page~\pageref{interpreter}). \index{lambda expression}
+
+\item[function] \index{function} A LAMBDA expression or a function-pointer
+to a function. A function is always evaluated as an EVAL, SPREAD form.
+\index{EVAL ! function}
+\end{description} 
+
+
+\subsection{Function Descriptions}
+
+Each function is provided with a prototypical header line. Each formal
+parameter is given a name and suffixed with its allowed type.  Lower
+case, italic tokens are names of classes and upper case, bold face,
+tokens are parameter names referred to in the definition. The type of
+the value returned by the function (if any) is suffixed to the
+parameter list.  If it is not commonly used the parameter type may be
+a specific set enclosed in brackets \{\ldots\}. \index{\{\ldots\} ! as
+syntax} For example:
+
+
+\vspace{.1in}
+\noindent \f{PUTD}(\p{FNAME}:\ty{id}, \p{TYPE}:\ty{ftype},
+\p{BODY}:\{\ty{lambda, function-pointer}\}):\ty{id}
+\vspace{.1in}
+
+PUTD is a function with three parameters. The parameter FNAME is an id
+to be the name of the function being defined. TYPE is the type of the
+function being defined and BODY is a lambda expression or a
+function-pointer. PUTD returns the name of the function being defined.
+
+
+
+Functions which accept formal parameter lists of arbitrary length have
+the type class and parameter enclosed in square brackets indicating
+that zero or more occurrences of that argument are permitted.
+\index{[\ldots] syntax} For example:
+
+\vspace{.1in}
+\noindent \f{AND}([\p{U}:\ty{any}]):\ty{extra-boolean}
+\vspace{.1in}
+
+AND is a function which accepts zero or more arguments which may be of
+any type.
+
+\subsection{Function Types}
+
+EVAL type functions are those which are invoked with evaluated
+\index{EVAL ! function type}
+arguments. NOEVAL functions are invoked with unevaluated arguments.
+\index{NOEVAL ! function type}
+SPREAD type functions have their arguments passed in one-to-one
+\index{SPREAD ! function type}
+correspondence with their formal parameters. NOSPREAD functions
+\index{NOSPREAD ! function type}
+receive their arguments as a single list. EVAL, SPREAD functions are
+\index{FEXPR}
+associated with EXPRs and NO\-EVAL, NO\-SPREAD functions with FEXPRs.
+EVAL, NO\-SPREAD and NOEVAL, SPREAD functions can be simulated using
+NOEVAL, NO\-SPREAD functions or MACROs. \index{MACRO}
+
+EVAL, SPREAD type functions may have a maximum of 15 parameters.
+\index{formal parameter limit}
+There is no limit on the number of parameters a NOEVAL, NOSPREAD
+function or MACRO may have.
+
+In the context of the description of an EVAL, SPREAD function, then we
+speak of the formal parameters we mean their actual values.  However,
+in a NOEVAL, NOSPREAD function it is the unevaluated actual
+parameters.
+
+A third function type, the MACRO, implements functions which
+\index{MACRO}
+create S-expressions based on actual parameters. When a macro
+invocation is encountered, the body of the macro, a lambda expression,
+is invoked as a NOEVAL, NOSPREAD function with the macro's invocation
+bound as a list to the macros single formal parameter. When the macro
+has been evaluated the resulting S-expression is reevaluated. The
+description of the EVAL and EXPAND
+\index{EVAL ! MACRO functions}
+functions provide precise details.
+
+
+\subsection{Error and Warning Messages}
+\index{error messages}
+Many functions detect errors. The description of such functions will
+include these error conditions and suggested formats for display
+\index{ERROR}
+of the generated error messages. A call on the ERROR function is
+implied but the error number is not specified by Standard LISP. In
+some cases a warning message is sufficient. To distinguish between
+\index{warning messages} \index{***** (error message)}
+\index{*** (warning message)}
+errors and warnings, errors are prefixed with five asterisks and
+warnings with only three.
+
+Primitive functions check arguments that must be of a certain
+primitive type for being of that type and display an error message if
+the argument is not correct. The type mismatch error always takes the
+form:
+\index{error ! type mismatch error}
+
+\errormessage{***** PARAMETER not TYPE for FN}
+
+Here PARAMETER is the unacceptable actual parameter, TYPE is the type
+that PARAMETER was supposed to be. FN is the name of the function that
+detected the error.
+
+\subsection{Comments}
+
+\index{comments} \index{\%}
+The character \% signals the start of a comment, text to be ignored
+during parsing.  A comment is terminated by the end of the line it
+\index{READCH} \index{READ}
+is on.  The function READCH must be able to read a comment one
+character at a time.  Comments are transparent to the function READ.
+\% may occur as a character in identifiers by preceding it with the
+\index{escape character}
+escape character !.
+
+
+\section{Functions}
+\label{slfns}
+
+\subsection{Elementary Predicates}
+\label{elpreds}
+\index{predicate !}
+\index{T (global)} \index{NIL (global)}
+Functions in this section return T when the condition defined is met
+and NIL when it is not. Defined are type checking functions and
+elementary comparisons.
+
+
+\de{ATOM}{(\p{U}:\ty{any}):{\ty boolean}}{eval, spread}
+{Returns T if U is not a pair.
+
+{\tt \begin{tabbing} EXPR PROCEDURE ATOM(U); \\
+\hspace*{1em} NULL PAIRP U;
+\end{tabbing}}}
+
+
+\de{CODEP}{(\p{U}:\f{any}):{\ty boolean}}{eval, spread}
+{Returns T if U is a function-pointer.}
+
+
+\de{CONSTANTP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is a constant (a number, string, function-pointer, or
+vector).
+
+{\tt \begin{tabbing} EXPR PROCEDURE CONSTANTP(U); \\
+\hspace*{1em} NULL OR(PAIRP U, IDP U);
+\end{tabbing}}
+}
+
+
+
+\de{EQ}{(\p{U}:\ty{any}, \p{V}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U points to the same object as V. EQ is \underline{not}
+a reliable comparison between numeric arguments. }
+
+
+\de{EQN}{(\p{U}:\ty{any}, \p{V}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U and V are EQ or if U and V are numbers and have the
+same value and type. }
+
+
+\de{EQUAL}{(\p{U}:\ty{any}, \p{V}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U and V are the same. Dotted-pairs are compared
+recursively to the bottom levels of their trees. Vectors must have
+identical dimensions and EQUAL values in all positions. Strings must
+\index{EQ ! of function-pointers} \index{EQN} have identical characters.
+Function pointers must have EQ values. Other atoms must be EQN equal. }
+
+
+\de{FIXP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is an integer (a fixed number).}
+
+
+\de{FLOATP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is a floating point number. }
+
+
+\de{IDP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is an id.}
+
+
+\de{MINUSP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is a number and less than 0.  If U is not a number or
+is a positive number, NIL is returned.
+
+{\tt \begin{tabbing} EXPR PROCEDURE MINUSP(U); \\
+\hspace*{1em} IF NUMBERP U THEN LESSP(U, 0) ELSE NIL;
+\end{tabbing}}}
+
+
+\de{NULL}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is NIL.
+
+{\tt \begin{tabbing} EXPR PROCEDURE NULL(U); \\
+\hspace*{1em} U EQ NIL;
+\end{tabbing}}}
+
+
+\de{NUMBERP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is a number (integer or floating).
+
+{\tt \begin{tabbing} EXPR PROCEDURE NUMBERP(U); \\
+\hspace*{1em} IF OR(FIXP U, FLOATP U) THEN T ELSE NIL;
+\end{tabbing}}}
+
+
+\de{ONEP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread.}
+{Returns T if U is a number and has the value 1 or 1.0.  Returns NIL
+otherwise. \footnote{The definition in the published report is
+incorrect as it does not return T for \p{U} of 1.0.}
+
+{\tt \begin{tabbing} EXPR PROCEDURE ONEP(U); \\
+\hspace*{1em} OR(EQN(U, 1), EQN(U, 1.0));
+\end{tabbing}}}
+
+
+\de{PAIRP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is a dotted-pair. }
+
+
+\de{STRINGP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is a string. }
+
+
+\de{VECTORP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is a vector. }
+
+
+\de{ZEROP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread.}
+{Returns T if U is a number and has the value 0 or 0.0.  Returns NIL
+otherwise.\footnote{The definition in the published report is
+incorrect as it does not return T for \p{U} of 0.0.}
+
+{\tt \begin{tabbing} EXPR PROCEDURE ZEROP(U); \\
+\hspace*{1em} OR(EQN(U, 0), EQN(U, 0.0));
+\end{tabbing}}}
+
+
+\subsection{Functions on Dotted-Pairs}
+
+\index{dotted-pair}
+The following are elementary functions on dotted-pairs. All functions
+in this section which require dotted-pairs as parameters detect a type
+mismatch error if the actual parameter is not a dotted-pair.
+
+
+
+\de{CAR}{(\p{U}:\ty{dotted-pair}):\ty{any}}{eval, spread}
+{CAR(CONS(a, b)) $\rightarrow$ a. The left part of U is returned. The
+type
+\index{CONS}
+mismatch error occurs if U is not a dotted-pair.}
+
+
+\de{CDR}{(\p{U}:\ty{dotted-pair}):\ty{any}}{eval, spread}
+{CDR(CONS(a, b)) $\rightarrow$ b. The right part of U is returned. The
+type
+\index{CONS}
+mismatch error occurs if U is not a dotted-pair.}
+
+
+The composites of CAR and CDR are supported up to 4 levels, namely:
+\index{CAR ! composite forms} \index{CDR ! composite forms}
+
+\hspace*{1in}\begin{tabular}{l l l}
+CAAAAR & CAAAR & CAAR \\ CAAADR & CAADR & CADR \\ CAADAR & CADAR &
+CDAR \\ CAADDR & CADDR & CDDR \\ CADAAR & CDAAR & \\ CADADR & CDADR &
+\\ CADDAR & CDDAR & \\ CADDDR & CDDDR & \\ CDAAAR & & \\ CDAADR & & \\
+CDADAR & & \\ CDADDR & & \\ CDDAAR & & \\ CDDADR & & \\ CDDDAR & & \\
+CDDDDR & &
+\end{tabular}
+
+\de{CONS}{(\p{U}:\ty{any}, \p{V}:\ty{any}):\ty{dotted-pair}}{eval, spread}
+{Returns a dotted-pair which is not EQ to anything and has U as its
+\index{EQ ! of dotted-pairs} \index{dotted-pair}
+CAR part and V as its CDR part.}
+
+
+\de{LIST}{([\p{U}:\ty{any}]):\ty{list}}{noeval, nospread, or macro}
+{A list of the evaluation of each element of U is returned. The order
+of evaluation need not be first to last as the following definition
+implies.\footnote{The published report's definition implies a specific
+ordering.}
+
+{\tt \begin{tabbing} FEXPR PROCEDURE LIST(U); \\
+\hspace*{1em} EVLIS U;
+\end{tabbing}}}
+
+
+\de{RPLACA}{(\p{U}:\ty{dotted-pair},
+\p{V}:\ty{any}):\ty{dotted-pair}}{eval, spread}
+{The CAR portion of the dotted-pair U is replaced by V. If dotted-pair
+U is (a . b) then (V . b) is returned. The type mismatch error occurs
+if U is not a dotted-pair. }
+
+
+\de{RPLACD}{(\p{U}:\ty{dotted-pair},
+\p{V}:\ty{any}):\ty{dotted-pair}}{eval, spread}
+{The CDR portion of the dotted-pair U is replaced by V. If dotted-pair
+U is (a . b) then (a . V) is returned. The type mismatch error occurs
+if U is not a dotted-pair.}
+
+
+\subsection{Identifiers}
+\label{identifiers}
+The following functions deal with identifiers and the OBLIST,
+\index{OBLIST}
+the structure of which is not defined. The function of the OBLIST is
+to provide a symbol table for identifiers created during input.
+Identifiers created by READ which have the same characters will
+\index{READ} \index{EQ ! of identifiers}
+therefore refer to the same object (see the EQ function in
+``Elementary Predicates'', section~\ref{elpreds} on
+page~\pageref{elpreds}).
+
+
+
+\de{COMPRESS}{(\p{U}:\ty{id-list}):\{\ty{atom}-\ty{vector}\}}{eval, spread}
+{U is a list of single character identifiers which is built into a
+Standard LISP entity and returned. Recognized are numbers, strings,
+and identifiers with the escape character prefixing special
+characters. The formats of these items appear in ``Primitive Data
+Types'' section~\ref{pdat} on page~\pageref{pdat}. Identifiers are not
+interned on the OBLIST. Function pointers may be compressed but this
+is an undefined use. If an entity cannot be parsed out of U or
+characters are left over after parsing an error occurs:
+
+\errormessage{***** Poorly formed atom in COMPRESS}
+}
+
+
+\de{EXPLODE}{(\p{U}:\{\ty{atom}\}-\{\ty{vector}\}):\ty{id-list}}{eval, spread}
+{Returned is a list of interned characters representing the characters
+to print of the value of U. The primitive data types have these
+formats:
+
+\begin{description}
+\item[integer] \index{integer ! output} Leading zeroes are suppressed and
+a minus sign prefixes the digits if the integer is negative.
+
+\item[floating] \index{floating ! output} The value appears in the format
+[-]0.nn...nnE[-]mm if the magnitude of the number is too large or
+small to display in [-]nnnn.nnnn format. The crossover point is
+determined by the implementation.
+
+\item[id] \index{id ! output} The characters of the print name of the
+identifier are produced with special characters prefixed with the
+escape character.
+
+\item[string] \index{string ! output} The characters of the string are
+produced surrounded by double quotes "\ldots".
+
+\item[function-pointer] \index{function-pointer ! output} The value of the
+function-pointer is created as a list of characters conforming to the
+conventions of the system site.
+\end{description}
+
+The type mismatch error occurs if U is not a number, identifier,
+string, or function-pointer. }
+
+
+\de{GENSYM}{():\ty{identifier}}{eval, spread}
+{Creates an identifier which is not interned on the OBLIST and
+consequently not EQ to anything else. \index{OBLIST entry} \index{EQ !
+of GENSYMs}}
+
+
+\de{INTERN}{(\p{U}:\{\ty{id,string}\}):\ty{id}}{eval, spread}
+{INTERN searches the OBLIST for an identifier with the same print name
+\index{OBLIST entry}
+as U and returns the identifier on the OBLIST if a match is found.
+Any properties and global values associated with U may be lost. If U
+does not match any entry, a new one is created and returned. If U has
+more than the maximum number of characters permitted by the
+implementation (the minimum number is 24) an error occurs:
+\index{id ! minimum size}
+
+\errormessage{***** Too many characters to INTERN}
+}
+
+
+\de{REMOB}{(\p{U}:\ty{id}):\ty{id}}{eval, spread}
+{If U is present on the OBLIST it is removed. This does not affect U
+\index{OBLIST entry}
+having properties, flags, functions and the like. U is returned.}
+
+
+\subsection{Property List Functions}
+\label{plist}
+\index{property list}
+With each id in the system is a ``property list'', a set of entities
+which are associated with the id for fast access. These entities are
+called ``flags'' if their use gives the id a single valued
+\index{flags}
+property, and ``properties'' if the id is to have a multivalued
+\index{properties}
+attribute: an indicator with a property.
+
+Flags and indicators may clash, consequently care should be taken to
+avoid this occurrence. Flagging X with an id which already is an
+indicator for X may result in that indicator and associated property
+being lost. Likewise, adding an indicator which is the same id as a
+flag may result in the flag being destroyed.
+
+
+
+\de{FLAG}{(\p{U}:\ty{id-list}, \p{V}:\ty{id}):\ty{NIL}}{eval, spread}
+{U is a list of ids which are flagged with V. The effect of FLAG is
+that FLAGP will have the value T for those ids of U which were
+flagged. Both V and all the elements of U must be identifiers or the
+type mismatch error occurs.}
+
+
+\de{FLAGP}{(\p{U}:\ty{any}, \p{V}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U has been previously flagged with V, else NIL. Returns
+NIL if either U or V is not an id.}
+
+
+\de{GET}{(\p{U}:\ty{any}, \p{IND}:\ty{any}):\ty{any}}{eval, spread}
+{Returns the property associated with indicator IND from the property
+list of U. If U does not have indicator IND, NIL is returned. GET
+cannot be used to access functions (use GETD instead).
+\index{GET ! not for functions}}
+
+
+\de{PUT}{(\p{U}:\ty{id}, \p{IND}:\ty{id},
+\p{PROP}:\ty{any}):\ty{any}}{eval, spread}
+{The indicator IND with the property PROP is placed on the property
+list of the id U. If the action of PUT occurs, the value of PROP is
+returned. If either of U and IND are not ids the type mismatch error
+will occur and no property will be placed. PUT cannot be used to
+define functions (use PUTD instead).
+\index{PUT ! not for functions}}
+
+
+\de{REMFLAG}{(\p{U}:\ty{any-list}, \p{V}:\ty{id}):\ty{NIL}}{eval, spread}
+{Removes the flag V from the property list of each member of the list
+U. Both V and all the elements of U must be ids or the type mismatch
+error will occur.}
+
+
+\de{REMPROP}{(\p{U}:\ty{any}, \p{IND}:\ty{any}):\ty{any}}{eval, spread}
+{Removes the property with indicator IND from the property list of U.
+Returns the removed property or NIL if there was no such indicator.}
+
+
+
+\subsection{Function Definition}
+\label{fdef}
+Functions in Standard LISP are global entities. To avoid
+function-variable naming clashes no variable may have the same name as
+a function. \index{function ! as GLOBAL}
+
+
+\de{DE}{(\p{FNAME}:\ty{id}, \p{PARAMS}:\ty{id-list},
+\p{FN}:\ty{any}):\ty{id}}{noeval, nospread}
+{The function FN with the formal parameter list PARAMS is added to the
+set of defined functions with the name FNAME. Any previous definitions
+of the function are lost. The function created is of type
+\index{*COMP (fluid)} 
+EXPR.  If the !*COMP variable is non-NIL, the EXPR is first
+\index{EXPR}
+compiled. The name of the defined function is returned.
+
+{\tt \begin{tabbing} FEXPR PROCEDURE DE(U); \\
+\hspace*{1em} PUTD(CAR U, 'EXPR, LIST('LAMBDA, CADR U, CADDR U));
+\end{tabbing}}}
+
+
+\de{DF}{(\p{FNAME}:\ty{id}, \p{PARAM}:\ty{id-list},
+\p{FN}:\ty{any}):\ty{id}}{noeval, nospread}
+{The function FN with formal parameter PARAM is added to the set of
+defined functions with the name FNAME. Any previous definitions of the
+function are lost. The function created is of type FEXPR.
+\index{*COMP variable} \index{FEXPR}
+If the !*COMP variable is T the FEXPR is first compiled. The name of
+the defined function is returned.
+
+{\tt \begin{tabbing} FEXPR PROCEDURE DF(U); \\
+\hspace*{1em} PUTD(CAR U, 'FEXPR, LIST('LAMBDA, CADR U, CADDR U)); \\
+\end{tabbing} }}
+
+
+\de{DM}{(\p{MNAME}:\ty{id}, \p{PARAM}:\ty{id-list},
+\p{FN}:\ty{any}):\ty{id}}{noeval, nospread}
+{The macro FN with the formal parameter PARAM is added to the set of
+defined functions with the name MNAME. Any previous definitions of the
+function are overwritten. The function created is of type MACRO.
+\index{MACRO}
+The name of the macro is returned.
+
+{\tt \begin{tabbing} FEXPR PROCEDURE DM(U); \\
+\hspace*{1em} PUTD(CAR U, 'MACRO, LIST('LAMBDA, CADR U, CADDR U));
+\end{tabbing} }
+}
+
+
+\de{GETD}{(\p{FNAME}:\ty{any}):\{NIL, \ty{dotted-pair}\}}{eval, spread}
+{If FNAME is not the name of a defined function, NIL is returned. If
+FNAME is a defined function then the dotted-pair
+
+\vspace{.15in}
+(\p{TYPE}:\ty{ftype} . \p{DEF}:\{\ty{function-pointer, lambda}\})
+\vspace{.15in}
+
+is returned.}
+
+
+\de{PUTD}{(\p{FNAME}:\ty{id}, \p{TYPE}:\ty{ftype},
+\p{BODY}:\ty{function}):\ty{id}}{eval, spread}
+{Creates a function with name FNAME and definition BODY of type TYPE.
+If PUTD succeeds the name of the defined function is returned. The
+effect of PUTD is that GETD will return a dotted-pair with the
+functions type and definition. Likewise the GLOBALP predicate will
+\index{GLOBALP} \index{function ! as global}
+return T when queried with the function name.
+
+If the function FNAME has already been declared as a GLOBAL or FLUID
+variable the error:
+
+\errormessage{***** FNAME is a non-local variable}
+
+occurs and the function will not be defined. If function FNAME already
+exists a warning message will appear:
+
+\errormessage{*** FNAME redefined}
+
+The function defined by PUTD will be compiled before definition
+\index{*COMP (fluid)} if the !*COMP global variable is non-NIL.}
+
+
+\de{REMD}{(\p{FNAME}:\ty{id}):\{NIL, \ty{dotted-pair}\}}{eval, spread}
+{Removes the function named FNAME from the set of defined functions.
+Returns the (ftype . function) dotted-pair or NIL as does GETD. The
+global/function attribute of FNAME is removed and the name may be used
+subsequently as a variable.}
+
+
+
+\subsection{Variables and Bindings}
+\label{varsandbinds}
+\index{variable scope} \index{scope}
+A variable is a place holder for a Standard LISP entity which is said
+to be bound to the variable. The scope of a variable is the range over
+which the variable has a defined value. There are three different
+binding mechanisms in Standard LISP.
+
+\begin{description}
+\item[Local Binding] \index{local binding} This type of binding occurs
+\index{scope ! local}
+only in compiled functions. Local variables occur as formal parameters
+in lambda expressions and as PROG form variables. The binding occurs
+when a lambda expression is evaluated or when a PROG form is executed.
+The scope of a local variable is the body of the function in which it
+is defined.
+
+\item[Global Binding] \index{global binding} Only one binding of a
+\index{scope ! global}
+global variable exists at any time allowing direct access to the value
+bound to the variable.  The scope of a global variable is universal.
+Variables declared GLOBAL may not appear as parameters in lambda
+expressions or as PROG form variables. A variable must be declared
+GLOBAL prior to its use as a global variable since the default type
+for undeclared variables is FLUID.
+
+
+\item[Fluid Binding] \index{fluid binding}
+\index{fluid binding ! as default} Fluid variables are global
+in scope but may occur as \index{scope ! fluid} formal parameters or
+PROG form variables. In interpreted functions all formal parameters
+and PROG form variables are considered to have fluid binding until
+changed to local binding by compilation.  When fluid variables are
+used as parameters they are rebound in such a way that the previous
+binding may be restored. All references to fluid variables are to the
+currently active binding.
+\end{description}
+
+
+\de{FLUID}{(\p{IDLIST}:\ty{id-list}):\p{NIL}}{eval, spread}
+{The ids in IDLIST are declared as FLUID type variables (ids not
+previously declared are initialized to NIL). Variables in IDLIST
+already declared FLUID are ignored. Changing a variable's type from
+GLOBAL to FLUID is not permissible and results in the error:
+
+\errormessage{***** ID cannot be changed to FLUID}
+}
+
+\de{FLUIDP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{If U has been declared FLUID (by declaration only) T is returned,
+otherwise NIL is returned.}
+
+
+\de{GLOBAL}{(\p{IDLIST}:\ty{id-list}):\p{NIL}}{eval, spread}
+{The ids of IDLIST are declared global type variables. If an id has
+not been declared previously it is initialized to NIL. Variables
+already declared GLOBAL are ignored. Changing a variables type from
+FLUID to GLOBAL is not permissible and results in the error:
+
+\errormessage{***** ID cannot be changed to GLOBAL}
+}
+
+
+\de{GLOBALP}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{If U has been declared GLOBAL or is the name of a defined function, T
+is returned, else NIL is returned.}
+
+
+\de{SET}{(\p{EXP}:\ty{id}, \p{VALUE}:\ty{any}):\ty{any}}{eval, spread}
+{EXP must be an identifier or a type mismatch error occurs. The effect
+of SET is replacement of the item bound to the identifier by VALUE.
+If the identifier is not a local variable or has not been declared
+GLOBAL it is automatically declared FLUID with the resulting warning
+message:
+
+\errormessage{*** EXP declared FLUID}
+
+EXP must not evaluate to T or NIL or an error occurs:
+\index{T ! cannot be changed} \index{NIL ! cannot be changed}
+
+\errormessage{***** Cannot change T or NIL}
+}
+
+\de{SETQ}{(\p{VARIABLE}:\ty{id}, \p{VALUE}:\ty{any}):\ty{any}}{noeval,
+nospread}
+{If VARIABLE is not local or GLOBAL it is by default declared FLUID
+and the warning message:
+
+\errormessage{*** VARIABLE declared FLUID}
+
+appears. The value of the current binding of VARIABLE is replaced by
+the value of VALUE. VARIABLE must not be T or NIL or an error occurs:
+\index{T ! cannot be changed} \index{NIL ! cannot be changed}
+
+\errormessage{***** Cannot change T or NIL}
+
+{\tt \begin{tabbing} MACRO PROCEDURE SETQ(X); \\
+\hspace*{1em} LIST('SET, LIST('QUOTE, CADR X), CADDR X);
+\end{tabbing}}
+}
+
+\de{UNFLUID}{(\p{IDLIST}:\ty{id-list}):\ty{NIL}}{eval, spread}
+{The variables in IDLIST that have been declared as FLUID variables
+are no longer considered as fluid variables. Others are ignored. This
+affects only compiled functions as free variables in interpreted
+functions are automatically considered fluid~\cite{PLC}.
+\index{scope ! fluid and compiled}}
+
+
+\subsection{Program Feature Functions}
+\label{prog}
+These functions provide for explicit control sequencing, and the
+definition of blocks altering the scope of local variables.
+
+
+\de{GO}{(\p{LABEL}:\ty{id})}{noeval, nospread}
+{GO alters the normal flow of control within a PROG function. The next
+statement of a PROG function to be evaluated is immediately preceded
+by LABEL. A GO may only appear in the following situations:
+
+
+\begin{enumerate}
+\item At the top level of a PROG referencing a label which also
+appears at the top level of the same PROG.
+
+\item As the consequent of a COND item of a COND appearing on the top
+level of a PROG.
+\index{GO ! in COND}
+\index{RETURN ! in COND}
+\item As the consequent of a COND item which appears as the
+consequent of a COND item to any level.
+
+\item As the last statement of a PROGN which appears at the top level
+of a PROG or in a PROGN appearing in the consequent of a COND to any
+level subject to the restrictions of 2 and 3.
+
+\item As the last statement of a PROGN within a PROGN or as the
+consequent of a COND in a PROGN to any level subject to the
+restrictions of 2, 3 and 4.
+\end{enumerate}
+
+If LABEL does not appear at the top level of the PROG in which the GO
+appears, an error occurs:
+
+\errormessage{***** LABEL is not a known label}
+
+If the GO has been placed in a position not defined by rules 1-5,
+another error is detected:
+
+\errormessage{***** Illegal use of GO to LABEL}
+}
+
+\de{PROG}{(\p{VARS}:\ty{id-list},
+[\p{PROGRAM}:\{\ty{id, any}\}]):\ty{any}}{noeval, nospread}
+{VARS is a list of ids which are considered fluid when the PROG is
+interpreted and local when compiled (see ``Variables and Bindings'',
+section~\ref{varsandbinds} on page~\pageref{varsandbinds}). The PROGs
+variables are allocated space when the PROG form is invoked and are
+deallocated when the PROG is exited. PROG variables are initialized to
+\index{PROG ! variables}
+NIL. The PROGRAM is a set of expressions to be evaluated in order of
+their appearance in the PROG function.  Identifiers appearing in the
+top level of the PROGRAM are labels which can be referenced by GO. The
+value returned by the PROG function is determined by a RETURN function
+\index{PROG ! default value}
+or NIL if the PROG ``falls through''.}
+
+
+\de{PROGN}{([\p{U}:\ty{any}]):\ty{any}}{noeval, nospread}
+{U is a set of expressions which are executed sequentially. The value
+returned is the value of the last expression.}
+
+
+\de{PROG2}{(A:any, B:any)\ty{any}}{eval, spread}
+{Returns the value of B.
+
+{\tt \begin{tabbing} EXPR PROCEDURE PROG2(A, B);\\
+\hspace*{1em} B;
+\end{tabbing}}}
+
+
+\de{RETURN}{(\p{U}:\ty{any})}{eval, spread}
+{Within a PROG, RETURN terminates the evaluation of a PROG and returns
+U as the value of the PROG. The restrictions on the placement of
+RETURN are exactly those of GO. Improper placement of RETURN results
+in the error:
+
+\errormessage{***** Illegal use of RETURN}
+}
+
+
+\subsection{Error Handling}
+\label{errors}
+
+\de{ERROR}{(\p{NUMBER}:\ty{integer}, \p{MESSAGE}:\ty{any})}{eval, spread}
+{NUMBER and MESSAGE are passed back to a surrounding ERRORSET (the
+Standard LISP reader has an ERRORSET). MESSAGE is placed in the
+\index{EMSG* (global)}
+global variable EMSG!* and the error number becomes the value of the
+surrounding ERRORSET. FLUID variables and local bindings are unbound
+\index{fluid ! unbinding by ERROR}
+to return to the environment of the ERRORSET. Global variables are not
+affected by the process.}
+
+
+\de{ERRORSET}{(\p{U}:\ty{any}, \p{MSGP}:\ty{boolean},
+\p{TR}:\ty{boolean}):\ty{any}}{eval, spread}
+{If an error occurs during the evaluation of U, the value of NUMBER
+from the ERROR call is returned as the value of ERRORSET. In addition,
+if the value of MSGP is non-NIL, the MESSAGE from the ERROR call is
+displayed upon both the standard output device and the currently
+selected output device unless the standard output device is not open.
+The message appears prefixed with 5 asterisks. The MESSAGE
+\index{***** (error message)}
+list is displayed without top level parentheses. The MESSAGE from the
+\index{EMSG* (global)}
+ERROR call will be available in the global variable EMSG!*. The exact
+format of error messages generated by Standard LISP functions
+described in this document are not fixed and should not be relied upon
+to be in any particular form. Likewise, error numbers generated by
+Standard LISP functions are implementation dependent.
+
+If no error occurs during the evaluation of U, the value of (LIST
+(EVAL U)) is returned.
+
+If an error has been signaled and the value of TR is non-NIL a
+traceback sequence will be initiated on the selected output device.
+The traceback will display information such as unbindings of FLUID
+\index{fluid ! in traceback}
+variables, argument lists and so on in an implementation dependent
+format.}
+
+
+\subsection{Vectors}
+\label{vectors}
+\index{vector}
+Vectors are structured entities in which random elements may be
+accessed with an integer index. A vector has a single dimension. Its
+maximum size is determined by the implementation and available space.
+A suggested input ``vector notation'' is defined in ``Classes of
+Primitive Data Types'', section~\ref{pclasses} on
+page~\pageref{pclasses} and output with EXPLODE, ``Identifiers''
+section~\ref{identifiers} on page~\pageref{identifiers}.
+\index{EXPLODE}
+
+
+\de{GETV}{(\p{V}:\ty{vector}, \p{INDEX}:\ty{integer}):\ty{any}}{eval, spread}
+{Returns the value stored at position INDEX of the vector V. The type
+mismatch error may occur. An error occurs if the INDEX does not lie
+within 0\ldots UPBV(V) inclusive:
+
+\errormessage{***** INDEX subscript is out of range}
+}
+
+
+\de{MKVECT}{(\p{UPLIM}:\ty{integer}):\ty{vector}}{eval, spread}
+{Defines and allocates space for a vector with UPLIM+1 elements
+accessed as 0\ldots UPLIM. Each element is initialized to NIL. An
+error will occur if UPLIM is $<$ 0 or there is not enough space for a
+vector of this size:
+
+\errormessage{***** A vector of size UPLIM cannot be allocated}
+}
+
+
+\de{PUTV}{(\p{V}:\ty{vector}, \p{INDEX}:\ty{integer},
+\p{VALUE}:\ty{any}):\ty{any}}{eval, spread}
+{Stores VALUE into the vector V at position INDEX. VALUE is returned.
+The type mismatch error may occur. If INDEX does not lie in 0\ldots
+UPBV(V) an error occurs:
+
+\errormessage{***** INDEX subscript is out of range}
+}
+
+
+\de{UPBV}{(\p{U}:\ty{any}):{NIL,\ty{integer}}}{eval, spread}
+{Returns the upper limit of U if U is a vector, or NIL if it is not.}
+
+
+\subsection{Boolean Functions and Conditionals}
+
+
+\de{AND}{([\p{U}:\ty{any}]):\ty{extra-boolean}}{noeval, nospread}
+{AND evaluates each U until a value of NIL is found or the end of the
+list is encountered. If a non-NIL value is the last value it is
+returned, or NIL is returned.
+
+{\tt \begin{tabbing} FEXPR PROCEDURE AND(U); \\ BEGIN \\
+\hspace*{1em} IF NULL U THEN RETURN NIL; \\
+LOOP: IF \= NULL CDR U THEN RETURN EVAL CAR U \\
+\> ELSE IF NULL EVAL CAR U THEN RETURN NIL; \\
+\hspace*{2em} \= U := CDR U; \\
+\> GO LOOP \\
+END;
+\end{tabbing} }}
+
+
+\de{COND}{([\p{U}:\ty{cond-form}]):\ty{any}}{noeval, nospread}
+{The antecedents of all U's are evaluated in order of their appearance
+until a non-NIL value is encountered. The consequent of the selected U
+is evaluated and becomes the value of the COND. The consequent may
+also contain the special functions GO and RETURN subject to the
+restraints given for these functions in ``Program Feature Functions'',
+section~\ref{prog} on page~\pageref{prog}.
+\index{GO ! in COND} \index{RETUNR ! in CODE} In these cases COND does
+not have a defined value, but rather an effect. If no antecedent is
+non-NIL the value of COND is NIL. An error is detected if a U is
+improperly formed:
+
+\errormessage{***** Improper cond-form as argument of COND}
+}
+
+
+\de{NOT}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{If U is NIL, return T else return NIL (same as function NULL).
+
+{\tt \begin{tabbing} EXPR PROCEDURE NOT(U); \\
+\hspace*{1em} U EQ NIL;
+\end{tabbing}}
+}
+
+
+\de{OR}{([\p{U}:\ty{any}]):\ty{extra-boolean}}{noeval, nospread}
+{U is any number of expressions which are evaluated in order of their
+appearance. When one is found to be non-NIL it is returned as the
+value of OR. If all are NIL, NIL is returned.
+
+{\tt \begin{tabbing} FEXPR PROCEDURE OR(U); \\ BEGIN SCALAR X; \\
+LOOP: IF \= NULL U THEN RETURN NIL \\
+\> ELSE IF (X := EVAL CAR U) THEN RETURN X; \\
+\hspace*{2em} \= U := CDR U; \\
+\> GO LOOP \\
+END;
+\end{tabbing} }}
+
+
+\subsection{Arithmetic Functions}
+
+Conversions between numeric types are provided explicitly by the
+\index{FIX} \index{FLOAT}
+FIX and FLOAT functions and implicitly by any multi-parameter
+\index{mixed-mode arithmetic}
+arithmetic function which receives mixed types of arguments. A
+conversion from fixed to floating point numbers may result in a loss
+of precision without a warning message being generated. Since
+\index{integer ! magnitude}
+integers may have a greater magnitude that that permitted for floating
+numbers, an error may be signaled when the attempted conversion cannot
+be done. Because the magnitude of integers is unlimited the conversion
+of a floating point number to a fixed number is always possible, the
+only loss of precision being the digits to the right of the decimal
+point which are truncated. If a function receives mixed types of
+arguments the general rule will have the fixed numbers converted to
+floating before arithmetic operations are performed. In all cases an
+error occurs if the parameter to an arithmetic function is not a
+number:
+
+\errormessage{***** XXX parameter to FUNCTION is not a number}
+
+XXX is the value of the parameter at fault and FUNCTION is the name of
+the function that detected the error. Exceptions to the rule are noted
+where they occur.
+
+
+
+
+\de{ABS}{(\p{U}:\ty{number}):\ty{number}}{eval, spread}
+{Returns the absolute value of its argument.
+
+{\tt \begin{tabbing} EXPR PROCEDURE ABS(U); \\
+\hspace*{1em} IF LESSP(U, 0) THEN MINUS(U) ELSE U;
+\end{tabbing}}}
+
+\de{ADD1}{(\p{U}:\ty{number}):\ty{number}}{eval, spread}
+{Returns the value of U plus 1 of the same type as U (fixed or
+floating).
+
+{\tt \begin{tabbing} EXPR PROCEDURE ADD1(U); \\
+% God knows why, but hspace* isn't accepted here.
+\hspace{1em} PLUS2(U, 1);
+\end{tabbing}}
+}
+
+\de{DIFFERENCE}{(\p{U}:\ty{number}, \p{V}:\ty{number}):\ty{number}}{eval,
+spread}
+{The value U - V is returned.}
+
+
+\de{DIVIDE}{(\p{U}:\ty{number}, \p{V}:\ty{number}):\ty{dotted-pair}}{eval,
+spread}
+{The dotted-pair (quotient . remainder) is returned. The quotient part
+is computed the same as by QUOTIENT and the remainder the same as by
+REMAINDER. An error occurs if division by zero is attempted:
+\index{division by zero}
+
+\errormessage{***** Attempt to divide by 0 in DIVIDE}
+
+{\tt \begin{tabbing} EXPR PROCEDURE DIVIDE(U, V); \\
+\hspace*{1em} (QUOTIENT(U, V) . REMAINDER(U, V));
+\end{tabbing}}}
+
+
+\de{EXPT}{(\p{U}:\ty{number}, \p{V}:\ty{integer}):\ty{number}}{eval, spread}
+{Returns U raised to the V power. A floating point U to an integer
+power V does \underline{not} have V changed to a floating number
+before exponentiation.}
+
+
+\de{FIX}{(\p{U}:\ty{number}):\ty{integer}}{eval, spread}
+{Returns an integer which corresponds to the truncated value of U. The
+result of conversion must retain all significant portions of U. If U
+is an integer it is returned unchanged. }
+
+
+\de{FLOAT}{(\p{U}:\ty{number}):\ty{floating}}{eval, spread}
+{The floating point number corresponding to the value of the argument
+U is returned. Some of the least significant digits of an integer may
+be lost do to the implementation of floating point numbers. FLOAT of a
+floating point number returns the number unchanged. If U is too large
+to represent in floating point an error occurs:
+
+\errormessage{***** Argument to FLOAT is too large}
+}
+
+\de{GREATERP}{(\p{U}:\ty{number}, \p{V}:\ty{number}):\ty{boolean}}{eval,
+spread}
+{Returns T if U is strictly greater than V, otherwise returns NIL.}
+
+
+\de{LESSP}{(\p{U}:\ty{number}, \p{V}:\ty{number}):\ty{boolean}}{eval, spread}
+{Returns T if U is strictly less than V, otherwise returns NIL. }
+
+
+\de{MAX}{([\p{U}:\ty{number}]):\ty{number}}{noeval, nospread, or macro}
+{Returns the largest of the values in U. If two or more values are the
+same the first is returned.
+
+{\tt \begin{tabbing} MACRO PROCEDURE MAX(U); \\
+\hspace*{1em} EXPAND(CDR U, 'MAX2);
+\end{tabbing}}}
+
+
+\de{MAX2}{(\p{U}:\ty{number}, \p{V}:\ty{number}):\ty{number}}{eval, spread}
+{Returns the larger of U and V. If U and V are the same value U is
+returned (U and V might be of different types).
+
+{\tt \begin{tabbing} EXPR PROCEDURE MAX2(U, V); \\
+\hspace*{1em} IF LESSP(U, V) THEN V ELSE U;
+\end{tabbing}}}
+
+
+\de{MIN}{([\p{U}:\ty{number}]):\ty{number}}{noeval, nospread, or macro}
+{Returns the smallest of the values in U. If two or more values are
+the same the first of these is returned.
+
+{\tt \begin{tabbing} MACRO PROCEDURE MIN(U); \\
+\hspace*{1em} EXPAND(CDR U, 'MIN2);
+\end{tabbing}}}
+
+
+\de{MIN2}{(\p{U}:\ty{number}, \p{V}:\ty{number}):\ty{number}}{eval, spread}
+{Returns the smaller of its arguments. If U and V are the same value,
+U is returned (U and V might be of different types).
+
+{\tt \begin{tabbing} EXPR PROCEDURE MIN2(U, V); \\
+\hspace*{1em} IF GREATERP(U, V) THEN V ELSE U;
+\end{tabbing}}}
+
+
+\de{MINUS}{(\p{U}:\ty{number}):\ty{number}}{eval, spread}
+{Returns -U.
+
+{\tt \begin{tabbing} EXPR PROCEDURE MINUS(U); \\
+\hspace*{1em} DIFFERENCE(0, U);
+\end{tabbing}}}
+
+
+\de{PLUS}{([\p{U}:\ty{number}]):\ty{number}}{noeval, nospread, or macro}
+{Forms the sum of all its arguments.
+
+{\tt \begin{tabbing} MACRO PROCEDURE PLUS(U); \\
+\hspace*{1em} EXPAND(CDR U, 'PLUS2);
+\end{tabbing}}}
+
+\de{PLUS2}{(\p{U}:\ty{number}, \p{V}:\ty{number}):\ty{number}}{eval, spread}
+{Returns the sum of U and V.}
+
+
+\de{QUOTIENT}{(\p{U}:\ty{number}, \p{V}:\ty{number}):\ty{number}}{eval, spread}
+{The quotient of U divided by V is returned. Division of two positive
+or two negative integers is conventional. When both U and V are
+integers and exactly one of them is negative the value returned is the
+negative truncation of the absolute value of U divided by the absolute
+value of V. An error occurs if division by zero is attempted:
+\index{division by zero}
+
+\errormessage{***** Attempt to divide by 0 in QUOTIENT}
+}
+
+\de{REMAINDER}{(\p{U}:\ty{number}, \p{V}:\ty{number}):\ty{number}}{eval,
+spread}
+{If both U and V are integers the result is the integer remainder of U
+divided by V. If either parameter is floating point, the result is the
+difference between U and V*(U/V) all in floating point. If either
+number is negative the remainder is negative. If both are positive or
+both are negative the remainder is positive. An error occurs if V is
+zero: \index{division by zero}
+
+\errormessage{***** Attempt to divide by 0 in REMAINDER}
+
+{\tt \begin{tabbing} EXPR PROCEDURE REMAINDER(U, V); \\
+\hspace*{1em} DIFFERENCE(U, TIMES2(QUOTIENT(U, V), V));
+\end{tabbing}}}
+
+
+\de{SUB1}{(\p{U}:\ty{number}):\ty{number}}{eval, spread}
+{Returns the value of U less 1.  If U is a FLOAT type number, the
+value returned is U less 1.0.
+
+{\tt \begin{tabbing} EXPR PROCEDURE SUB1(U); \\
+\hspace*{1em} DIFFERENCE(U, 1);
+\end{tabbing}}}
+
+
+\de{TIMES}{([\p{U}:\ty{number}]):\ty{number}}{noeval, nospread, or macro}
+{Returns the product of all its arguments.
+
+{\tt \begin{tabbing} MACRO PROCEDURE TIMES(U); \\
+\hspace*{1em} EXPAND(CDR U, 'TIMES2);
+\end{tabbing}}}
+
+
+\de{TIMES2}{(\p{U}:\ty{number}, \p{V}:\ty{number}):\ty{number}}{eval, spread}
+{Returns the product of U and V.}
+
+
+\subsection{MAP Composite Functions}
+
+
+\de{MAP}{(\p{X}:\ty{list}, F\p{N}:\ty{function}):\ty{any}}{eval, spread}
+{Applies FN to successive CDR segments of X. NIL is returned.
+
+{\tt \begin{tabbing} EXPR PROCEDURE MAP(X, FN); \\
+\hspace*{1em} WHILE X DO $<<$ FN X; X := CDR X $>>$;
+\end{tabbing}}}
+
+
+\de{MAPC}{(X:list, FN:function):\ty{any}}{eval, spread}
+{FN is applied to successive CAR segments of list X. NIL is returned.
+
+{\tt \begin{tabbing} EXPR PROCEDURE MAPC(X, FN); \\
+\hspace*{1em} WHILE X DO $<<$ FN CAR X; X := CDR X $>>$;
+\end{tabbing}}}
+
+
+\de{MAPCAN}{(X:list, FN:function):\ty{any}}{eval, spread}
+{A concatenated list of FN applied to successive CAR elements of X is
+returned.
+
+{\tt \begin{tabbing} EXPR PROCEDURE MAPCAN(X, FN); \\
+\hspace*{1em} IF\= NULL X THEN NIL \\
+\> ELSE NCONC(FN CAR X, MAPCAN(CDR X, FN));
+\end{tabbing}}}
+
+
+\de{MAPCAR}{(X:list, FN:function):\ty{any}}{eval, spread}
+{Returned is a constructed list of FN applied to each CAR of list X.
+
+{\tt \begin{tabbing} EXPR PROCEDURE MAPCAR(X, FN); \\
+\hspace*{1em} IF\= NULL X THEN NIL \\
+\> ELSE FN CAR X . MAPCAR(CDR X, FN);
+\end{tabbing}}}
+
+
+\de{MAPCON}{(X:list, FN:function):\ty{any}}{eval, spread}
+{Returned is a concatenated list of FN applied to successive CDR
+segments of X.
+
+{\tt \begin{tabbing} EXPR PROCEDURE MAPCON(X, FN); \\
+\hspace*{1em} IF\= NULL X THEN NIL \\
+\> ELSE NCONC(FN X, MAPCON(CDR X, FN));
+\end{tabbing}}}
+
+
+\de{MAPLIST}{(X:list, FN:function):\ty{any}}{eval, spread}
+{Returns a constructed list of FN applied to successive CDR segments
+of X.
+
+{\tt \begin{tabbing} EXPR PROCEDURE MAPLIST(X, FN); \\
+\hspace*{1em} IF\= NULL X THEN NIL \\
+\> ELSE FN X . MAPLIST(CDR X, FN);
+\end{tabbing}}}
+
+
+\subsection{Composite Functions}
+
+\de{APPEND}{(\p{U}:\ty{list}, \p{V}:\ty{list}):\ty{list}}{eval, spread}
+{Returns a constructed list in which the last element of U is followed
+by the first element of V. The list U is copied, V is not.
+
+{\tt \begin{tabbing} EXPR PROCEDURE APPEND(U, V); \\
+\hspace*{1em} IF\= NULL U THEN V \\
+\> ELSE CAR U . APPEND(CDR U, V);
+\end{tabbing}}}
+
+\de{ASSOC}{(\p{U}:\ty{any}, \p{V}:\ty{alist}):\{\ty{dotted-pair},
+NIL\}}{eval, spread}
+{If U occurs as the CAR portion of an element of the alist V, the
+dotted-pair in which U occurred is returned, else NIL is returned.
+ASSOC might not detect a poorly formed alist so an invalid
+\index{EQUAL ! in ASSOC} \index{alist ! in ASSOC}
+construction may be detected by CAR or CDR.
+
+{\tt \begin{tabbing} EXPR PROCEDURE ASSOC(U, V); \\
+\hspace*{1em} IF \= NULL V THEN NIL \\
+\> ELSE \= IF ATOM CAR V THEN \\
+\> \> ERROR(000, LIST(V, "is a poorly formed alist")) \\
+\> ELSE IF U = CAAR V THEN CAR V \\
+\> ELSE ASSOC(U, CDR V);
+\end{tabbing}}
+}
+
+\de{DEFLIST}{(\p{U}:\ty{dlist}, \p{IND}:\ty{id}):\ty{list}}{eval, spread}
+{A "dlist" is a list in which each element is a two element list:
+\index{dlist}
+(ID:id PROP:any). Each ID in U has the indicator IND with property
+PROP placed on its property list by the PUT function. The value of
+DEFLIST is a list of the first elements of each two element list.
+Like PUT, DEFLIST may not be used to define functions.
+
+{\tt \begin{tabbing} EXPR PROCEDURE DEFLIST(U, IND); \\
+\hspace*{1em} IF NULL U THEN NIL \\
+\hspace*{2em} ELSE $<<$ \= PUT(CAAR U, IND, CADAR U); \\
+\> CAAR U $>>$ . DEFLIST(CDR U, IND);
+\end{tabbing}}
+}
+
+\de{DELETE}{(\p{U}:\ty{any}, \p{V}:\ty{list}):\ty{list}}{eval, spread}
+{Returns V with the first top level occurrence of U removed from it.
+\index{EQUAL ! in DELETE}
+
+{\tt \begin{tabbing} EXPR PROCEDURE DELETE(U, V); \\
+\hspace*{1em} IF NULL V THEN NIL \\
+\hspace*{2em} ELSE IF CAR V = U THEN CDR V \\
+\hspace*{2em} ELSE CAR V . DELETE(U, CDR V);
+\end{tabbing}}}
+
+\de{DIGIT}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is a digit, otherwise NIL.
+
+{\tt \begin{tabbing} EXPR PROCEDURE DIGIT(U); \\
+\hspace*{1em} IF MEMQ(U, '(!0 !1 !2 !3 !4 !5 !6 !7 !8 !9)) \\
+\hspace*{2em} THEN T ELSE NIL;
+\end{tabbing}}}
+
+\de{LENGTH}{(\p{X}:\ty{any}):\ty{integer}}{eval, spread}
+{The top level length of the list X is returned.
+
+{\tt \begin{tabbing} EXPR PROCEDURE LENGTH(X); \\
+\hspace*{1em} IF ATOM X THEN 0 \\
+\hspace*{2em} ELSE PLUS(1, LENGTH CDR X);
+\end{tabbing}}}
+
+\de{LITER}{(\p{U}:\ty{any}):\ty{boolean}}{eval, spread}
+{Returns T if U is a character of the alphabet, NIL
+otherwise.\footnote{The published report omits escape characters.
+These are required for both upper and lower case as some systems
+default to lower.}
+
+{\tt \begin{tabbing} EXPR PROCEDURE LITER(U); \\
+\hspace*{1em} IF \= MEMQ(U, '(\=!A !B !C !D !E !F !G !H !I !J !K !L !M \\
+\> \> !N !O !P !Q !R !S !T !U !V !W !X !Y !Z \\
+\> \> !a !b !c !d !e !f !g !h !i !j !k !l !m \\
+\> \> !n !o !p !q !r !s !t !u !v !w !x !y !z)) \\
+\> THEN T ELSE NIL;
+\end{tabbing}}}
+
+\de{MEMBER}{(\p{A}:\ty{any}, \p{B}:\ty{list}):\ty{extra-boolean}}{eval, spread}
+{Returns NIL if A is not a member of list B, returns the remainder of
+B whose first element is A. \index{EQUAL ! in MEMBER}
+
+{\tt \begin{tabbing} EXPR PROCEDURE MEMBER(A, B); \\
+\hspace*{1em} IF NULL B THEN NIL \\
+\hspace*{2em} ELSE IF A = CAR B THEN B \\
+\hspace*{2em} ELSE MEMBER(A, CDR B);
+\end{tabbing}}}
+
+
+\de{MEMQ}{(\p{A}:\ty{any}, \p{B}:\ty{list}):\ty{extra-boolean}}{eval, spread}
+{Same as MEMBER but an EQ check is used for comparison. \index{EQ ! in
+MEMQ}
+
+{\tt \begin{tabbing} EXPR PROCEDURE MEMQ(A, B); \\
+\hspace*{1em} IF \= NULL B THEN NIL \\
+\> ELSE IF A EQ CAR B THEN B \\
+\> ELSE MEMQ(A, CDR B);
+\end{tabbing}}}
+
+\de{NCONC}{(\p{U}:\ty{list}, \p{V}:\ty{list}):\ty{list}}{eval, spread}
+{Concatenates V to U without copying U. The last CDR of U is modified
+to point to V.
+
+{\tt \begin{tabbing} EXPR PROCEDURE NCONC(U, V); \\ BEGIN SCALAR W; \\
+\hspace*{2em} \= IF NULL U THEN RETURN V; \\
+\> W := U; \\
+\> WHILE CDR W DO W := CDR W; \\
+\> RPLACD(W, V); \\
+\> RETURN U \\
+END;
+\end{tabbing}}}
+
+\de{PAIR}{(\p{U}:\ty{list}, \p{V}:\ty{list}):\ty{alist}}{eval, spread}
+{U and V are lists which must have an identical number of elements. If
+not, an error occurs (the 000 used in the ERROR call is arbitrary and
+need not be adhered to). Returned is a list where each element is a
+dotted-pair, the CAR of the pair being from U, and the CDR the
+corresponding element from V.
+
+{\tt \begin{tabbing} EXPR PROCEDURE PAIR(U, V); \\
+\hspace*{1em} IF AND(U, V) THEN (CAR U . CAR V) . PAIR(CDR U, CDR V) \\
+\hspace*{2em} \= ELSE IF OR(U, V) THEN ERROR(000, \\
+\hspace*{4em} "Different length lists in PAIR") \\
+\> ELSE NIL;
+\end{tabbing}}}
+
+
+\de{REVERSE}{(\p{U}:\ty{list}):\ty{list}}{eval, spread}
+{Returns a copy of the top level of U in reverse order.
+
+{\tt \begin{tabbing} EXPR PROCEDURE REVERSE(U); \\ BEGIN SCALAR W; \\
+\hspace*{2em} \= WHILE U DO $<<$ \= W := CAR U . W; \\
+\> \> U := CDR U $>>$; \\
+\>  RETURN W \\
+END;
+\end{tabbing}}}
+
+\de{SASSOC}{(\p{U}:\ty{any}, \p{V}:\ty{alist},
+\p{FN}:\ty{function}):\ty{any}}{eval, spread}
+{Searches the alist V for an occurrence of U. If U is not in the alist
+the evaluation of function FN is returned. \index{EQUAL ! in SASSOC}
+\index{alist ! in SASSOC}
+
+{\tt \begin{tabbing} EXPR PROCEDURE SASSOC(U, V, FN); \\
+\hspace*{1em} IF NULL V THEN FN() \\
+\hspace*{2em} \= ELSE IF U = CAAR V THEN CAR V \\
+\> ELSE SASSOC(U, CDR V, FN);
+\end{tabbing}}}
+
+\de{SUBLIS}{(\p{X}:\ty{alist}, \p{Y}:\ty{any}):\ty{any}}{eval, spread}
+{The value returned is the result of substituting the CDR of each
+element of the alist X for every occurrence of the CAR part of that
+element in Y. \index{alist ! in SUBLIS}
+
+{\tt \begin{tabbing} EXPR PROCEDURE SUBLIS(X, Y); \\
+\hspace*{1em}IF NULL X THEN Y \\
+\hspace*{2em} ELSE BEGIN \= SCALAR U; \\
+\> U := ASSOC(Y, X); \\
+\> RETURN \= IF U THEN CDR U \\
+\> \> ELSE IF ATOM Y THEN Y \\
+\> \> ELSE \= SUBLIS(X, CAR Y) . \\
+\> \> \> SUBLIS(X, CDR Y) \\
+\> END;
+\end{tabbing}}}
+
+\de{SUBST}{(\p{U}:\ty{any}, \p{V}:\ty{any}, \p{W}:\ty{any}):\ty{any}}{eval,
+spread}
+{The value returned is the result of substituting U for all
+occurrences of V in W. \index{EQUAL ! in SUBST}
+
+{\tt \begin{tabbing} EXPR PROCEDURE SUBST(U, V, W); \\
+\hspace*{1em} IF NULL W THEN NIL \\
+\hspace*{2em} \= ELSE IF V = W THEN U \\
+\> ELSE IF ATOM W THEN W \\
+\> ELSE SUBST(U, V, CAR W) . SUBST(U, V, CDR W);
+\end{tabbing}}}
+
+
+\subsection{The Interpreter}
+\label{interpreter}
+\de{APPLY}{(\p{FN}:\{\ty{id,function}\},
+\p{ARGS}:\ty{any-list}):\ty{any}}{eval, spread}
+{APPLY returns the value of FN with actual parameters ARGS. The actual
+parameters in ARGS are already in the form required for binding to the
+formal parameters of FN. Implementation specific portions described in
+English are enclosed in boxes.
+
+{\tt \begin{tabbing} EXPR PROCEDURE APPLY(FN, ARGS); \\ BEGIN SCALAR
+DEFN; \\
+\hspace*{2em}\= IF CODEP FN THEN RETURN \\
+\> \hspace{1em} \framebox[3.25in]{\parbox{3.25in}{Spread the actual
+parameters in ARGS
+following the conventions: for calling functions, transfer to the
+entry point of the function, and return the value returned by the
+function.}}; \\
+\> IF \= IDP FN THEN RETURN \\
+\> \> IF \= NULL(DEFN := GETD FN) THEN \\
+\> \> \> ERROR(000, LIST(FN, "is an undefined function")) \\
+\> \> ELSE IF CAR DEFN EQ 'EXPR THEN \\
+\> \> \> APPLY(CDR DEFN, ARGS) \\
+\> \> ELSE ERROR(000, \\
+\> \> \> LIST(FN, "cannot be evaluated by APPLY")); \\
+\> IF OR(ATOM FN, NOT(CAR FN EQ 'LAMBDA)) THEN \\
+\> \> ERROR(000, \\
+\> \> LIST(FN, "cannot be evaluated by APPLY")); \\
+\> RETURN \\
+\> \> \framebox[3.25in]{\parbox{3.25in}{Bind the actual parameters in ARGS to
+the formal
+parameters of the lambda expression. If the two lists are not of equal
+length then ERROR(000, "Number of parameters do not match"); The value
+returned is EVAL CADDR FN.}} \\ END;
+\end{tabbing}}}
+
+\de{EVAL}{(\p{U}:\ty{any}):\ty{any}}{eval, spread}
+{The value of the expression U is computed. Error numbers are
+arbitrary. Portions of EVAL involving machine specific coding are
+expressed in English enclosed in boxes.
+
+{\tt \begin{tabbing} EXPR PROCEDURE EVAL(U); \\ BEGIN SCALAR FN; \\
+\hspace*{2em} \= IF CONSTANTP U THEN RETURN U; \\
+\> IF IDP U THEN RETURN \\
+\> \hspace{1em} \framebox[3.25in]{\parbox{3.25in}{U is an id. Return the
+value most currently
+bound to U or if there is no such binding: ERROR(000, LIST("Unbound:",
+U));}} \\
+\> IF \= PAIRP CAR U THEN RETURN \\
+\> \> IF CAAR U EQ 'LAMBDA THEN APPLY(CAR U, EVLIS CDR U) \\
+\> \> ELSE ERROR(\= 000, LIST(CAR U, \\
+\> \> \> "improperly formed LAMBDA expression")) \\
+\> \> ELSE IF CODEP CAR U THEN \\
+\> \> \> RETURN APPLY(CAR U, EVLIS CDR U); \\
+\> FN := GETD CAR U; \\
+\> IF NULL FN THEN \\
+\> \> ERROR(000, LIST(CAR U, "is an undefined function")) \\
+\> ELSE IF CAR FN EQ 'EXPR THEN \\
+\> \> RETURN APPLY(CDR FN, EVLIS CDR U) \\
+\> ELSE IF CAR FN EQ 'FEXPR THEN \\
+\> \> RETURN APPLY(CDR FN, LIST CDR U) \\
+\> ELSE IF CAR FN EQ 'MACRO THEN \\
+\> \> RETURN EVAL APPLY(CDR FN, LIST U) \\
+END;
+\end{tabbing}}}
+
+\de{EVLIS}{(\p{U}:\ty{any-list}):\ty{any-list}}{eval, spread}
+{EVLIS returns a list of the evaluation of each element of U.
+
+{\tt \begin{tabbing} EXPR PROCEDURE EVLIS(U); \\
+\hspace*{1em} IF NULL U THEN NIL \\
+\hspace*{2em} ELSE EVAL CAR U . EVLIS CDR U;
+\end{tabbing}}}
+
+\de{EXPAND}{(\p{L}:\ty{list}, \p{FN}:\ty{function}):\ty{list}}{eval, spread}
+{FN is a defined function of two arguments to be used in the expansion
+of a MACRO. EXPAND returns a list in the form:
+
+\vspace{.15in}
+(FN L$_0$ (FN L$_1$ \ldots (FN L$_{n-1}$ L$_n$) \ldots ))
+\vspace{.15in}
+
+where $n$ is the number of elements in L, L$_i$ is the $i$th element
+of L.
+
+{\tt \begin{tabbing} EXPR PROCEDURE EXPAND(L,FN); \\
+\hspace*{1em} IF NULL CDR L THEN CAR L \\
+\hspace*{2em} ELSE LIST(FN, CAR L, EXPAND(CDR L, FN));
+\end{tabbing}}}
+
+\de{FUNCTION}{(\p{FN}:\ty{function}):\ty{function}}{noeval, nospread}
+{The function FN is to be passed to another function. If FN is to have
+side effects its free variables must be fluid or global. FUNCTION is
+like QUOTE but its argument may be affected by compilation. We do not
+\index{FUNARGs not supported}
+consider FUNARGs in this report.}
+
+
+\de{QUOTE}{(U:any):\ty{any}}{noeval, nospread}
+{Stops evaluation and returns U unevaluated.
+
+{\tt \begin{tabbing} FEXPR PROCEDURE QUOTE(U); \\
+\hspace*{2em}CAR U;
+\end{tabbing}}}
+
+\subsection{Input and Output}
+\label{IO}
+The user normally communicates with Standard LISP through
+\index{standard devices}
+``standard devices''. The default devices are selected in accordance
+with the conventions of the implementation site. Other input and
+output devices or files may be selected for reading and writing using
+the functions described herein.
+
+
+
+\de{CLOSE}{(\p{FILEHANDLE}:\ty{any}):\ty{any}}{eval, spread}
+{Closes the file with the internal name FILEHANDLE writing any
+necessary end of file marks and such. The value of FILEHANDLE is that
+returned by the corresponding OPEN. \index{OPEN} The value returned is
+the value of FILEHANDLE. An error occurs if the file can not be
+\index{file handle} \index{files}
+closed.
+
+\errormessage{   ***** FILEHANDLE could not be closed}
+}
+
+\de{EJECT}{():NIL}{eval, spread}
+{Skip to the top of the next output page. Automatic EJECTs are
+executed by the print functions when the length set by the PAGELENGTH
+\index{PAGELENGTH} function is exceeded.}
+
+
+\de{LINELENGTH}{(\p{LEN}:\{\ty{integer}, NIL\}):\ty{integer}}{eval, spread}
+{If LEN is an integer the maximum line length to be printed before the
+print functions initiate an automatic TERPRI is set to the value LEN.
+\index{TERPRI}
+No initial Standard LISP line length is assumed. The previous line
+length is returned except when LEN is NIL. This special case returns
+the current line length and does not cause it to be reset. An error
+occurs if the requested line length is too large for the currently
+selected output file or LEN is negative or zero.
+
+\errormessage{   ***** LEN is an invalid line length}
+}
+
+
+\de{LPOSN}{():\ty{integer}}{eval, spread}
+{Returns the number of lines printed on the current page. At the top
+of a page, 0 is returned. }
+
+
+\de{OPEN}{(\p{FILE}:\ty{any}, \p{HOW}:\ty{id}):\ty{any}}{eval, spread}
+{Open the file with the system dependent name FILE for output if HOW
+is EQ to OUTPUT, or input if HOW is EQ to INPUT. If the file is
+\index{file handle} \index{files} \index{OUTPUT} \index{INPUT}
+opened successfully, a value which is internally associated with the
+file is returned. This value must be saved for use by RDS and WRS. An
+error occurs if HOW is something other than INPUT or OUTPUT or the
+file can't be opened.
+
+\errormessage{***** HOW is not option for OPEN}
+\errormessage{***** FILE could not be opened}
+}
+
+
+\de{PAGELENGTH}{(\p{LEN}:\{\ty{integer}, NIL\}):\ty{integer}}{eval, spread}
+{Sets the vertical length (in lines) of an output page. Automatic page
+EJECTs are executed by the print functions when this length is
+\index{EJECT}
+reached. The initial vertical length is implementation specific. The
+previous page length is returned. If LEN is 0, no automatic page
+ejects will occur. }
+
+
+\de{POSN}{():\ty{integer}}{eval, spread}
+{Returns the number of characters in the output buffer. When the
+buffer is empty, 0 is returned.}
+
+
+\de{PRINC}{(\p{U}:\ty{id}):\ty{id}}{eval, spread}
+{U must be a single character id such as produced by EXPLODE or read
+by READCH or the value of !\$EOL!\$. The effect is the character U
+\index{\$EOL\$ (global)}
+displayed upon the currently selected output device. The value of
+!\$EOL!\$ causes termination of the current line like a call to
+TERPRI.}
+
+
+\de{PRINT}{(\p{U}:\ty{any}):\ty{any}}{eval, spread}
+{Displays U in READ readable format and terminates the print line. The
+value of U is returned.
+
+{\tt \begin{tabbing} EXPR PROCEDURE PRINT(U); \\
+\hspace*{2em} $<<$ PRIN1 U; TERPRI(); U $>>$;
+\end{tabbing}}}
+
+
+\de{PRIN1}{(\p{U}:\ty{any}):\ty{any}}{eval, spread}
+{U is displayed in a READ readable form. The format of display is the
+result of EXPLODE expansion; special characters are prefixed with the
+escape character !, and strings are enclosed in "\ldots ". Lists are
+displayed in list-notation and vectors in vector-notation. }
+
+
+\de{PRIN2}{(\p{U}:\ty{any}):\ty{any}}{eval, spread}
+{U is displayed upon the currently selected print device but output is
+not READ readable. The value of U is returned. Items are displayed as
+described in the EXPLODE function with the exceptions that the escape
+character does not prefix special characters and strings are not
+enclosed in "\ldots ". Lists are displayed in list-notation and
+vectors in vector-notation. The value of U is returned. }
+
+
+\de{RDS}{(\p{FILEHANDLE}:\ty{any}):\ty{any}}{eval, spread}
+{Input from the currently selected input file is suspended and further
+input comes from the file named. FILEHANDLE is a system dependent
+\index{file handle}
+internal name which is a value returned by OPEN. If FILEHANDLE is NIL
+the standard input device is selected. When end of file is reached on
+a non-standard input device, the standard input device is reselected.
+When end of file occurs on the standard input device the Standard LISP
+reader terminates. RDS returns the internal name of the previously
+selected input file.
+\index{standard input}
+
+\errormessage{***** FILEHANDLE could not be selected for input}
+}
+
+
+\de{READ}{():\ty{any}}{}
+{The next expression from the file currently selected for input. Valid
+input forms are: vector-notation, dot-notation, list-notation,
+numbers, function-pointers, strings, and identifiers with escape
+characters. Identifiers are interned onW the OBLIST (see
+\index{INTERN} \index{OBLIST entry}
+the INTERN function in "Identifiers", section~\ref{identifiers} on
+page~\pageref{identifiers}). READ returns the
+\index{\$EOF\$ (global)}
+value of !\$EOF!\$ when the end of the currently selected input file
+is reached. }
+
+
+\de{READCH}{():\ty{id}}{}
+{Returns the next interned character from the file currently selected
+for input. Two special cases occur. If all the characters in an input
+\index{\$EOL\$ (global)} \index{\$EOF\$ (global)} record have been read,
+the value of !\$EOL!\$ is returned. If the file selected for input has
+all been read the value of !\$EOF!\$ is returned. Comments delimited
+by \% and end-of-line are not transparent to READCH. \index{\% ! read
+by READCH} }
+
+
+\de{TERPRI}{():\p{NIL}}{}
+{The current print line is terminated.}
+
+
+\de{WRS}{(\p{FILEHANDLE}:\ty{any}):\ty{any}}{eval, spread}
+{Output to the currently active output file is suspended and further
+output is directed to the file named. FILEHANDLE is an internal name
+which is returned by OPEN. The file named must have been opened for
+output. If FILEHANDLE is NIL the standard output device is selected.
+\index{file handle} \index{standard output}
+WRS returns the internal name of the previously selected output file.
+
+\errormessage{***** FILEHANDLE could not be selected for output}
+}
+
+\subsection{LISP Reader}
+
+An EVAL read loop has been chosen to drive a Standard LISP system to
+provide a continuity in functional syntax. Choices of messages and the
+amount of extra information displayed are decisions left to the
+implementor.
+
+\index{STANDARD-LISP}
+{\tt \begin{tabbing} EXPR PROCEDURE STANDARD!-LISP(); \\ BEGIN SCALAR
+VALUE; \\
+\hspace*{2em} \= RDS NIL;  WRS NIL; \\
+\> PRIN2 "Standard LISP"; TERPRI(); \\
+\> WHILE T DO \\
+\> \hspace*{1em} $<<$ \= PRIN2 "EVAL:"; TERPRI(); \\
+\> \> VALUE := ERRORSET(QUOTE EVAL READ(), T, T); \\
+\> \> IF NOT ATOM VALUE THEN PRINT CAR VALUE; \\
+\> \> TERPRI() $>>$; \\
+END;
+\end{tabbing}}
+
+\de{QUIT}{()}{}
+{Causes termination of the LISP reader and control to be transferred
+to the operating system.}
+
+\section{System GLOBAL Variables}
+\label{slglobals}
+
+These variables provide global control of the LISP system, or
+implement values which are constant throughout execution.\footnote{The
+published document does not specify that all these are GLOBAL.}
+
+
+\variable{*COMP}{NIL}{global}
+{The value of !*COMP controls whether or not PUTD compiles the
+function defined in its arguments before defining it. If !*COMP is NIL
+the function is defined as an xEXPR. If !*COMP is something else the
+function is first compiled. Compilation will produce certain changes
+in the semantics of functions particularly FLUID type access.}
+
+
+\variable{EMSG*}{NIL}{global}
+{Will contain the MESSAGE generated by the last ERROR call (see
+\index{ERROR}
+``Error Handling'' section~\ref{errors} on page~\pageref{errors}).}
+
+
+\variable{\$EOF\$}{\s{an uninterned identifier}}{global}
+{The value of !\$EOF!\$ is returned by all input functions when the
+end
+\index{end of file}
+of the currently selected input file is reached.}
+
+
+\variable{\$EOL\$}{\s{an uninterned identifier}}{global}
+{The value of !\$EOL!\$ is returned by READCH when it reaches the end
+of
+\index{READCH} \index{end of line} \index{PRINC}
+a logical input record. Likewise PRINC will terminate its current line
+(like a call to TERPRI) when !\$EOL!\$ is its argument.}
+
+\variable{*GC}{NIL}{global}
+{!*GC controls the printing of garbage collector messages.  If NIL no
+\index{garbage collector}
+indication of garbage collection may occur.  If non-NIL various system
+dependent messages may be displayed.}
+
+
+\variable{NIL}{NIL}{global}
+{NIL is a special global variable. It is protected from being modified
+by SET or SETQ.
+\index{NIL ! cannot be changed}}
+
+
+\variable{*RAISE}{NIL}{global}
+{If !*RAISE is non-NIL all characters input through Standard LISP
+input/output functions will be raised to upper case. If !*RAISE is NIL
+characters will be input as is.}
+
+
+\variable{T}{T}{global}
+{T is a special global variable. It is protected from being modified
+by SET or SETQ. \index{T ! cannot be changed}}
+
+
+\section{The Extended Syntax}
+
+Whenever it is possible to define Standard LISP functions in LISP the
+text of the function will appear in an extended syntax.  These
+definitions are supplied as an aid to understanding the behavior of
+functions and not as a strict implementation guide.  A formal scheme
+for the translation of extended syntax to Standard LISP is presented
+to eliminate misinterpretation of the definitions.
+
+\subsection{Definition}
+The goal of the transformation scheme is to produce a PUTD invocation
+which has the function translated from the extended syntax as its
+actual parameter.  A rule has a name in brackets
+\s{\ldots} by which it is known and is defined by what follows the meta 
+symbol ::=.  Each rule of the set consists of one or more
+``alternatives'' separated by the $\mid$ meta symbol, being the
+different ways in which the rule will be matched by source text.  Each
+alternative is composed of a ``recognizer'' and a ``generator''
+separated by the $\Longrightarrow$ meta symbol.  The recognizer is a
+concatenation of any of three different forms.  1) Terminals - Upper
+case lexemes and punctuation which is not part of the meta syntax
+represent items which must appear as is in the source text for the
+rule to succeed.  2) Rules - Lower case lexemes enclosed in \s{\ldots}
+are names of other rules.  The source text is matched if the named
+rule succeeds.  3) Primitives - Lower case singletons not in brackets
+are names of primitives or primitive classes of Standard LISP.  The
+syntax and semantics of the primitives are given in Part I.
+
+The recognizer portion of the following rule matches an extended
+syntax procedure:
+ 
+
+\s{function} ::= ftype PROCEDURE id (\s{id list});  \\
+\hspace*{2em} \s{statement}; $\Longrightarrow$
+ 
+A function is recognized as an ``ftype'' (one of the tokens EXPR,
+FEXPR, etc.) followed by the keyword PROCEDURE, followed by an ``id''
+(the name of the function), followed by an \s{id list} (the formal
+parameter names) enclosed in parentheses.  A semicolon terminates the
+title line.  The body of the function is a
+\s{statement} followed by a semicolon.  For example: 
+ 
+\begin{verbatim}
+EXPR PROCEDURE NULL(X); EQ(X, NIL);
+\end{verbatim}
+
+\noindent satisfies the recognizer, causes the generator to be activated and 
+the rule to be matched successfully.
+
+The generator is a template into which generated items are
+substituted.  The three syntactic entities have corresponding meanings
+when they appear in the generator portion.  1) Terminals - These
+lexemes are copied as is to the generated text.  2) Rules - If a rule
+has succeeded in the recognizer section then the value of the rule is
+the result of the generator portion of that rule.  3) Primitives -
+When primitives are matched the primitive lexeme replaces its
+occurrence in the generator.
+ 
+If more than one occurrence of an item would cause ambiguity in the
+generator portion this entity appears with a bracketed subscript.
+Thus:
+ 
+\begin{tabbing}
+\s{conditional} ::= \\
+\hspace*{2em} IF \s{expression} \= THEN \s{statement$_1$} \\ 
+\> ELSE \s{statement$_2$} \ldots
+\end{tabbing}
+ 
+\noindent has occurrences of two different \s{statement}s.  The generator 
+portion uses the subscripted entities to reference the proper
+generated value.
+
+The \s{function} rule appears in its entirety as:
+
+\begin{tabbing}
+\s{function} ::= ftype PROCEDURE id (\s{id list});\s{statement};
+$\Longrightarrow$ \\
+\hspace*{2em} \=(PUTD \= (QUOTE id) \\
+\> \> (QUOTE ftype) \\
+\> \>(QUOTE (LAMBDA (\s{id list}) \s{statement})))
+\end{tabbing}
+ 
+If the recognizer succeeds (as it would in the case of the NULL
+procedure example) the generator returns:
+
+\begin{verbatim}
+(PUTD (QUOTE NULL) (QUOTE EXPR) (QUOTE (LAMBDA (X) (EQ X NIL))))
+\end{verbatim}
+ 
+The identifier in the template is replaced by the procedure name NULL,
+\s{id list} by the single formal parameter X, the \s{statement} by (EQ
+X NIL) which is the result of the \s{statement} generator.  EXPR
+replaces ftype, the type of the defined procedure.
+ 
+ 
+\subsection{The Extended Syntax Rules}
+
+\begin{tabbing}
+\s{function} ::= ftype \k{PROCEDURE} id (\s{id list}); \s{statement};
+$\Longrightarrow$ \\
+\hspace*{2em} \= (PUTD \= (QUOTE id) \\
+\> \> (QUOTE ftype) \\
+\> \> (QUOTE (LAMBDA (\s{id list}) \s{statement}))) \\ \\
+
+\s{id list} ::= id $\Longrightarrow$ id $\mid$ \\
+\> id, \s{id list} $\Longrightarrow$ id \s{id list} $\mid$ \\
+\> $\Longrightarrow$ NIL \\
+
+\s{statement} ::= \s{expression} $\Longrightarrow$ \s{expression} $\mid$ \\
+\> \s{proper statement} $\Longrightarrow$ \s{proper statement} \\ \\
+
+\s{proper statement} ::=  \\
+\> \s{assignment statement} $\Longrightarrow$ \s{assignment statement}
+$\mid$ \\
+\> \s{conditional statement} $\Longrightarrow$ \s{conditional statement}
+$\mid$ \\
+\> \s{while statement} $\Longrightarrow$ \s{while statement} $\mid$ \\
+\> \s{compound statement} $\Longrightarrow$ \s{compound statement} \\ \\
+
+\s{assignment statement} ::= id := \s{expression} $\Longrightarrow$ \\
+\> \> (SETQ id \s{expression}) \\ \\
+
+\s{conditional statement} ::= \\
+\> \k{IF} \s{expression} \k{THEN} \s{statement$_1$} \k{ELSE}
+\s{statement$_2$} $\Longrightarrow$ \\
+\> \hspace{2em} \= (COND (\s{expression} \s{statement$_1$})(T
+\s{statement$_2$})) $\mid$ \\
+\> \k{IF} \s{expression} \k{THEN} \s{statement} $\Longrightarrow$ \\
+\> \> (COND (\s{expression} \s{statement})) \\ \\
+
+\s{while statement} ::= \k{WHILE} \s{expression} \k{DO} \s{statement}
+$\Longrightarrow$ \\
+\> \> (PROG NIL \\
+\> \> LBL \= (COND ((NULL \s{expression}) (RETURN NIL))) \\
+\> \> \> \s{statement} \\
+\> \> \> (GO LBL))  \\ \\
+
+\s{compound statement} ::= \\
+\> \k{BEGIN} \k{SCALAR} \s{id list}; \s{program list} \k{END}
+$\Longrightarrow$ \\
+\> \> (PROG (\s{id list}) \s{program list}) $\mid$ \\
+\> \k{BEGIN} \s{program list} \k{END} $\Longrightarrow$ \\
+\> \> (PROG NIL \s{program list}) $\mid$ \\
+\> \k{$<<$} \s{statement list} \k{$>>$} $\Longrightarrow$ (PROGN
+\s{statement list}) \\ \\
+
+\s{program list} ::= \s{full statement} $\Longrightarrow$ \s{full statement}
+ $\mid$ \\
+\> \s{full statement} \s{program list} $\Longrightarrow$ \\
+\> \> \s{full statement} \s{program list} \\ \\
+
+\s{full statement} ::= \s{statement} $\Longrightarrow$ \s{statement} $\mid$
+id: $\Longrightarrow$ id  \\ \\
+
+\s{statement list} ::= \s{statement} $\Longrightarrow$ \s{statement} $\mid$ \\
+\> \s{statement}; \s{statement list} $\Longrightarrow$ \\
+\> \> \s{statement} \s{statement list}  \\ \\
+
+\s{expression} ::= \\
+\> \s{expression$_1$} \k{.} \s{expression$_2$} $\Longrightarrow$ \\
+\> \> (CONS \s{expression$_1$} \s{expression$_2$} $\mid$ \\
+\> \s{expression$_1$} \k{=}  \s{expression$_2$} $\Longrightarrow$ \\
+\> \> (EQUAL \s{expression$_1$} \s{expression$_2$}) $\mid$ \\
+\> \s{expression$_1$} \k{EQ} \s{expression$_2$} $\Longrightarrow$ \\
+\> \> (EQ \s{expression$_1$} \s{expression$_2$}) $\mid$ \\
+\> '\s{expression} $\Longrightarrow$ (QUOTE \s{expression}) $\mid$ \\
+\> function \s{expression} $\Longrightarrow$ (function \s{expression})
+$\mid$ \\
+\> function(\s{argument list}) $\Longrightarrow$ (function \s{argument list})
+$\mid$ \\
+\>  number $\Longrightarrow$ number $\mid$ \\
+\> id $\Longrightarrow$ id \\ \\
+
+\s{argument list} ::= () $\Longrightarrow$ $\mid$ \\
+\> \s{expression} $\Longrightarrow$ \s{expression} $\mid$ \\
+\> \s{expression}, \s{argument list} $\Longrightarrow$ \s{expression}
+\s{argument list}
+\end{tabbing}
+ 
+Notice the three infix operators .  EQ and = which are translated into
+calls on CONS, EQ, and EQUAL respectively.  Note also that a call on a
+function which has no formal parameters must have () as an argument
+list.  The QUOTE function is abbreviated by '.
+\bibliography{sl}
+\bibliographystyle{plain}
+\end{document}

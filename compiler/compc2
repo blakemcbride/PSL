@@ -1,0 +1,207 @@
+
+void Spaces()     /* spaces */
+{
+  reg3 = reg1;
+  reg1 = Sexp(&ONE);
+  reg4 = reg1;
+lab1 : 
+  reg2 = reg3;
+  reg1 = reg4;
+  Greaterp();    /* greaterp */
+  if (!null(reg1)) goto lab2;
+  reg1 = urwelt[0];
+  Prin2();    /* prin2 */
+  reg1 = reg4;
+  Add1();    /* add1 */
+  reg4 = reg1;
+  goto lab1;
+lab2 : 
+  reg1 = NIL;
+  return;
+}
+
+void AStracearg()     /* !*tracearg */
+{
+  zbind(urwelt[288],reg2);
+  zbind(urwelt[289],reg1);
+  reg1 = urwelt[290];
+  Output1();    /* output1 */
+  zunbind(2);
+  return;
+}
+
+void ASredefine()     /* !*redefine */
+{
+  zbind(urwelt[288],reg2);
+  zbind(urwelt[289],reg1);
+  reg1 = urwelt[291];
+  Output1();    /* output1 */
+  zunbind(2);
+  return;
+}
+
+void ASexit2()     /* !*exit2 */
+{
+  zbind(urwelt[289],reg1);
+  reg1 = urwelt[292];
+  Output1();    /* output1 */
+  zunbind(1);
+  return;
+}
+
+void ASexit1()     /* !*exit1 */
+{
+  reg1 = urwelt[293];
+  Output1();    /* output1 */
+  return;
+  }
+
+void ASexit3()     /* !*exit3 */
+{
+  reg1 = urwelt[294];
+  Output1();    /* output1 */
+  return;
+  }
+
+void ASexit()     /* !*exit */
+{
+  ASexit3();    /* !*exit3 */
+  return;
+  }
+
+void Priname()     /* priname */
+{
+  kalloc(4);
+  kset0(reg1);
+  kset(1,reg2);
+  kset(2,reg3);
+  reg1 = value(urwelt[245]);
+  Wrs();    /* wrs */
+  kload0(reg1);
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Explode();    /* explode */
+  reg2 = reg1;
+  reg1 = urwelt[169];
+  Del();    /* del */
+  Length();    /* length */
+  kset(3,reg1);
+  reg2 = urwelt[295];
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab1;
+  kload(reg2,3);
+  reg1 = urwelt[295];
+  Difference();    /* difference */
+  goto lab2;
+lab1 : 
+  reg1 = Sexp(&ONE);
+lab2 : 
+  Spaces();    /* spaces */
+  kload0(reg1);
+  Ersinize();    /* ersinize */
+  Prin2();    /* prin2 */
+  Explode();    /* explode */
+  Length();    /* length */
+  kset(3,reg1);
+  reg2 = urwelt[295];
+  Lessp();    /* lessp */
+  if (null(reg1)) goto lab3;
+  kload(reg2,3);
+  reg1 = urwelt[295];
+  Difference();    /* difference */
+  goto lab4;
+lab3 : 
+  reg1 = Sexp(&ONE);
+lab4 : 
+  Spaces();    /* spaces */
+  kload(reg1,2);
+  if (reg1 != urwelt[12]) goto lab5;
+  kload(reg1,1);
+  Prin2();    /* prin2 */
+  reg1 = urwelt[296];
+  goto lab6;
+lab5 : 
+  reg1 = urwelt[297];
+lab6 : 
+  Prin2();    /* prin2 */
+  Terpri();    /* terpri */
+  reg1 = value(urwelt[231]);
+  Wrs();    /* wrs */
+  reg1 = NIL;
+  kpop(4);
+  return;
+}
+
+void Mkprog()     /* mkprog */
+{
+  Cons();    /* cons */
+  zcons3c(urwelt[54]);
+  return;
+}
+
+void Quotep1()     /* quotep1 */
+{
+  kalloc(1);
+  kset0(reg1);
+  reg2 = urwelt[5];
+  Eqcar();    /* eqcar */
+  if (null(reg1)) goto lab1;
+  reg1 = cdr(local(0));
+  Atom();    /* atom */
+  Null();    /* null */
+  if (null(reg1)) goto lab1;
+  reg1 = cdr(cdr(local(0)));
+  Null();    /* null */
+lab1 : 
+  kpop(1);
+  return;
+}
+
+void Prin1q()     /* prin1q */
+{
+  kalloc(1);
+lab1 : 
+  kset0(reg1);
+  if (pairp(reg1)) goto lab2;
+  kpop(1);
+  Prin1();    /* prin1 */
+  return;
+lab2 : 
+  Quotep1();    /* quotep1 */
+  if (null(reg1)) goto lab3;
+  reg1 = urwelt[298];
+  Prin2();    /* prin2 */
+  reg1 = car(cdr(local(0)));
+  goto lab1;
+lab3 : 
+  reg1 = urwelt[299];
+  Prin2();    /* prin2 */
+lab4 : 
+  reg1 = car(local(0));
+  Prin1q();    /* prin1q */
+  reg1 = cdr(local(0));
+  kset0(reg1);
+  if (atom(reg1)) goto lab5;
+  reg1 = urwelt[300];
+  Prin2();    /* prin2 */
+  goto lab4;
+lab5 : 
+  if (null(reg1)) goto lab6;
+  reg1 = urwelt[301];
+  Prin2();    /* prin2 */
+  kload0(reg1);
+  Prin1();    /* prin1 */
+lab6 : 
+  reg1 = urwelt[302];
+  Prin2();    /* prin2 */
+  reg1 = NIL;
+  kpop(1);
+  return;
+}
+
+void Printq()     /* printq */
+{
+  Prin1q();    /* prin1q */
+  Terpri();    /* terpri */
+  return;
+  }

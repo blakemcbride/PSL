@@ -1,0 +1,117 @@
+
+                            S T D   -   L I S P
+
+Authors :  Ersin KARABUDAK + Gokturk UCOLUK + Tugrul YILMAZ
+
+Internal Release : August 1990
+
+Public Release : April 1993 (6.0), June 1993 (6.1)
+
+Addresses :
+
+ Dr. Gokturk Ucoluk, Dept. of Computer Engineering,
+                     Middle East Technical Univ.,
+                     ODTU, Ankara, Turkiye
+                     Email: ucoluk@vm.cc.metu.edu.tr
+
+ Dr. Tugrul Yilmaz,  Dept. of Physics, Middle East Technical Univ.,
+                     ODTU, Ankara, Turkiye
+                     Email: tugrul@vm.cc.metu.edu.tr
+
+ Ersin Karabudak,    LOGO Coorp., P.K. 322 Kadikoy,
+                     Istanbul, Turkiye
+
+This software can  freely  be distributed and  used provided the following
+conditions:
+
+      *  Anyone can freely copy and use this software, provided that the
+         names of  the  authors are  referenced in the work the software
+         is used for.
+
+      *  The parts of the code and documentation   where the authors are
+         mentioned cannot be removed.
+
+      *  This software is distributed as is.  The authors will not
+         take any responsibility for any bugs in it. Legally said:
+
+             "The  authors  of  this  software and documentation
+              provide them "as is" without warranty of any kind,
+              either  express  or  implied,  including,  but not
+              limited to, warranties of fitness for a particular
+              purpose."
+
+      *  Any code change will be clearly commented to indicate:
+
+          (a) What change is made,
+          (b) By whom it is made,
+          (c) When was it made.
+
+       The authors will be notified in case of a code alternation.
+
+===========================================================================
+
+The tar file in which you have this (README) file you will have
+additional file with extentions ".c", ".l", ".h"  ".tex" and
+a subdirectory named "compiler" under which there exist files
+with the extension ".lsp" and some files (with no extentions)
+with names starting with "comp".
+
+The first to do is: To get a LaTeX printout of the "lispman.tex"
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are already a Utah-STD-LISP pro then we hope you will enjoy
+our work.  Presumably your first wish will be getting your hands
+on the interpreter, so proceed by reading the "Compiler" chapter.
+
+If you are not familiar with Utah-STD-LISP then the first job to do
+is to get the
+
+     "Standard Lisp Report"
+     by: J. B. Marti, A. C. Hearn, M. L.Griss, and C. Griss,
+     Published in: SIGPLAN Notices 14, No 10 (1979) 48--68,
+                   ACM, New York.
+
+This is the description of this LISP dialect. It is NOT a LISP
+tutor. If you are a novice in LISP then you need some other books.
+
+(We believe "Standard Lisp Report" should exist in electronic form
+ somewhere in the reduce-library)
+
+===========================================================================
+
+Due   to   incompatibilities   among  various  systems/networks, there is a
+possibility that some characters in the file get replaced by others in
+a way which is not one-to-one. Below is a list how we see  it.
+
+     The first capital letter in the alphabet : A
+     Exclamation mark                         : !
+     Backslash                                : \
+     Slash                                    : /
+     Caret                                    : ^
+     Left square bracket                      : [
+     Right square bracket                     : ]
+     Left curly brace                         : {
+     Right curly brace                        : }
+     Left parenthesis                         : (
+     Right paranthesis                        : )
+     Underscore                               : _
+     The "at" sign                            : @
+     The "and" sign                           : &
+     Question mark                            : ?
+     Quote                                    : '
+     Double quote                             : "
+     Vertical bar                             : |
+     Number sign                              : #
+     Dollar sign                              : $
+     Persentage sign                          : %
+     Back quote                               : `
+
+===========================================================================
+
+The authors, will be happy to hear any comment, question, suggestion.
+Feel free to contact.
+
+-gokturk ucoluk
+
+============================================================= end of README
+
