@@ -26,11 +26,11 @@
 #define  SEVEN  small_num[8]
 
 #if DSTACK
-#define saveregisters(n) memcpy(zstackptr-(n)+1,registers+1,(n)*sizeof(PSEXP))
-#define restoreregisters(n) memcpy(registers+1,zstackptr-(n)+1,(n)*sizeof(PSEXP))
+#define saveregisters(n) memcpy(zstackptr - (n) + 1, registers + 1, (n) * sizeof(PSEXP))
+#define restoreregisters(n) memcpy(registers + 1, zstackptr - (n) + 1, (n) * sizeof(PSEXP))
 #else
-#define saveregisters(n) memcpy(zstackp+zstackptr-(n)+1,registers+1,(n)*sizeof(PSEXP))
-#define restoreregisters(n) memcpy(registers+1,zstackp+zstackptr-(n)+1,(n)*sizeof(PSEXP))
+#define saveregisters(n) memcpy(zstackp + zstackptr - (n) + 1, registers + 1, (n) * sizeof(PSEXP))
+#define restoreregisters(n) memcpy(registers + 1, zstackp + zstackptr - (n) + 1, (n) * sizeof(PSEXP))
 #endif
 
 #define Spair(x)      ((PPAIR) (x))
@@ -63,14 +63,14 @@
 #define numberp(x)    (fixp(x) || bigp(x) || floatp(x))
 #define constantp(x)  (!idp(x) && !pairp(x))
 #if BITF
-#define inheap(x)     (Sid(x)-> Xisinheap)
-#define globalp(x)    (Sid(x)-> Xisglobal)
-#define fluidp(x)     (Sid(x)-> Xisfluid)
-#define functionp(x)  (Sid(x)-> Xisfunction)
-#define dclfluidp(x)  (Sid(x)-> Xisdclfluid)
-#define inoblistp(x)  (Sid(x)-> Xisinoblist)
+#define inheap(x)     (Sid(x)->Xisinheap)
+#define globalp(x)    (Sid(x)->Xisglobal)
+#define fluidp(x)     (Sid(x)->Xisfluid)
+#define functionp(x)  (Sid(x)->Xisfunction)
+#define dclfluidp(x)  (Sid(x)->Xisdclfluid)
+#define inoblistp(x)  (Sid(x)->Xisinoblist)
 #else
-#define attribute(x)  (Sid(x)-> Xattr)
+#define attribute(x)  (Sid(x)->Xattr)
 #define inheap(x)     (attribute(x) & 0x20)
 #define globalp(x)    (attribute(x) & 0x10)
 #define fluidp(x)     (attribute(x) & 0x08)
@@ -79,82 +79,82 @@
 #define dclfluidp(x)  (attribute(x) & 0x01)
 #endif
 
-#define floval(x)     (Sfloat(x)-> Xfloval)
-#define hashlink(x)   (Sid(x)-> Xhashlink)
-#define intval(x)     (Sfix(x)-> Xintval)
-#define bigval(x)     (Sbig(x)-> Xintval)
-#define bigcdr(x)     (Sbig(x)-> Xcdr)
-#define pname(x)      (Sid(x)-> Xpname)
-#define proplist(x)   (Sid(x)-> Xproplist)
-#define value(x)      (Sid(x)-> Xvalue)
-#define strelement(x) (Sstr(x) -> Xstrelement)
+#define floval(x)     (Sfloat(x)->Xfloval)
+#define hashlink(x)   (Sid(x)->Xhashlink)
+#define intval(x)     (Sfix(x)->Xintval)
+#define bigval(x)     (Sbig(x)->Xintval)
+#define bigcdr(x)     (Sbig(x)->Xcdr)
+#define pname(x)      (Sid(x)->Xpname)
+#define proplist(x)   (Sid(x)->Xproplist)
+#define value(x)      (Sid(x)->Xvalue)
+#define strelement(x) (Sstr(x)->Xstrelement)
 #define strbody(x)    (strelement(x) + STROFFSET)
 #define elmbody(x)    (((char *) (x)) + STROFFSET)
 #define father(x)     (strelement(x) + sizeof(char))
 #define elmfather(x)  (((char *) (x)) + sizeof(char))
-#define storeelmfather(e,x)  ((dummystrptr=Sstr(x) ,  \
-    movmem((char *) &dummystrptr,(char *)elmfather(e),sizeof(PSTRING))))
-#define setfather(x)  (storeelmfather(strelement(x),x))
+#define storeelmfather(e, x)  ((dummystrptr = Sstr(x),  \
+	                        movmem((char *) &dummystrptr, (char *)elmfather(e), sizeof(PSTRING))))
+#define setfather(x)  (storeelmfather(strelement(x), x))
 #define getelmfather(e)  \
-   ((movmem((char *)elmfather(e),(char *) &dummystrptr,sizeof(PSTRING)) , \
-     dummystrptr))
+	((movmem((char *)elmfather(e), (char *) &dummystrptr, sizeof(PSTRING)), \
+	  dummystrptr))
 #define elmlength(x)  (*((char *) (x)))
 #define strlength(x)  (*(strelement(x)))
-#define upbv(x)       (Svector(x)-> Xupbv)
-#define usedvec(x)    (Svector(x)-> Xused)
-#define vectelt(x,n)  (vectelts(x)[n])
-#define vectelts(x)   (Svector(x)-> Xvectelts)
+#define upbv(x)       (Svector(x)->Xupbv)
+#define usedvec(x)    (Svector(x)->Xused)
+#define vectelt(x, n)  (vectelts(x)[n])
+#define vectelts(x)   (Svector(x)->Xvectelts)
 #define forwardadr(x) (Sforwardadr(x)->Xforwardaddress)   /*v 6.0  *GU*/
-#define argno(x)      (Scode(x)-> Xargno)
-#define fnc(x)        (*(Scode(x)-> Xfnc))
-#define errorno(x)    (Serrmsg(x)-> Xerrorno)
-#define errormsg(x)   (Serrmsg(x)-> Xerrormsg)
+#define argno(x)      (Scode(x)->Xargno)
+#define fnc(x)        (*(Scode(x)->Xfnc))
+#define errorno(x)    (Serrmsg(x)->Xerrorno)
+#define errormsg(x)   (Serrmsg(x)->Xerrormsg)
 #define caadr(x)      (car(car(cdr(x))))
 #define caar(x)       (car(car(x)))
 #define cadar(x)      (car(cdr(car(x))))
 #define cadddr(x)     (car(cdr(cdr(cdr(x)))))
 #define caddr(x)      (car(cdr(cdr(x))))
 #define cadr(x)       (car(cdr(x)))
-#define car(x)        (Spair(x)-> Xcar)
+#define car(x)        (Spair(x)->Xcar)
 #define cdadr(x)      (cdr(car(cdr(x))))
 #define cdar(x)       (cdr(car(x)))
 #define cddddr(x)     (cdr(cdr(cdr(cdr(x)))))
 #define cdddr(x)      (cdr(cdr(cdr(x))))
 #define cddr(x)       (cdr(cdr(x)))
-#define cdr(x)        (Spair(x)-> Xcdr)
+#define cdr(x)        (Spair(x)->Xcdr)
 
 #define STACKSIZE     3500            /*size of stack */
 #if SLOWSTACK         /*alternative stack manipulation definitions*/
 #if DSTACK
 #define kpop(n)       kpops(n)
-#define kset(n,x)     ksets(n,&(x))
-#define kload(x,n)    kloads(&(x),n)
+#define kset(n, x)     ksets(n, &(x))
+#define kload(x, n)    kloads(&(x), n)
 #define local(n)      (*(zstackptr - n))
 #define local0        (*zstackptr)
-#define kset0(x)      ksets(0,&(x))
-#define kload0(x)     kloads(&(x),0)
+#define kset0(x)      ksets(0, &(x))
+#define kload0(x)     kloads(&(x), 0)
 #else
 #define kpop(n)       (zstackptr -= n)
-#define kset(n,x)     ksets(n,&(x))
-#define kload(x,n)    kloads(&(x),n)
+#define kset(n, x)     ksets(n, &(x))
+#define kload(x, n)    kloads(&(x), n)
 #define local(n)      (zstackp[zstackptr - n])
 #define local0        (zstackp[zstackptr])
-#define kset0(x)      ksets(0,&(x))
-#define kload0(x)     kloads(&(x),0)
+#define kset0(x)      ksets(0, &(x))
+#define kload0(x)     kloads(&(x), 0)
 #endif
 #else
 #if DSTACK
 #define kpop(n)       (zstackptr -= n)
-#define kset(n,x)     (*(zstackptr - n) = x)
-#define kload(x,n)    (x = *(zstackptr - n))
+#define kset(n, x)     (*(zstackptr - n) = x)
+#define kload(x, n)    (x = *(zstackptr - n))
 #define local(n)      (*(zstackptr - n))
 #define local0        (*zstackptr)
 #define kset0(x)      (*zstackptr = x)
 #define kload0(x)     (x = *zstackptr)
 #else
 #define kpop(n)       (zstackptr -= n)
-#define kset(n,x)     (zstackp[zstackptr - n] = x)
-#define kload(x,n)    (x = zstackp[zstackptr - n])
+#define kset(n, x)     (zstackp[zstackptr - n] = x)
+#define kload(x, n)    (x = zstackp[zstackptr - n])
 #define local(n)      (zstackp[zstackptr - n])
 #define local0        (zstackp[zstackptr])
 #define kset0(x)      (zstackp[zstackptr] = x)
@@ -163,38 +163,46 @@
 #endif
 
 #define zreturn(x)    { reg1 = (x); return; }
-#define zkreturn(x,n) { reg1 = (x); kpop(n); return; }
+#define zkreturn(x, n) { reg1 = (x); kpop(n); return; }
 
 #define ch(x)   (Sexp(&chrid[(x)]))
 
-struct alistentry  {PSEXP alistid;
-                    PSEXP alistval; } ;
+struct alistentry {
+	PSEXP alistid;
+	PSEXP alistval;
+};
 
 typedef struct alistentry ALISTENT, *PALISTENT;
 
 #define NTYPES    7
-#define STROFFSET (sizeof(char)+sizeof(PSTRING))
+#define STROFFSET (sizeof(char) + sizeof(PSTRING))
 #define STROFFSET2 (STROFFSET + 1)
 
 
 
-struct page { struct page *nextpage;
-              PSEXP free;
-              char pagebd[PAGESIZE]; } ;
+struct page {
+	struct page *nextpage;
+	PSEXP free;
+	char pagebd[PAGESIZE];
+};
 
 typedef struct page PAGE, *PPAGE;
 #if DSTACK
-struct errortrap { jmp_buf errsave;
-                   PPSEXP stacksave;
-                   PALISTENT curalist;
-                   unsigned msgprint : 1;
-                   unsigned backtrace : 1; } ;
+struct errortrap {
+	jmp_buf errsave;
+	PPSEXP stacksave;
+	PALISTENT curalist;
+	unsigned msgprint : 1;
+	unsigned backtrace : 1;
+};
 #else
-struct errortrap { jmp_buf errsave;
-                   int stacksave;
-                   PALISTENT curalist;
-                   unsigned msgprint : 1;
-                   unsigned backtrace : 1; } ;
+struct errortrap {
+	jmp_buf errsave;
+	int stacksave;
+	PALISTENT curalist;
+	unsigned msgprint : 1;
+	unsigned backtrace : 1;
+};
 #endif
 
 typedef struct errortrap ERRORTRAP;
@@ -205,19 +213,19 @@ typedef struct errortrap ERRORTRAP;
 #define gtype(x)    (type(x) &  0x7f)
 
 #define cnewline currlin++; \
-                 if (pageln && currlin >= pageln) \
-                    {putc('\f',outputf); currlin = 0; }
+	if (pageln && currlin >= pageln) \
+	{putc('\f', outputf); currlin = 0; }
 
 #define longd(x)  ((double)(x))
 #define longdbl   double
 
 #ifndef labs
-#define labs(x) ((x)<0?-(x):(x))
+#define labs(x) ((x) < 0 ? -(x) : (x))
 #endif
 #ifndef fabs
-#define fabs(x) ((x)<0.0?-(x):(x))
-#endif   
+#define fabs(x) ((x) < 0.0 ? -(x) : (x))
+#endif
 
 #ifndef min
-#define min(a,b)        (((a) < (b)) ? (a) : (b))
+#define min(a, b)        (((a) < (b)) ? (a) : (b))
 #endif

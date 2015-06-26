@@ -31,35 +31,44 @@ unsigned STRLENGTH = 8500;     /*string space length*/
 unsigned maxpair = 1440;       /*max empty work space if possible*/
 unsigned maxpage = 5;          /*max pages allocated without GC */
 
-PAIR dummypair = {Tpair, NIL, NIL };
-BIG dummybig = {Tbig, 0L, NIL};
+PAIR dummypair = {
+	Tpair, NIL, NIL
+};
+BIG dummybig = {
+	Tbig, 0L, NIL
+};
 PSTRING dummystrptr;
 
 INTEGER small_num[9] = {
-      {Tinteger, -1L},
-      {Tinteger, 0L},     /* frequently used numbers TY*/
-      {Tinteger, 1L},
-      {Tinteger, 2L},
-      {Tinteger, 3L},
-      {Tinteger, 4L},
-      {Tinteger, 5L},
-      {Tinteger, 6L},
-      {Tinteger, 7L} };
+	{Tinteger, -1L},
+	{Tinteger, 0L},   /* frequently used numbers TY*/
+	{Tinteger, 1L},
+	{Tinteger, 2L},
+	{Tinteger, 3L},
+	{Tinteger, 4L},
+	{Tinteger, 5L},
+	{Tinteger, 6L},
+	{Tinteger, 7L}
+};
 
-ERRMSG forprog = { Terrmsg, 0, NIL };
+ERRMSG forprog = {
+	Terrmsg, 0, NIL
+};
 
 PALISTENT alist;
-PALISTENT alisttop,zalisttop;
+PALISTENT alisttop, zalisttop;
 PPAGE pages[NTYPES], cpages[NTYPES];
 PPAGE freepages;
 
-unsigned sz[NTYPES] = { sizeof(PAIR),
-                        sizeof(ID),
-                        sizeof(STRING),
-                        sizeof(INTEGER),
-                        sizeof(BIG),
-                        sizeof(FLOATING),
-                        sizeof(VECTOR) };
+unsigned sz[NTYPES] = {
+	sizeof(PAIR),
+	sizeof(ID),
+	sizeof(STRING),
+	sizeof(INTEGER),
+	sizeof(BIG),
+	sizeof(FLOATING),
+	sizeof(VECTOR)
+};
 
 unsigned gcfree[NTYPES];
 unsigned npages;
@@ -67,7 +76,7 @@ unsigned tnpages[NTYPES];
 PCHAR pnmchp, strchp, startpns, startstr;
 
 #if DSTACK
-PPSEXP zstackp,zstackptr;
+PPSEXP zstackp, zstackptr;
 #else
 PSEXP zstackp[STACKSIZE];
 int zstackptr = -1;

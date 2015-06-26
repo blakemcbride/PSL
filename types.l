@@ -19,7 +19,7 @@ typedef char *PCHAR;
    to find this number.
    rule: 'product of all sizes' mod PAGESIZE should be zero. */
 
-#define PAGESIZE    12000 
+#define PAGESIZE    12000
 #define TXSIZE       121
 
 /* big integer arithmetic machine specific constants */
@@ -30,55 +30,77 @@ typedef char *PCHAR;
 typedef int *PSEXP, **PPSEXP;
 
 #if BITF
- struct Xid { char Xtype;
-             unsigned Xisinheap : 1;
-             unsigned Xisglobal : 1;
-             unsigned Xisfluid  : 1;
-             unsigned Xisfunction : 1;
-             unsigned Xisinoblist : 1;
-             unsigned Xisdclfluid : 1;
-             struct Xid *Xhashlink;
-             PSEXP Xvalue;
-             PSEXP Xproplist;
-             char *Xpname; } ;
+struct Xid {
+	char Xtype;
+	unsigned Xisinheap : 1;
+	unsigned Xisglobal : 1;
+	unsigned Xisfluid  : 1;
+	unsigned Xisfunction : 1;
+	unsigned Xisinoblist : 1;
+	unsigned Xisdclfluid : 1;
+	struct Xid *Xhashlink;
+	PSEXP Xvalue;
+	PSEXP Xproplist;
+	char *Xpname;
+};
 #else
- struct Xid { char Xtype;
-             char Xattr;
-             struct Xid *Xhashlink;
-             PSEXP Xvalue;
-             PSEXP Xproplist;
-             char *Xpname; } ;
+struct Xid {
+	char Xtype;
+	char Xattr;
+	struct Xid *Xhashlink;
+	PSEXP Xvalue;
+	PSEXP Xproplist;
+	char *Xpname;
+};
 #endif
 
-struct Xpair { char Xtype;
-               PSEXP Xcar;
-               PSEXP Xcdr; } ;
+struct Xpair {
+	char Xtype;
+	PSEXP Xcar;
+	PSEXP Xcdr;
+};
 
-struct Xstring { char Xtype;              /* Added in 7.0 */
-                 char *Xstrelement; } ;
+struct Xstring {
+	char Xtype;                       /* Added in 7.0 */
+	char *Xstrelement;
+};
 
 typedef struct Xstring STRING, *PSTRING;
 
-struct Xinteger { char Xtype;
-                  long int Xintval; } ;
-struct Xbig { char Xtype;
-              long int Xintval;
-              PSEXP Xcdr; } ;
-struct Xfloating { char Xtype;
-                   double Xfloval; } ;
-struct Xvector { char Xtype;
-                 int Xupbv;
-                 PSEXP *Xvectelts;
-                 char Xused; } ;
-struct Xfpointer { char Xtype;
-                   char Xargno;
-                   void (*Xfnc)(); } ;
-struct Xerrmsg { char Xtype;
-                 int Xerrorno;
-                 PSEXP Xerrormsg; } ;
+struct Xinteger {
+	char Xtype;
+	long int Xintval;
+};
+struct Xbig {
+	char Xtype;
+	long int Xintval;
+	PSEXP Xcdr;
+};
+struct Xfloating {
+	char Xtype;
+	double Xfloval;
+};
+struct Xvector {
+	char Xtype;
+	int Xupbv;
+	PSEXP *Xvectelts;
+	char Xused;
+};
+struct Xfpointer {
+	char Xtype;
+	char Xargno;
+	void (*Xfnc)();
+};
+struct Xerrmsg {
+	char Xtype;
+	int Xerrorno;
+	PSEXP Xerrormsg;
+};
 
-struct Xforwardadr { char Xtype;                      /*v 6.0  *GU*/
-                     PSEXP Xforwardaddress; } ;       /*v 6.0  *GU*/
+struct Xforwardadr {
+	char Xtype;                                   /*v 6.0  *GU*/
+	PSEXP Xforwardaddress;
+};                                                    /*v 6.0  *GU*/
 
 typedef struct Xid ID, *PID;
 typedef struct Xpair PAIR, *PPAIR;

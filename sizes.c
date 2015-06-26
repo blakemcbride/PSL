@@ -4,56 +4,78 @@
 typedef int *PSEXP, **PPSEXP;
 
 #if BITF
- struct Xid { char Xtype;
-             int Xisinheap : 1;
-             int Xisglobal : 1;
-             int Xisfluid  : 1;
-             int Xisfunction : 1;
-             int Xisinoblist : 1;
-             int Xisdclfluid : 1;
-             struct Xid *Xhashlink;
-             PSEXP Xvalue;
-             PSEXP Xproplist;
-             char *Xpname; } ;
+struct Xid {
+	char Xtype;
+	int Xisinheap : 1;
+	int Xisglobal : 1;
+	int Xisfluid  : 1;
+	int Xisfunction : 1;
+	int Xisinoblist : 1;
+	int Xisdclfluid : 1;
+	struct Xid *Xhashlink;
+	PSEXP Xvalue;
+	PSEXP Xproplist;
+	char *Xpname;
+};
 #else
- struct Xid { char Xtype;
-             char Xattr;
-             struct Xid *Xhashlink;
-             PSEXP Xvalue;
-             PSEXP Xproplist;
-             char *Xpname; } ;
+struct Xid {
+	char Xtype;
+	char Xattr;
+	struct Xid *Xhashlink;
+	PSEXP Xvalue;
+	PSEXP Xproplist;
+	char *Xpname;
+};
 #endif
 
-struct Xpair { char Xtype;
-               PSEXP Xcar;
-               PSEXP Xcdr; } ;
+struct Xpair {
+	char Xtype;
+	PSEXP Xcar;
+	PSEXP Xcdr;
+};
 
-struct Xstring { char Xtype;
-                 struct Xstrelmnt *Xstrbody; } ;       /*Changed in ver 3.3*/
+struct Xstring {
+	char Xtype;
+	struct Xstrelmnt *Xstrbody;
+};                                                     /*Changed in ver 3.3*/
 
 typedef struct Xstring STRING, *PSTRING;
 
-struct Xstrelmnt { char Xlength;                           /*New in ver 3.3*/
-                   PSTRING Xbackpointer;
-                   char Xrealstr[254]; } ;
+struct Xstrelmnt {
+	char Xlength;                                      /*New in ver 3.3*/
+	PSTRING Xbackpointer;
+	char Xrealstr[254];
+};
 
-struct Xinteger { char Xtype;
-                  long int Xintval; } ;
-struct Xbig { char Xtype;
-              long int Xintval;
-              PSEXP Xcdr; } ;
-struct Xfloating { char Xtype;
-                   double Xfloval; } ;
-struct Xvector { char Xtype;
-                 int Xupbv;
-                 PSEXP *Xvectelts;
-                 char Xused; } ;
-struct Xfpointer { char Xtype;
-                   char Xargno;
-                   int (*Xfnc)(); } ;
-struct Xerrmsg { char Xtype;
-                 int Xerrorno;
-                 PSEXP Xerrormsg; } ;
+struct Xinteger {
+	char Xtype;
+	long int Xintval;
+};
+struct Xbig {
+	char Xtype;
+	long int Xintval;
+	PSEXP Xcdr;
+};
+struct Xfloating {
+	char Xtype;
+	double Xfloval;
+};
+struct Xvector {
+	char Xtype;
+	int Xupbv;
+	PSEXP *Xvectelts;
+	char Xused;
+};
+struct Xfpointer {
+	char Xtype;
+	char Xargno;
+	int (*Xfnc)();
+};
+struct Xerrmsg {
+	char Xtype;
+	int Xerrorno;
+	PSEXP Xerrormsg;
+};
 
 
 
@@ -68,53 +90,58 @@ typedef struct Xerrmsg ERRMSG, *PERRMSG;
 typedef struct Xstrelmnt STRELEMENT, *PSTRELEMENT;
 
 
-unsigned sz[] =       { sizeof(PAIR),
-			sizeof(ID),
-			sizeof(STRING),
-			sizeof(INTEGER),
-			sizeof(BIG),
-			sizeof(FLOATING),
-			sizeof(VECTOR),
-			sizeof(char),
-			sizeof(int),
-			sizeof(long),
-			sizeof(PSEXP),
-			sizeof(double),
-                        sizeof(long long)
+unsigned sz[] =       {
+	sizeof(PAIR),
+	sizeof(ID),
+	sizeof(STRING),
+	sizeof(INTEGER),
+	sizeof(BIG),
+	sizeof(FLOATING),
+	sizeof(VECTOR),
+	sizeof(char),
+	sizeof(int),
+	sizeof(long),
+	sizeof(PSEXP),
+	sizeof(double),
+	sizeof(long long)
 };
 
-long gcd(long m,long n)
+long gcd(long m, long n)
 {
- if (n==0) return m;
- if (n>m) return gcd(n,m);
- return gcd(n,m%n); }
+	if (n == 0)
+		return m;
+	if (n > m)
+		return gcd(n, m);
+	return gcd(n, m % n);
+}
 
 
 int main(void)
-{ int i;
-  long j=1;
+{
+	int i;
+	long j = 1;
 /*  double d1=2.,d2=1.; */
 
-  printf(" size of PAIR           %d\n",sz[0]);
-  printf(" size of ID             %d\n",sz[1]);
-  printf(" size of STRING         %d\n",sz[2]);
-  printf(" size of INTEGER        %d\n",sz[3]);
-  printf(" size of BIG            %d\n",sz[4]);
-  printf(" size of FLOATING       %d\n",sz[5]);
-  printf(" size of VECTOR         %d\n",sz[6]);
-  printf("--------------------------\n");
-  printf(" size of char           %d\n",sz[7]);
-  printf(" size of int            %d\n",sz[8]);
-  printf(" size of long int       %d\n",sz[9]);
-  printf(" size of PSEXP          %d\n",sz[10]);
-  printf(" size of double         %d\n",sz[11]);
-  printf(" size of long long      %d\n",sz[12]);
-  for(i=0; i<8; i++)
-     j = (j/gcd(j,(long) sz[i]))*sz[i];   /* LCM of all sz[i] */
-  printf(" Set PAGESIZE to n positive integer multiple of:  %ld\n",j);
+	printf(" size of PAIR           %d\n", sz[0]);
+	printf(" size of ID             %d\n", sz[1]);
+	printf(" size of STRING         %d\n", sz[2]);
+	printf(" size of INTEGER        %d\n", sz[3]);
+	printf(" size of BIG            %d\n", sz[4]);
+	printf(" size of FLOATING       %d\n", sz[5]);
+	printf(" size of VECTOR         %d\n", sz[6]);
+	printf("--------------------------\n");
+	printf(" size of char           %d\n", sz[7]);
+	printf(" size of int            %d\n", sz[8]);
+	printf(" size of long int       %d\n", sz[9]);
+	printf(" size of PSEXP          %d\n", sz[10]);
+	printf(" size of double         %d\n", sz[11]);
+	printf(" size of long long      %d\n", sz[12]);
+	for (i = 0 ; i < 8 ; i++)
+		j = (j / gcd(j, (long) sz[i])) * sz[i]; /* LCM of all sz[i] */
+	printf(" Set PAGESIZE to n positive integer multiple of:  %ld\n", j);
 /*  while((long)d1 != (long) d2)
     { d1 = d2;
       d2 *= 2; }
-  printf("\n mantissa size of double is %g \n", d1); */
-  return 0;
+   printf("\n mantissa size of double is %g \n", d1); */
+	return 0;
 }

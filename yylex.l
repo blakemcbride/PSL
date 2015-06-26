@@ -1,9 +1,9 @@
 /*  A LISP primitive tokenizer to be used with the STD-LISP interpreter
     written by E. Karabudak. Shall play the role of yylex of UNIX.
 
-    * main function is yylex ... returns parsed expression bit in yytext
-    * expects source from 'inputf' .. a filepointer
-    * the pattern matcher tries to apply the test functions
+ * main function is yylex ... returns parsed expression bit in yytext
+ * expects source from 'inputf' .. a filepointer
+ * the pattern matcher tries to apply the test functions
           is....()
       these functions are responsible of disposing the characters which
       they have consumed by advancing the curpos pointer to the next
@@ -11,7 +11,7 @@
       is also the responsebility of the function to back the pointer
       curpos to the point where that test function was entered, that
       means it  has to restore the virginity... funny ehh!?
-*/
+ */
 
 /* INPUTBUFLEN shall be minimum 200 */
 
@@ -25,22 +25,24 @@ char signflag;       /* is 1/0 depending on whether sign is allowed or not */
 char *ch1, *ch2;
 
 /* The below is new in ver 7.0 */
-/* corrects the problem of  rds() change => lose of unconsumed sexprs in  input buffer */ 
+/* corrects the problem of  rds() change => lose of unconsumed sexprs in  input buffer */
 /* additionally this part now keeps track the open files 7.1 TY */
- 
+
 #define INPUTSAVETABLESIZE 100
 
-typedef 
-   struct INPUT_BUF_SAVE_ENTRY 
-          { FILE *file; 
-            char *curpos;
-            char *lastpos;
-            char input[INPUTBUFLEN]; } INPUT_BUF_SAVE_ENTRY ;
+typedef
+        struct INPUT_BUF_SAVE_ENTRY
+{
+	FILE *file;
+	char *curpos;
+	char *lastpos;
+	char input[INPUTBUFLEN];
+} INPUT_BUF_SAVE_ENTRY;
 
-INPUT_BUF_SAVE_ENTRY input_buf_save_table[INPUTSAVETABLESIZE] ; 
+INPUT_BUF_SAVE_ENTRY input_buf_save_table[INPUTSAVETABLESIZE];
 
 /* end of ver 7.0 new part */
- 
+
 
 
 
@@ -49,303 +51,424 @@ int soffinteger();
 
 /*   PATTERN : 1  */
 void incr_curpos () /* needed for isstring 7.1 TY */
-{ if (curpos < endpos) curpos++; 
-    else zerror(44);
+{
+	if (curpos < endpos)
+		curpos++;
+	else
+		zerror(44);
 }
 
 
 int isstring()
-{  if (*curpos != '"') return(0);
-  cont:
-   incr_curpos ();
-   while (*curpos != '"') incr_curpos ();
-   incr_curpos ();
-   if (*curpos == '"') goto cont;
-   return(1); }
+{
+	if (*curpos != '"')
+		return 0;
+cont:
+	incr_curpos ();
+	while (*curpos != '"')
+		incr_curpos ();
+	incr_curpos ();
+	if (*curpos == '"')
+		goto cont;
+	return 1;
+}
 
 /*   PATTERN : 2  */
 
 int isexl()
-{  if (*curpos != '!') return(0);
-   curpos++;
-   return(1); }
+{
+	if (*curpos != '!')
+		return 0;
+	curpos++;
+	return 1;
+}
 
 int isid()
-{  if ((!isexl()) && (!isalpha(*curpos))) return(0);
-   else curpos++;
-   while(isalnum(*curpos) || isexl()) curpos++; /*patch 1*/
-   return(1);  }
+{
+	if ((!isexl()) && (!isalpha(*curpos)))
+		return 0;
+	else
+		curpos++;
+	while (isalnum(*curpos) || isexl())
+		curpos++;                       /*patch 1*/
+	return 1;
+}
 
 /*  PATTERN : 3  */
 
 int isflo1()
-{  char *start;
+{
+	char *start;
 
-   start = curpos;
-   digits();
-   if(*curpos != '.') goto fail; else curpos++;
-   if(! isdigit(*curpos)) goto fail;
-   digits();
-   exponent();
-   return(1);
- fail:
-   curpos = start;
-   return(0);
+	start = curpos;
+	digits();
+	if (*curpos != '.')
+		goto fail;
+	else
+		curpos++;
+	if (!isdigit(*curpos))
+		goto fail;
+	digits();
+	exponent();
+	return 1;
+fail:
+	curpos = start;
+	return 0;
 }
 
 int isflo2()
-{  char *start;
+{
+	char *start;
 
-   start = curpos;
-   if(! isdigit(*curpos)) goto fail;
-   digits();
-   if(*curpos != '.') goto fail; else curpos++;
-   digits();
-   exponent();
-   return(1);
- fail:
-   curpos = start;
-   return(0);
+	start = curpos;
+	if (!isdigit(*curpos))
+		goto fail;
+	digits();
+	if (*curpos != '.')
+		goto fail;
+	else
+		curpos++;
+	digits();
+	exponent();
+	return 1;
+fail:
+	curpos = start;
+	return 0;
 }
 
 void exponent()
-{  char *start;
+{
+	char *start;
 
-   start = curpos;
-  if( toupper(*curpos) != 'E') goto fail;  else curpos++;
-   sign();
-   if(! isdigit(*curpos)) goto fail;
-   digits();
-   return;
- fail:
-   curpos=start;
+	start = curpos;
+	if ( toupper(*curpos) != 'E')
+		goto fail;
+	else
+		curpos++;
+	sign();
+	if (!isdigit(*curpos))
+		goto fail;
+	digits();
+	return;
+fail:
+	curpos = start;
 }
 
 int sonflo()
-{  sign();
-   return(isflo1() || isflo2());  }
+{
+	sign();
+	return isflo1() || isflo2();
+}
 
 /*  PATTERN : 4 & 6 */
 
 int soninteger()
-{  char *start;
+{
+	char *start;
 
-   start = curpos;
-   sign();
-   if(soffinteger())   return(1);
-   curpos=start;
-   return(0);
+	start = curpos;
+	sign();
+	if (soffinteger())
+		return 1;
+	curpos = start;
+	return 0;
 }
 
 int soffinteger()
-{  if(!isdigit(*curpos)) return(0);        /*  no need to stack start pos */
-   digitcnt = 0;
-   while(isdigit(*curpos)){ digitcnt++; curpos++; }
-   return(1);
+{
+	if (!isdigit(*curpos))
+		return 0;                  /*  no need to stack start pos */
+	digitcnt = 0;
+	while (isdigit(*curpos)) {
+		digitcnt++;
+		curpos++;
+	}
+	return 1;
 }
 
 /*  PATTERN : 5  */
 
 int soffflo()
-{  return(isflo1() || isflo2());  }
+{
+	return isflo1() || isflo2();
+}
 
 /*  PATTERN : 7  */
 
 int isoctal(c)
 {
-  if( (c >= '0')  &&  (c <='7')) return(1);
-  else return(0);  }
+	if ((c >= '0')  &&  (c <= '7'))
+		return 1;
+	else
+		return 0;
+}
 
 int isfpointer()
-{  char *start;
+{
+	char *start;
 
-   start = curpos;
-   if(*curpos != '#')  goto fail;
-   curpos++;
-   if (!isoctal(*curpos)) goto fail;
-   while(((curpos-start) <= 12) && isoctal(*curpos)) curpos++;
-   if(*curpos != '#') goto fail;
-   curpos++;
-   return(1);
- fail:
-   curpos=start;
-   return(0);  }
+	start = curpos;
+	if (*curpos != '#')
+		goto fail;
+	curpos++;
+	if (!isoctal(*curpos))
+		goto fail;
+	while (((curpos - start) <= 12) && isoctal(*curpos))
+		curpos++;
+	if (*curpos != '#')
+		goto fail;
+	curpos++;
+	return 1;
+fail:
+	curpos = start;
+	return 0;
+}
 
 /*  PATTERN : 8  */
 
 int isnonspace()
-{  if ((*curpos != ' ') && (*curpos != '\n') && (*curpos != '\t')) curpos++;
-   else return(0);
-   return(1);  }
+{
+	if ((*curpos != ' ') && (*curpos != '\n') && (*curpos != '\t'))
+		curpos++;
+	else
+		return 0;
+	return 1;
+}
 
 /*  PATTERN : 9  */
 
 int is_blank()
-{  if ((*curpos == ' ') || (*curpos == '\t')) curpos++;
-     else return(0);
-   return(1);  }
+{
+	if ((*curpos == ' ') || (*curpos == '\t'))
+		curpos++;
+	else
+		return 0;
+	return 1;
+}
 
 /*  PATTERN : 10  */
 
 int iseol()          /* comment part added. version 5.2   TY */
-{  if (*curpos == '\n' || *curpos == '%') return(1);
-   else return(0);  }
+{
+	if (*curpos == '\n' || *curpos == '%')
+		return 1;
+	else
+		return 0;
+}
 
 /*  UTILITIES  */
 
 void sign()
-{  char *start;
-   start = curpos;
-   if ((*curpos == '+') || (*curpos == '-')) curpos++;
-   if (!isdigit(*curpos)) curpos = start;  }
+{
+	char *start;
+	start = curpos;
+	if ((*curpos == '+') || (*curpos == '-'))
+		curpos++;
+	if (!isdigit(*curpos))
+		curpos = start;
+}
 
 void digits()
-{  while(isdigit(*curpos)) curpos++;  }
+{
+	while (isdigit(*curpos))
+		curpos++;
+}
 
 void storetext()                 /*  copies matched text into yytext  */
-{ int i;
-  i = (int) (curpos-lastpos);
-  strncpy(yytext,lastpos,i);
-  yytext[i] = 0;
+{
+	int i;
+	i = (int) (curpos - lastpos);
+	strncpy(yytext, lastpos, i);
+	yytext[i] = 0;
 }
 
 void unput(c)
 char c;
-{  *(--curpos) = c; }
+{
+	*(--curpos) = c;
+}
 
 void zycpsunput(c)
 char *c;
-{  ch1 = curpos;       /*  curpos plays the same role as yysptr does  */
-   unput(' ');
-   unput('"');
-   unput(' ');
-   ch2 = curpos;
-   while (c != tx) unput(*(--c));
-   return;  }
+{
+	ch1 = curpos;  /*  curpos plays the same role as yysptr does  */
+	unput(' ');
+	unput('"');
+	unput(' ');
+	ch2 = curpos;
+	while (c != tx)
+		unput(*(--c));
+	return;
+}
 
 int zycpscheck()
-{  if (curpos != ch2) {  curpos = ch1; return(1);  }
-   curpos = ch1;
-   return(0);  }
+{
+	if (curpos != ch2) {
+		curpos = ch1;
+		return 1;
+	}
+	curpos = ch1;
+	return 0;
+}
 
 
 /*  SLAVE FUNCTIONS  */
 
 void zysignonoff(x)
 int x;
-{  if (x) signflag = 1;
-   else signflag = 0; }
+{
+	if (x)
+		signflag = 1;
+	else
+		signflag = 0;
+}
 
 int yylex()
-{ 
-  if (*curpos == 0)
-   {
-     start:
-       if((curpos = fgets(input+100,INPUTBUFLEN-100,inputf)) == NULL)
-         { yywrap(); return(EOF); };    /* ver [5.0]   .GU */
+{
+	if (*curpos == 0) {
+start:
+		if ((curpos = fgets(input + 100, INPUTBUFLEN - 100, inputf)) == NULL) {
+			yywrap();
+			return EOF;
+		}                       /* ver [5.0]   .GU */
 #ifndef TESTYYLEX
-       if (echo.Xvalue!=NIL) zedit(curpos);
+		if (echo.Xvalue != NIL)
+			zedit(curpos);
 #endif
-    }
-  delimflag = 0;     /* That's the common case */
- match:
-  lastpos = curpos;
+	}
+	delimflag = 0; /* That's the common case */
+match:
+	lastpos = curpos;
 
-  if (isstring()) { storetext(); return(Tstring); };
-  if (isid())     { storetext(); return(Tid); };
-  if (signflag)   { if (sonflo())     { storetext(); return(Tfloating); };
-                    if (soninteger())
-                       { storetext();
-                         return(digitcnt <= DZ ? Tinteger : Tbig);} }
-  else            { if (soffflo())    { storetext(); return(Tfloating); };
-                    if (soffinteger())
-                       { storetext();
-                         return(digitcnt <= DZ ? Tinteger : Tbig);} };
-  if (isfpointer())  { storetext(); return(Tfpointer); };
-  if (iseol())    {
+	if (isstring()) {
+		storetext();
+		return Tstring;
+	}
+	if (isid()) {
+		storetext();
+		return Tid;
+	}
+	if (signflag) {
+		if (sonflo()) {
+			storetext();
+			return Tfloating;
+		}
+		if (soninteger()) {
+			storetext();
+			return digitcnt <= DZ ? Tinteger : Tbig;
+		}
+	} else {
+		if (soffflo()) {
+			storetext();
+			return Tfloating;
+		}
+		if (soffinteger()) {
+			storetext();
+			return digitcnt <= DZ ? Tinteger : Tbig;
+		}
+	}
+	if (isfpointer()) {
+		storetext();
+		return Tfpointer;
+	}
+	if (iseol()) {
 #ifndef TESTYYLEX
-                    if (inputf == stdin && !null(value(&prompt)))
-                     { if(idp(value(&prompt))) printf("%s",pname(value(&prompt)));
-                       else if(stringp(value(&prompt)))
-                          printf("%s",strbody(value(&prompt))); }
+		if (inputf == stdin && !null(value(&prompt))) {
+			if (idp(value(&prompt)))
+				printf("%s", pname(value(&prompt)));
+			else if (stringp(value(&prompt)))
+				printf("%s", strbody(value(&prompt)));
+		}
 #endif
-                    goto start; };
-  if (isnonspace()) { delimflag = 1; storetext(); return(Tid); };
-  if (is_blank())  goto match;
-  zerror(8);
-  return(0);  /* just for supressing warning - Mar 2009 TY */
+		goto start;
+	}
+	if (isnonspace()) {
+		delimflag = 1;
+		storetext();
+		return Tid;
+	}
+	if (is_blank())
+		goto match;
+	zerror(8);
+	return 0; /* just for supressing warning - Mar 2009 TY */
 }
 
 char yych()  /* This function is new, will be used by Readch ver [5.0] .GU */
 {
-  if(*curpos == 0)
-   {if((curpos = fgets(input+100,INPUTBUFLEN-100,inputf)) == NULL)
-      { yywrap(); return(EOF); };       /* ver [5.0]   .GU */
+	if (*curpos == 0) {
+		if ((curpos = fgets(input + 100, INPUTBUFLEN - 100, inputf)) == NULL) {
+			yywrap();
+			return EOF;
+		}                       /* ver [5.0]   .GU */
 #ifndef TESTYYLEX
-    if(echo.Xvalue!=NIL) zedit(curpos);
+		if (echo.Xvalue != NIL)
+			zedit(curpos);
 #endif
-   }
-  return(*(curpos++));
+	}
+	return *(curpos++);
 }
 
 
 void yywrap()     /* was formerly in lisp-zfn.l ... don't know why? */
 {
-  if(inputf == stdin)
-    { printf("end of std input file\n");
-      exit(0); }
-}           
+	if (inputf == stdin) {
+		printf("end of std input file\n");
+		exit(0);
+	}
+}
 /* The below is new in ver 7.0 */
 
 void store_input_buf_save_entry()  /* stores current input from inputf */
-{ 
- int i;
- for (i=0; i<INPUTSAVETABLESIZE; i++) 
-    if (input_buf_save_table[i].file==inputf) goto proceed;
- for (i=0; i<INPUTSAVETABLESIZE; i++) 
-    if (input_buf_save_table[i].file == NULL) goto proceed;
- /* if we are here no empty place in table ..=> issue error */
- zerror(42);
+{
+	int i;
+	for (i = 0 ; i < INPUTSAVETABLESIZE ; i++)
+		if (input_buf_save_table[i].file == inputf)
+			goto proceed;
+	for (i = 0 ; i < INPUTSAVETABLESIZE ; i++)
+		if (input_buf_save_table[i].file == NULL)
+			goto proceed;
+	/* if we are here no empty place in table ..=> issue error */
+	zerror(42);
 proceed:
-    input_buf_save_table[i].file    =  inputf;
-    input_buf_save_table[i].curpos  =  curpos;
-    input_buf_save_table[i].lastpos = lastpos;
-    memcpy(input_buf_save_table[i].input, input, INPUTBUFLEN);
-}         
+	input_buf_save_table[i].file    =  inputf;
+	input_buf_save_table[i].curpos  =  curpos;
+	input_buf_save_table[i].lastpos = lastpos;
+	memcpy(input_buf_save_table[i].input, input, INPUTBUFLEN);
+}
 
 
 void restore_input_buf_save_entry()  /* restores current input of inputf  */
 {                                    /* if ~exist in table=> no action    */
- int i;
- for (i=0; i<INPUTSAVETABLESIZE; i++) 
-    if (input_buf_save_table[i].file==inputf)
-      { 
-        curpos  = input_buf_save_table[i].curpos;
-        lastpos = input_buf_save_table[i].lastpos;
-        memcpy(input, input_buf_save_table[i].input, INPUTBUFLEN);
-        return;
-      }
-}         
+	int i;
+	for (i = 0 ; i < INPUTSAVETABLESIZE ; i++)
+		if (input_buf_save_table[i].file == inputf) {
+			curpos  = input_buf_save_table[i].curpos;
+			lastpos = input_buf_save_table[i].lastpos;
+			memcpy(input, input_buf_save_table[i].input, INPUTBUFLEN);
+			return;
+		}
+}
 
-       
+
 int kill_input_buf_save_entry(FILE *f)  /* brutally removes current input from f */
-{                                 /* no action if not exist */ 
- int i;
- for (i=0; i<INPUTSAVETABLESIZE; i++) 
-    if (input_buf_save_table[i].file==f)
-       { input_buf_save_table[i].file = NULL;
-         return(1); }  /* only one existence is possible */
- return(0);  /* 7.1 now returns the success TY */
-}           
+{                                 /* no action if not exist */
+	int i;
+	for (i = 0 ; i < INPUTSAVETABLESIZE ; i++)
+		if (input_buf_save_table[i].file == f) {
+			input_buf_save_table[i].file = NULL;
+			return 1;
+		}      /* only one existence is possible */
+	return 0; /* 7.1 now returns the success TY */
+}
 
 void create_input_buf_save_entry(FILE *f)   /* creates a buffer for input  7.1 TY */
 {                                         /* used for keep track of input files */
-  int i;
-  for (i=0; i<INPUTSAVETABLESIZE; i++)
-    if(input_buf_save_table[i].file == NULL)
-      { input_buf_save_table[i].file = f;
-        input_buf_save_table[i].curpos  = "";
-        return;
-      }
-  zerror(42); /* if we are here no empty place in table ..=> issue error */
+	int i;
+	for (i = 0 ; i < INPUTSAVETABLESIZE ; i++)
+		if (input_buf_save_table[i].file == NULL) {
+			input_buf_save_table[i].file = f;
+			input_buf_save_table[i].curpos  = "";
+			return;
+		}
+	zerror(42); /* if we are here no empty place in table ..=> issue error */
 }
