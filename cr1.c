@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#define  outfile  "lisp1.c"
 
 #include "flags.l"
 #include "crfile.h"
 
 
+char outfile[100];
 char hsh[128][50];
 char nm[32], pnm[32], tp[20], val[32], compn1[30], compn[30], argv1[30];
 char ln[132], *buf, *obuf;
@@ -55,10 +55,16 @@ int main(argc, argv)
 int argc;
 char *argv[];
 {
-	if (argc >= 2)
-		strcpy(argv1, argv[1]);
-	else
+	if (argc == 1) {
+		strcpy(outfile, "lisp1.c");
 		strcpy(argv1, "~~~");  /*  force user to use "comp" argument when building for the compiler */
+	} else if (argc != 3) {
+		fprintf(stderr, "Usage:  cr1  [<compiler-file-prefix>  <output-file>]\n");
+		exit(1);
+	} else {
+		strcpy(argv1, argv[1]);
+		strcpy(outfile, argv[2]);
+	}
 	strcpy(compn, argv1);
 	strcat(compn, "n");
 	strcpy(compn1, argv1);
