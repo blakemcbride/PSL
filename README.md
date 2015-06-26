@@ -14,6 +14,8 @@ This system was written by:
 	Dr. Gokturk Ucoluk
 	Ersin Karabudak
 
+It is available from:  https://github.com/blakemcbride/PSL
+
 Through the years I (Blake McBride) contributed portability
 adjustments, build adjustments, and bug fixes.  More recently,
 I was given permission to release the system.  I performed
