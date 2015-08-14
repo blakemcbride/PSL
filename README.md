@@ -48,7 +48,7 @@ The compiler is just the regular lisp interpreter with the compiler
 To build the compiler type:  make lispc
 
 Note that the process of building anything but the raw interpreter
-builds an initialization file names LISP-INI.  This file is specific
+builds an initialization file named LISP-INI.  This file is specific
 to the related lisp executable created.  The means the "lisp" program
 and the "lispc" program must use different LISP-INI files.  This also
 means that "lisp" will not run after you create "lispc" because of the
