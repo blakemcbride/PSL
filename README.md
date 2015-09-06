@@ -26,7 +26,7 @@ The git repository you obtained this system from starts its repository
 history with the code that has been distributed on their Internet site
 ( http://www.ceng.metu.edu.tr/~ucoluk/research/lisp/generalinfo.html )
 then continues with the changes that were made by both them and me.
-After the joint changes were applied, I numerous changes including
+After the joint changes were applied, I made numerous changes including
 code re-formatting and code changes designed to simplify the build
 process along with some minor corrections and enhancements.
 
@@ -87,7 +87,7 @@ Basically all of the lisp source files get compiled and combined into
 a single executable.  You must compile all of the lisp files at the
 same time.  Additional source files may be included in the compile by
 typing their file names in double-quotes one after the other when
-prompted by the compiler.  You type "end" (without the quotes when
+prompted by the compiler.  You type "end" (without the quotes) when
 done.
 
 
