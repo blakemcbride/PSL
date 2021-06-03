@@ -104,6 +104,4 @@ documentation on the PSL lisp dialect that this system conforms to.
 
 
     Blake McBride
-    blake@mcbride.name
-    blake1024@gmail.com
-    blake@arahant.com
+    blake@mcbridemail.com
