@@ -8,17 +8,14 @@
 
 COMPILER_FILES = compc1 compe compn1 compu compx1
 
-all: lisp lispc LISP-INI
+all: lisp lispc
 
 lisp : lisp1.o lisp2.o crc cri
 	gcc -ggdb -O0 -o lisp lisp1.o lisp2.o -lm
 
-lispc : lisp1c.o lisp2.o lispc1.o
-	gcc -o $@ $^ -lm
-	./cri comp
-
-LISP-INI : $(COMPILER_FILES) cri
-	./cri comp
+lispc : lisp1c.o lisp2.o lispc1.o cri
+	gcc -o $@ lisp1c.o lisp2.o lispc1.o -lm
+	./cri comp lispc.lispini
 
 lisp1.c : flags.l fnames.l types.l sysids.l sysid.l cr1 
 	./cr1
@@ -59,7 +56,7 @@ clean:
 	rm -f compc1 compe compn1 compu compx1
 
 realclean: clean
-	rm -f lisp lispc cr? LISP-INI
+	rm -f lisp lispc cr? LISP-INI *.lispini
 
 sizes :  sizes.c flags.l
 	gcc -Wall -pedantic -o sizes sizes.c

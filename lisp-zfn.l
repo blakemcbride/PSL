@@ -433,17 +433,15 @@ void zurwelt()
 	unsigned int i;
 	char *x, buf[BUFSIZE];                                        /*TY*/
 	char u = 0;
+	char *exe_ini = NULL;
 
 	size_t j;
-/*  if environment has been set by '-e' command line option take it;
-       else set environment to "LISPINI";
-    GET the initialization file name from the environment;
-    if the name obtained, try to open it;
-       else try to open "LISP-INI";
-    if init file opened, it is the initialization file;
-       else get the full path of running program and concatanate ".lispini" to it,
-         and try open this file as an initialization file;
-    if all fail, that means no initialization file. */
+/*  Search order for initialization file:
+    1. If -e option specified, use that environment variable
+    2. Else check LISPINI environment variable
+    3. Else try <executable>.lispini (executable-specific)
+    4. Else fall back to LISP-INI (legacy)
+    If all fail and ursize > 0, error out; otherwise continue without ini */
 	if (environment != NULL) {
 		x = (PCHAR) getenv(environment);                     /*GU*/
 		if (!x)
@@ -451,21 +449,30 @@ void zurwelt()
 	}                                                              /*GU*/
 	else
 		x = getenv("LISPINI");                               /*GU*/
-	if (!x)
-		x = "LISP-INI";                                      /*GU*/
-	fp = fopen(x, "r");
-#if LINUX                                   /*this part included in 7.1 May 2009 TY */
+	fp = x ? fopen(x, "r") : NULL;
+#if LINUX
+	/* Try executable-specific ini file first */
 	if (!fp) {
 		j = readlink("/proc/self/exe", buf, (size_t) BUFSIZE);
 		if (j != -1) {
 			buf[j] = 0;
-			x = strcat(buf, ".lispini");
-			fp = fopen(x, "r");
+			exe_ini = strcat(buf, ".lispini");
+			fp = fopen(exe_ini, "r");
+			if (fp)
+				x = exe_ini;
 		}
 	}
 #endif
+	/* Fall back to LISP-INI for legacy compatibility */
 	if (!fp) {
-		printf("No initialization file: %s or LISP-INI\n", x);
+		x = "LISP-INI";
+		fp = fopen(x, "r");
+	}
+	if (!fp) {
+		if (exe_ini)
+			printf("No initialization file: %s or LISP-INI\n", exe_ini);
+		else
+			printf("No initialization file: LISP-INI\n");
 		if (ursize)
 			zysuicide(6);
 		else
