@@ -5,8 +5,7 @@ void booleanp(int i)      /* utility used by most of boolean functions */
 	reg1 = i ? T : NIL;
 }
 
-int greaterp1(x, y)    /* utility used by Greaterp, Lessp */
-PSEXP x, y;
+int greaterp1(PSEXP x, PSEXP y)    /* utility used by Greaterp, Lessp */
 {
 	switch (type(x)) {
 	case Tinteger:
@@ -93,8 +92,7 @@ jn:
 	return 0;
 }
 
-int addsub1(n)    /* utility used by Add1, Sub1 */
-int n;
+int addsub1(int n)    /* utility used by Add1, Sub1 */
 {
 	switch (type(reg1)) {
 	case Tinteger:
@@ -116,8 +114,7 @@ int n;
 	}
 }
 
-int addsub(s)     /* utility used by Plus2, Difference */
-int s;
+int addsub(int s)     /* utility used by Plus2, Difference */
 {
 	double d;
 	switch (type(reg1)) {
@@ -188,14 +185,14 @@ void Abs()
 			reg1 = zfloating(-y);
 		return;
 	default:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	}
 }
 /*@*/
 Add1()
 {
 	if (addsub1(1))
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 }
 /*@*/
 Alength()
@@ -279,7 +276,7 @@ Apply()
 		}
 		for (i = 0 ; i <= n ; i++) {
 			if (null(u))
-				zerror(17);
+				zerror(17, NIL, NIL, NIL);
 			registers[i] = car(u);
 			u = cdr(u);
 		}
@@ -295,7 +292,7 @@ Apply()
 	}
 	if (idp(f)) {
 		if (!functionp(f))
-			zerror(15, f);
+			zerror(15, f, NIL, NIL);
 		else if (car(value(f)) == Sexp(&expr) || car(value(f)) == Sexp(&subr)) {
 			reg1 = cdr(value(f));
 			Apply();
@@ -304,19 +301,19 @@ Apply()
 #endif
 			return;
 		} else
-			zerror(16, f);
+			zerror(16, f, NIL, NIL);
 	}
 	if (!pairp(f) || car(f) != Sexp(&lambda))
-		zerror(16, f);
+		zerror(16, f, NIL, NIL);
 	u = cadr(f);
 #if 0
 	if (!pairp(u))               /* improper lambda expression Nov 2014 TY */
-		zerror(19, f);
+		zerror(19, f, NIL, NIL);
 #endif
 	n = 0;
 	while (u != NIL) {
 		if (null(reg2))
-			zerror(17);
+			zerror(17, NIL, NIL, NIL);
 		zalist(car(u), value(car(u)));
 		value(car(u)) = car(reg2);
 		u = cdr(u);
@@ -324,7 +321,7 @@ Apply()
 		n++;
 	}
 	if (reg2 != NIL)
-		zerror(17);
+		zerror(17, NIL, NIL, NIL);
 	reg1 = caddr(f);
 	Eval();
 	while (n--)
@@ -353,7 +350,7 @@ Assoc()
 		if (null(v))
 			zreturn(NIL)
 		if (atom(v) || atom(car(v)))
-			zerror(26, reg2);
+			zerror(26, reg2, NIL, NIL);
 		reg2 = caar(v);
 		reg1 = u;
 		Equal();
@@ -559,12 +556,12 @@ Close1()
 	if (fixp(reg1)) {
 		if (kill_input_buf_save_entry(f = (FILE *) intval(reg1))) { /* 7.1 is it a valid file handle  TY */
 			if (fclose(f))          /* 7.0 . It will not harm write files */
-				zerror(20, reg1);
+				zerror(20, reg1, NIL, NIL);
 		}                               /*  Since they have no buf.table entry at all.  GU */
 		else
-			zerror(43, reg1);
+			zerror(43, reg1, NIL, NIL);
 	} else
-		zerror(36, reg1, @);
+		zerror(36, reg1, @, NIL);
 }
 /*@*/
 Cdif()
@@ -572,9 +569,9 @@ Cdif()
 	int i;
 	i = addsub(-1);
 	if (i == 1)
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	else if (i == 2)
-		zerror(12, reg2, @);
+		zerror(12, reg2, @, NIL);
 	Cmod();
 }
 /*@*/
@@ -595,9 +592,9 @@ Cplus()
 	int i;
 	i = addsub(1);
 	if (i == 1)
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	else if (i == 2)
-		zerror(12, reg2, @);
+		zerror(12, reg2, @, NIL);
 	Cmod();
 }
 /*@*/
@@ -624,7 +621,7 @@ Crecip()
 	reg1 = zinteger((b > 0 ? 0 : pr) + b % pr);
 	return;
 err:
-	zerror(36, reg1, @);
+	zerror(36, reg1, @, NIL);
 }
 /*@*/
 Ctimes()
@@ -658,28 +655,28 @@ Codep()
 /*@*/
 Compress()
 {
-	int i = 0, zycpscheck();
-	void zycpsunput();
+	int i = 0, zycpscheck(void);
+	void zycpsunput(char *);
 	PSEXP u;
 	char *c;
 	c = tx;
 	while (!null(reg1)) {
 		if (i++ == TXSIZE)
-			zerror(1);   /* size of array tx limits */
+			zerror(1, NIL, NIL, NIL);   /* size of array tx limits */
 		if (!pairp(reg1))
 			zerror(0, reg1, Sexp(&npair), @);
 		u = car(reg1);
 		if (idp(u)) {
 			if (pname(u)[1])
-				zerror(28, u, @);
+				zerror(28, u, @, NIL);
 			*c++ = *pname(u);
 		} else if (fixp(u)) {
 			if (intval(u) < 0 || intval(u) > 9)
-				zerror(28, u, @);
+				zerror(28, u, @, NIL);
 			sprintf(c, "%1ld", intval(u));
 			c++;
 		} else
-			zerror(28, u, @);
+			zerror(28, u, @, NIL);
 		reg1 = cdr(reg1);
 
 	}
@@ -687,7 +684,7 @@ Compress()
 	zycpsunput(c);
 	Token();
 	if (zycpscheck())
-		zerror(1);
+		zerror(1, NIL, NIL, NIL);
 }
 /*@*/
 Cond()
@@ -695,7 +692,7 @@ Cond()
 	kalloc(1);
 	while (!null(reg1)) {
 		if (atom(reg1) || atom(car(reg1)))
-			zerror(11);
+			zerror(11, NIL, NIL, NIL);
 		kset0(reg1);
 		reg1 = caar(reg1);
 		Eval();
@@ -749,13 +746,13 @@ De()
 	reg2 = cadr(reg1);
 #if 0
 	if (!pairp(reg2))
-		zerror(45, reg2, @); /* id parameters list expected Nov 2014 TY*/
+		zerror(45, reg2, @, NIL); /* id parameters list expected Nov 2014 TY*/
 #endif
 	while (!null(reg2))
 		if (idp(car(reg2)))
 			reg2 = cdr(reg2);
 		else
-			zerror(45, cadr(reg1), @);
+			zerror(45, cadr(reg1), @, NIL);
 	defn();
 	reg2 = Sexp(&expr);
 	Putd();
@@ -810,7 +807,7 @@ lab2:
 Df()
 {
 	if (!pairp(cadr(reg1)) || !null(cdadr(reg1)))
-		zerror(45, cadr(reg1), @); /*Parameter list expected Nov 2014 TY*/
+		zerror(45, cadr(reg1), @, NIL); /*Parameter list expected Nov 2014 TY*/
 	defn();
 	reg2 = Sexp(&fexpr);
 	Putd();
@@ -822,9 +819,9 @@ Difference()
 	case 0:
 		return;
 	case 1:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	case 2:
-		zerror(12, reg2, @);
+		zerror(12, reg2, @, NIL);
 	}
 }
 /*@*/
@@ -838,10 +835,10 @@ Divide()
 	char x;
 	x = type(reg1);
 	if (!((x == Tinteger) || (x == Tbig)))
-		zerror(36, reg1, @);
+		zerror(36, reg1, @, NIL);
 	x = type(reg2);
 	if (!((x == Tinteger) || (x == Tbig)))
-		zerror(36, reg2, @);
+		zerror(36, reg2, @, NIL);
 	zdivision(2);
 }
 /*
@@ -855,7 +852,7 @@ Divide()
 Dm()
 {
 	if (!pairp(cadr(reg1)) || !null(cdadr(reg1)))
-		zerror(45, cadr(reg1), @); /*Parameter list expected Nov 2014 TY*/
+		zerror(45, cadr(reg1), @, NIL); /*Parameter list expected Nov 2014 TY*/
 	defn();
 	reg2 = Sexp(&macro);
 	Putd();
@@ -869,7 +866,7 @@ Dump()
 	else if (idp(reg1))
 		zdump(pname(reg1));
 	else
-		zerror(27, reg1, @);
+		zerror(27, reg1, @, NIL);
  #else
 	printf("\n*** not compiled in DEBUG mode !\n");
 #endif
@@ -1090,7 +1087,7 @@ Eval()
 #endif
 	if (idp(reg1)) { /* curly parant. added - Mar 2009 TY */
 		if (value(reg1) == NULL || functionp(reg1))
-			zerror(18, reg1);
+			zerror(18, reg1, NIL, NIL);
 		else {
 			reg1 = value(reg1);
 #if TRACEABLE
@@ -1106,12 +1103,12 @@ Eval()
 		if (caar(reg1) == Sexp(&lambda))
 			goto lab1;
 		else
-			zerror(19, car(reg1));
+			zerror(19, car(reg1), NIL, NIL);
 	}
 	if (codep(car(reg1)))
 		goto lab1;
 	if (!idp(car(reg1)) || !functionp(car(reg1)))
-		zerror(15, car(reg1));
+		zerror(15, car(reg1), NIL, NIL);
 	reg1 = value(car(reg1));
 	if (car(reg1) == Sexp(&expr) || car(reg1) == Sexp(&subr)) {
 		kset(2, reg1);
@@ -1214,7 +1211,7 @@ Explode()
 	if (bigp(reg1)) {
 		n = (int)bigval(reg1);
 		if (abs(n) > 100)
-			zerror(36, reg1, @); /* max. 100*DZ length list allowed */
+			zerror(36, reg1, @, NIL); /* max. 100*DZ length list allowed */
 		reg1 = bigcdr(reg1);
 		x = tx;
 		if (n < 0)
@@ -1287,10 +1284,10 @@ Expt()
 			goto df;
 		}
 	default:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	}
 df:
-	zerror(12, reg2, @);
+	zerror(12, reg2, @, NIL);
 }
 
 /*@*/
@@ -1332,7 +1329,7 @@ Fix()
 		}
 		return;
 	default:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	}
 }
 /*@*/
@@ -1399,7 +1396,7 @@ Float()
 		x = zbig2float(reg1);
 		break;
 	default:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	}
 	reg1 = zfloating(x);
 }
@@ -1421,7 +1418,7 @@ Fluid()
 			continue;
 		}
 		if (globalp(car(reg1)) || functionp(car(reg1)))
-			zerror(3, car(reg1));
+			zerror(3, car(reg1), NIL, NIL);
 #if BITF
 		fluidp(car(reg1)) = 1;
 #else
@@ -1490,7 +1487,7 @@ Getv()
 	if (!fixp(reg2))
 		zerror(0, reg2, Sexp(&ninteger), @);
 	if ((x = intval(reg2)) < 0 || x > upbv(reg1))
-		zerror(9, reg2);
+		zerror(9, reg2, NIL, NIL);
 	reg1 = vectelt(reg1, x);
 }
 /*@*/
@@ -1507,7 +1504,7 @@ Global()
 			continue;
 		}
 		if (fluidp(z))
-			zerror(4, z);
+			zerror(4, z, NIL, NIL);
 #if BITF
 		globalp(z) = 1;
 #else
@@ -1540,9 +1537,9 @@ Greaterp()
 	case 0:
 		return;
 	case 1:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	case 2:
-		zerror(12, reg2, @);
+		zerror(12, reg2, @, NIL);
 	}
 }
 /*@*/
@@ -1581,9 +1578,9 @@ Lessp()
 	case 0:
 		return;
 	case 1:
-		zerror(12, reg2, @);
+		zerror(12, reg2, @, NIL);
 	case 2:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	}
 }
 /*@*/
@@ -1595,7 +1592,7 @@ Linelength()
 	}
 	if (null(reg1))
 		zreturn(zinteger((long) lineln))
-	zerror(21, reg1);
+	zerror(21, reg1, NIL, NIL);
 }
 /*@*/
 List()
@@ -1651,9 +1648,9 @@ Logor2()
 	if (fixp(reg1) && fixp(reg2))
 		reg1 = zinteger(intval(reg1) | intval(reg2));
 	else if (!fixp(reg1))
-		zerror(39, reg1, @);
+		zerror(39, reg1, @, NIL);
 	else
-		zerror(39, reg2, @);
+		zerror(39, reg2, @, NIL);
 }
 /*@*/
 Logand2()
@@ -1661,9 +1658,9 @@ Logand2()
 	if (fixp(reg1) && fixp(reg2))
 		reg1 = zinteger(intval(reg1) & intval(reg2));
 	else if (!fixp(reg1))
-		zerror(39, reg1, @);
+		zerror(39, reg1, @, NIL);
 	else
-		zerror(39, reg2, @);
+		zerror(39, reg2, @, NIL);
 }
 /*@*/
 Logxor2()
@@ -1671,9 +1668,9 @@ Logxor2()
 	if (fixp(reg1) && fixp(reg2))
 		reg1 = zinteger(intval(reg1) ^ intval(reg2));
 	else if (!fixp(reg1))
-		zerror(39, reg1, @);
+		zerror(39, reg1, @, NIL);
 	else
-		zerror(39, reg2, @);
+		zerror(39, reg2, @, NIL);
 }
 /*@*/
 Lposn()
@@ -1956,7 +1953,7 @@ Minus()
 		reg1 = zbig(-bigval(reg1), bigcdr(reg1));
 		return;
 	default:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	}
 }
 /*@*/
@@ -1976,7 +1973,7 @@ Minusp()
 			goto jt;
 		break;
 	default:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	}
 	reg1 = NIL;
 	return;
@@ -1992,12 +1989,12 @@ Mkvect()
 
 	m = intval(reg1);
 	if (m < 0 || m > 16000)
-		zerror(10, reg1);             /*system dependent TY*/
+		zerror(10, reg1, NIL, NIL);             /*system dependent TY*/
 	v = Sexp(zalloc(Tvector));
 	upbv(v) = m;
 	x = (PPSEXP) myalloc((unsigned) (m + 1) * sizeof(PSEXP)); /*ver 5.1 TY*/
 	if (x == NULL)
-		zerror(10, reg1);
+		zerror(10, reg1, NIL, NIL);
 	vectelts(v) = x;
 	usedvec(v) = 1; /*ver 5.2 TY*/
 	for (n = 0 ; n <= m ; n++)
@@ -2064,20 +2061,19 @@ Open1()
 	int i;
 	char b[150], rw[3];
 	char *x, *y;
-	extern char *getenv();
 
 	if (stringp(reg1))
 		fl = strbody(reg1);
 	else if (idp(reg1))
 		fl = pname(reg1);
 	else
-		zerror(27, reg1, @);
+		zerror(27, reg1, @, NIL);
 	if (reg2 == Sexp(&inpt))
 		strcpy(rw, "r");
 	else if (reg2 == Sexp(&outpt))
 		strcpy(rw, "w");
 	else
-		zerror(22, reg2);
+		zerror(22, reg2, NIL, NIL);
 	fp = fopen(fl, rw);
 #if LINUX              /* Search the path  7.1 TY */
 	if (fp == NULL) {
@@ -2106,7 +2102,7 @@ Open1()
 	}
 #endif
 	if (fp == NULL)
-		zerror(23, reg1);
+		zerror(23, reg1, NIL, NIL);
 	create_input_buf_save_entry(fp); /* 7.1 TY */
 	reg1 = zinteger((long) fp);
 }
@@ -2170,7 +2166,7 @@ Orderp()
 		Lessp();
 		return;
 	default:
-		zerror(36, reg1, @);
+		zerror(36, reg1, @, NIL);
 	}
 jtrue:
 	reg1 = T;
@@ -2189,7 +2185,7 @@ Pagelength()
 	if (fixp(reg1) && intval(reg1) >= 0)
 		pageln = intval(reg1);
 	else
-		zerror(30, reg1);
+		zerror(30, reg1, NIL, NIL);
 	reg1 = v;
 }
 /*@*/
@@ -2211,10 +2207,10 @@ Pair()
 			if (atom(reg2))
 				zkreturn(local(1), 3)
 			else
-				zerror(14);
+				zerror(14, NIL, NIL, NIL);
 		}                 /* braces put - Mar 2009 */
 		if (atom(reg2))
-			zerror(14);
+			zerror(14, NIL, NIL, NIL);
 		local0 = zcons(car(reg1), car(reg2));
 		local(2) = cdr(local(2)) = zcons1(local0);
 	}
@@ -2271,7 +2267,7 @@ Plus()
 	kpop(2);
 	return;
 err:
-	zerror(12, reg1, @);
+	zerror(12, reg1, @, NIL);
 	/* from now on integers are big */
 bign:
 	kset(1, reg2);
@@ -2323,9 +2319,9 @@ Plus2()
 	case 0:
 		return;
 	case 1:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	case 2:
-		zerror(12, reg2, @);
+		zerror(12, reg2, @, NIL);
 	}
 }
 /*@*/
@@ -2462,7 +2458,7 @@ Prin2()
 Princ()
 {
 	if (!idp(reg1))
-		zerror(28, reg1, @);
+		zerror(28, reg1, @, NIL);
 	if (reg1 == Sexp(&eol)) {
 		putc('\n', outputf); /*quick code   TY*/
 		cnewline;
@@ -2470,7 +2466,7 @@ Princ()
 		return;
 	}
 	if (pname(reg1)[1])
-		zerror(28, reg1, @);
+		zerror(28, reg1, @, NIL);
 	zedit(pname(reg1));
 }
 /*@*/
@@ -2527,7 +2523,7 @@ Prog()
 		kset0( cdr(local(1)));
 		while (1) {
 			if (null(local0))
-				zerror(6, errormsg(reg1));
+				zerror(6, errormsg(reg1), NIL, NIL);
 			if (car(local0) == errormsg(reg1))
 				break;
 			kset0( cdr(local0));
@@ -2584,10 +2580,10 @@ Putd()
 {
 #if BITF
 	if (!idp(reg1) || globalp(reg1) || fluidp(reg1))
-		zerror(2, reg1);
+		zerror(2, reg1, NIL, NIL);
 #else
 	if (!idp(reg1) || (attribute(reg1) & 0x18))
-		zerror(2, reg1);
+		zerror(2, reg1, NIL, NIL);
 #endif
 	if (reg2 != Sexp(&expr) && reg2 != Sexp(&fexpr) && reg2 != Sexp(&macro)
 /*   && reg2 != Sexp(&lexpr) && reg2 != Sexp(&nexpr)  */
@@ -2612,7 +2608,7 @@ Putv()
 	if (!fixp(reg2))
 		zerror(0, reg2, Sexp(&ninteger), @);
 	if (intval(reg2) < 0 || intval(reg2) > upbv(reg1))
-		zerror(9, reg2);
+		zerror(9, reg2, NIL, NIL);
 	vectelt(reg1, intval(reg2)) = reg3;
 	reg1 = reg3;
 }
@@ -2668,10 +2664,10 @@ Quotient()
 			goto err;
 		}
 	default:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	}
 err:
-	zerror(12, reg2, @);
+	zerror(12, reg2, @, NIL);
 jint:
 	zdivision(1);
 	return;
@@ -2697,7 +2693,7 @@ Rds()
 		restore_input_buf_save_entry();
 	}                                                 /* 7.0 */
 	else
-		zerror(24, reg1);
+		zerror(24, reg1, NIL, NIL);
 	reg1 = v;
 }
 /*@*/
@@ -2910,7 +2906,7 @@ Rplacd()
 Sassoc()                       /*modified completely TY*/
 {
 	if (atom(reg2))
-		zerror(26, reg2);
+		zerror(26, reg2, NIL, NIL);
 	kalloc(2);
 	kset0( reg1);
 lab0:
@@ -2921,7 +2917,7 @@ lab0:
 	goto lab3;
 lab1:
 	if (atom(car(reg2)))
-		zerror(26, reg2);
+		zerror(26, reg2, NIL, NIL);
 	kset(1, reg2);
 	reg2 = car(car(reg2));
 	Equal();
@@ -2942,7 +2938,7 @@ lab3:
 Select()
 {
 	if (atom(reg1) || atom(cdr(reg1)))
-		zerror(31);
+		zerror(31, NIL, NIL, NIL);
 	kalloc(2);
 	kset0(reg1);
 	kset(1, reg2);
@@ -2952,7 +2948,7 @@ Select()
 	kset0( cdr(local0));
 	while (!null(cdr(local0))) {
 		if (atom(car(local0)))
-			zerror(31);
+			zerror(31, NIL, NIL, NIL);
 		reg1 = caar(local0);
 		Eval();
 		Equal();
@@ -2965,7 +2961,7 @@ Select()
 		}
 		kset0( cdr(local0));
 		if (atom(local0))
-			zerror(31);
+			zerror(31, NIL, NIL, NIL);
 	}
 	reg1 = car(local0);
 	kpop(2);
@@ -2981,9 +2977,9 @@ Set()
 	if (!idp(reg1))
 		zerror(0, reg1, Sexp(&nid), @);
 	if (reg1 == NIL || reg1 == T)
-		zerror(5);
+		zerror(5, NIL, NIL, NIL);
 	if (functionp(reg1))
-		zerror(3, reg1);
+		zerror(3, reg1, NIL, NIL);
 	reg1 = value(reg1) = reg2;
 #if TRACEABLE
 exit:
@@ -3009,9 +3005,9 @@ Setq()
 	if (!idp(z = car(reg1)))
 		zerror(0, z, Sexp(&nid), @);
 	if (z == NIL || z == T)
-		zerror(5);
+		zerror(5, NIL, NIL, NIL);
 	if (functionp(z))
-		zerror(3, z);
+		zerror(3, z, NIL, NIL);
 	reg1 = cdr(reg1);
 	if (value(z) == NULL)
 		value(z) = z;        /* just for GC purposes. protection of id. TY*/
@@ -3087,9 +3083,9 @@ Standardfzlisp()
 			reg1 = zinteger((long) inputf);
 			if (kill_input_buf_save_entry(inputf)) { /* 7.1 erase from the file table TY */
 				if (fclose(inputf))
-					zerror(20, reg1);
+					zerror(20, reg1, NIL, NIL);
 			} else
-				zerror(43, reg1);
+				zerror(43, reg1, NIL, NIL);
 			inputf = stdin;
 			reg1 = Sexp(&eof);
 			restore_input_buf_save_entry();
@@ -3119,7 +3115,7 @@ Stringp()
 Sub1()
 {
 	if (addsub1(-1))
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 }
 
 /*@*/
@@ -3194,7 +3190,7 @@ System1()
 	else if (idp(reg1))
 		sc = pname(reg1);
 	else
-		zerror(27, reg1, @);
+		zerror(27, reg1, @, NIL);
 	reg1 = zinteger((long) system(sc));
 }
 /*@*/
@@ -3208,8 +3204,7 @@ Terpri()
 /*@*/
 Time()
 {
-	long time();  /* declaration may be removed if necessary TY*/
-	znormalize(time(NULL)); /* added NULL as argument 7.1 GU */
+	znormalize((long)time(NULL)); /* removed local declaration, cast result */
 }
 /*@*/
 Times()
@@ -3245,7 +3240,7 @@ Times()
 	kpop(2);
 	return;
 err:
-	zerror(12, reg1, @);
+	zerror(12, reg1, @, NIL);
 	/* from now on integers are big */
 bign:
 	kset(1, reg2);
@@ -3339,17 +3334,16 @@ Times2()
 			goto df;
 		}
 	default:
-		zerror(12, reg1, @);
+		zerror(12, reg1, @, NIL);
 	}
 df:
-	zerror(12, reg2, @);
+	zerror(12, reg2, @, NIL);
 dbl:
 	reg1 = zfloating(d);
 }
 /*@*/
 Token()
 {
-	double atof();
 	char c, *cp, *cx;
 	long int i;
 
@@ -3453,7 +3447,7 @@ Unlink1()
 	else if (idp(reg1))
 		fl = pname(reg1);
 	else
-		zerror(27, reg1, @);
+		zerror(27, reg1, @, NIL);
 	reg1 = zinteger((long) unlink(fl));
 }
 /*@*/
@@ -3480,7 +3474,7 @@ Wrs()
 	else if (fixp(reg1))
 		outputf = (FILE *) intval(reg1);
 	else
-		zerror(25, reg1);
+		zerror(25, reg1, NIL, NIL);
 	reg1 = v;
 }                                /*14:05:09  11/15/1986  TY*/
 /*func. calls modified 19:24  5/2/1987  TY*/

@@ -27,8 +27,7 @@ void filecopy()
 	fclose(in_file);
 }
 
-void file_open(file_name)
-char *file_name;
+void file_open(char *file_name)
 {
 	in_file = fopen(file_name, "r");
 	if (in_file == NULL) {
@@ -175,7 +174,7 @@ int main()
 	file_open(zfnames);
 	fprintf(out_file, "\n");
 	while (fscanf(in_file, "%s%s", tp, nm) != EOF)
-		fprintf(out_file, "%s %s();\n", tp, nm);
+		fprintf(out_file, "%s %s;\n", tp, nm);
 	fclose(in_file);
 
 /* TOKENIZER */

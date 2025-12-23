@@ -18,8 +18,7 @@ int x1;
 #endif
 FILE *in_file, *out_file;
 
-int hash(xx)
-char *xx;
+int hash(char *xx)
 {
 	int h;
 	h = 0;
@@ -38,8 +37,7 @@ void filecopy()
 	fclose(in_file);
 }
 
-void file_open(file_name)
-char *file_name;
+void file_open(char *file_name)
 {
 	in_file = fopen(file_name, "r");
 	if (in_file == NULL) {
@@ -51,9 +49,7 @@ char *file_name;
 	setvbuf(in_file, buf, _IOFBF, 16000);
 }
 
-int main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
 	if (argc == 1) {
 		strcpy(outfile, "lisp1.c");

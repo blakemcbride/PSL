@@ -20,8 +20,7 @@ void filecopy()
 	fclose(in_file);
 }
 
-void file_open(file_name)
-char *file_name;
+void file_open(char *file_name)
 {
 	in_file = fopen(file_name, "r");
 	if (in_file == NULL) {
@@ -34,9 +33,7 @@ char *file_name;
 		setvbuf(in_file, buf, _IOFBF, 16000);
 }
 
-int main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
 	buf = (char *)malloc(16000);
 	obuf = (char *)malloc(20000);

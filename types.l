@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 typedef char *PCHAR;
 #define myalloc(x)   malloc(x)

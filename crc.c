@@ -24,8 +24,7 @@ void filecopy()
 	fclose(in_file);
 }
 
-void file_open(file_name)
-char *file_name;
+void file_open(char *file_name)
 {
 	in_file = fopen(file_name, "r");
 	if (in_file == NULL) {
@@ -112,7 +111,7 @@ void lispc()
 	file_open(zfnames);
 	fprintf(out_file, "\n");
 	while (fscanf(in_file, "%s%s", tp, nm) != EOF)
-		fprintf(out_file, "%s %s();\n", tp, nm);
+		fprintf(out_file, "%s %s;\n", tp, nm);
 	fclose(in_file);
 
 
@@ -159,9 +158,7 @@ void lispc()
    arg 1) number of the first file. default first (1).
    arg 2) number of the last file. default all (100).  */
 
-int main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
 	i1 = 1;
 	i2 = 100;

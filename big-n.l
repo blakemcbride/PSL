@@ -5,8 +5,7 @@
 /* umultiply multiplies two long number; result returned in x and y.
    lower part in y and higher part in x. */
 
-void umultiply(x, y)
-long *x, *y;
+void umultiply(long *x, long *y)
 {
 	longdbl z;
 	z = longd(*x) * (*y);
@@ -14,8 +13,7 @@ long *x, *y;
 	*y = (long) (z - longd(*x) * BASE);
 }
 
-long udivide(x, y, d)
-long x, *y, d;       /* returns remainder */
+long udivide(long x, long *y, long d)       /* returns remainder */
 {
 	longdbl z;
 	if (x) {
@@ -29,19 +27,14 @@ long x, *y, d;       /* returns remainder */
 	}
 }
 
-void resize(p, n, l)
-long **p;          /* resizes the arithmetic arrays */
-int *n;
-int l;
+void resize(long **p, unsigned *n, int l)          /* resizes the arithmetic arrays */
 {
 	free(*p);
 	*n = 3 * l / 2;
 	*p = (long *)myalloc((*n) * sizeof(long));
 }
 
-PSEXP zbig(v, n)  /* prepares new cell for big number */
-long v;
-PSEXP n;
+PSEXP zbig(long v, PSEXP n)  /* prepares new cell for big number */
 {
 	PSEXP z;
 	z = Sexp(zalloc(Tbig));
@@ -51,9 +44,7 @@ PSEXP n;
 	return z;
 }
 
-long zintval(xp, dz)   /* ascii string of dz numbers pointed by xp --> bin number */
-char *xp;
-int dz;
+long zintval(char *xp, int dz)   /* ascii string of dz numbers pointed by xp --> bin number */
 {
 	long j = 0;
 	int k;
@@ -90,8 +81,7 @@ void zbigint()
 	reg1 = zbig((long) s * l, reg1);
 }
 
-double zbig2float(x)    /* big to float conversion */
-PSEXP x;
+double zbig2float(PSEXP x)    /* big to float conversion */
 {
 	int i, j, l, s = 1;
 	double r = 0.0;
@@ -109,8 +99,7 @@ PSEXP x;
 	return s * r;
 }
 
-void znormalize(x)   /* checks the number sizes and put them in */
-long x;                     /*  single cell if possible */
+void znormalize(long x)   /* checks the number sizes and put them in single cell if possible */
 {
 	long x1;
 
@@ -124,8 +113,7 @@ long x;                     /*  single cell if possible */
 	}
 }
 
-void zfnormalize(x)   /* checks the number sizes and put them in */
-longdbl x;              /*  single cell if possible */
+void zfnormalize(double x)   /* checks the number sizes and put them in single cell if possible */
 {
 	int s;
 	long a;
@@ -263,7 +251,7 @@ void zexpt()
 		if (bigval(reg2) < 0)
 			goto r0;
 		else
-			zerror(41);
+			zerror(41, NIL, NIL, NIL);
 	}
 	if ((a = intval(reg2)) < 0)
 		goto r0;
@@ -313,8 +301,7 @@ r0:
 		do { addon(d); } while (--k != 0)
 #define exchange   dd = reg1; reg1 = reg2; reg2 = dd; l1 = 2 * l2 - l1
 
-void zaddsub(s)
-int s;
+void zaddsub(int s)
 {
 	long h, e, d;
 	int l1, l2, l, k = 0, s1 = 1;
@@ -433,9 +420,8 @@ int s;
 		z = bigcdr(z) = zbig(Q, NIL)
 
 
-void zdivision(p)           /* arbitrary precision integer division */
-int p;                                  /* p == 0  ===> remainder */
-{
+void zdivision(int p)           /* arbitrary precision integer division */
+{                                       /* p == 0  ===> remainder */
 	long a, b, rl, s, q, v, u, *np; /* p == 1  ===> quotient  */
 	int l1, l2, l, i, j, k;         /* p == 2  ===> divide    */
 	PSEXP z;

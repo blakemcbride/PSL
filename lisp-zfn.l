@@ -6,58 +6,47 @@ extern unsigned NOFPAIR;
 #if DSTACK
 PPSEXP zstacktop;
 
-void kalloc(n)
-unsigned n;
+void kalloc(unsigned n)
 {
 	zstackptr += n;  /* zstackptr is pointer TY*/
 	if (zstackptr > zstacktop) {
 		zstackptr -= n; /* For backtracking March 2009 TY */
-		zerror(37);
+		zerror(37, NIL, NIL, NIL);
 	}                 /*TY*/
 }
 #else
-void kalloc(n)
-unsigned n;
+void kalloc(unsigned n)
 {
 	zstackptr += n;           /*zstackptr is integer TY*/
 	if (zstackptr > STACKSIZE - 1)
-		zerror(37);                            /*TY*/
+		zerror(37, NIL, NIL, NIL);                            /*TY*/
 }
 #endif
 /*Slows down the lisp but generates (in general) */
 #if SLOWSTACK      /*smaller code.*/
 #if DSTACK         /*dynamic procedural stack manipulation TY*/
-void  ksets(n, x)
-unsigned n;
-PPSEXP x;
+void ksets(unsigned n, PPSEXP x)
 {
 	*(zstackptr - n) = *x;
 }
 
-void kloads(x, n)        /* usage:   kload(&reg1,0); */
-unsigned n;
-PPSEXP x;
+void kloads(PPSEXP x, unsigned n)        /* usage:   kload(&reg1,0); */
 {
 	*x = *(zstackptr - n);
 }
 
-void kpops(n)
-unsigned n;
+void kpops(unsigned n)
 {
 	zstackptr -= n;
 }
 
 #else              /*static procedural stack manipulation TY*/
-void ksets(n, x)
-unsigned n;
-PPSEXP x;
+void ksets(unsigned n, PPSEXP x)
 {
 	zstackp[zstackptr - n] = *x;
 }
 
-void kloads(x, n)        /* usage:   kload(&reg1,0); */
-unsigned n;
-PPSEXP x;
+void kloads(PPSEXP x, unsigned n)        /* usage:   kload(&reg1,0); */
 {
 	*x = zstackp[zstackptr - n];
 }
@@ -65,32 +54,29 @@ PPSEXP x;
 #endif
 #endif
 
-void zalist(x, y)
-PSEXP x, y;
+void zalist(PSEXP x, PSEXP y)
 {
 #if BITF
 	if (globalp(x) || functionp(x))
-		zerror(2, x);
+		zerror(2, x, NIL, NIL);
 #else
 	if (attribute(x) & 0x14)
-		zerror(2, x);
+		zerror(2, x, NIL, NIL);
 #endif
 	if (alisttop > zalisttop)
-		zerror(38);                     /*TY*/
+		zerror(38, NIL, NIL, NIL);                     /*TY*/
 	alisttop->alistid = x;
 	alisttop++->alistval = y;
 	return;
 }
 
-void zbind(x, y)    /*GU*/  /*This is new*/
-PSEXP x, y;
+void zbind(PSEXP x, PSEXP y)    /*GU*/  /*This is new*/
 {
 	zalist(x, value(x));
 	value(x) = y;
 }
 
-void zunbind(n)     /*GU*/  /*This is also new*/
-unsigned n;
+void zunbind(unsigned n)     /*GU*/  /*This is also new*/
 {
 	while (n) {
 		alisttop--;
@@ -99,11 +85,9 @@ unsigned n;
 	}
 }
 
-PSEXP zalloc(tp)
-int tp;   /* changed char -> int Mar 2009 TY */
+PSEXP zalloc(int tp)   /* changed char -> int Mar 2009 TY */
 {
 	int n = 0;
-	PPAGE zgetpage();
 	PSEXP v;
 	PPAGE p;
 
@@ -149,20 +133,19 @@ no_gc:
 			if (n < 2)
 				goto gc; /* Mar 2009 TY */
 			else
-				zerror(35);
+				zerror(35, NIL, NIL, NIL);
 		}                       /*not enough memory TY*/
 	}
 }
 
-PCHAR zcalloc(n)
-unsigned n;
+PCHAR zcalloc(unsigned n)
 {
 	PCHAR v;
 
 	if ((chrcount + n) >= PNSLENGTH) { /* new in ver 3.3  ... GU */
 		zgarbage(Tpname);
 		if ((chrcount + n) > PNSLENGTH)
-			zerror(32);
+			zerror(32, NIL, NIL, NIL);
 	}
 	chrcount += n;
 	v = pnmchp;
@@ -170,8 +153,7 @@ unsigned n;
 	return v;
 }
 
-PCHAR zsalloc(n)             /* Brand new in ver 3.3  ... GU */
-unsigned n;
+PCHAR zsalloc(unsigned n)             /* Brand new in ver 3.3  ... GU */
 /*Actual # of char's to build the STDLisp-string, e.g. for "ali" n=5 */
 {
 	PCHAR v;
@@ -179,7 +161,7 @@ unsigned n;
 	if ((strcount + n + STROFFSET2) >= STRLENGTH) {
 		zgarbage(Tsname);
 		if ((strcount + n + STROFFSET2) > STRLENGTH)
-			zerror(33);
+			zerror(33, NIL, NIL, NIL);
 	}
 	v = strchp;
 	elmlength(v) = (char) n; /* here we store the length immediately */
@@ -190,8 +172,7 @@ unsigned n;
 	return v;
 }
 
-void zedit(x)
-char *x;
+void zedit(char *x)
 {
 	if ((currcol += strlen(x)) > lineln) {
 		putc('\n', outputf);
@@ -212,8 +193,7 @@ void pr_reg1(int col)
 	Terpri();
 }
 
-void dispargs(i)
-unsigned i;
+void dispargs(unsigned i)
 {
 	unsigned j;
 	PSEXP x;
@@ -294,9 +274,7 @@ l1:
 	reg1 = x;
 }                  /*end of stack argument dump procedure*/
 
-void zerror (n, a1, a2, a3)
-unsigned n;
-PSEXP a1, a2, a3;
+void zerror(unsigned n, PSEXP a1, PSEXP a2, PSEXP a3)
 {
 	PSEXP a[3];
 	unsigned i = 0;
@@ -343,8 +321,7 @@ PSEXP a1, a2, a3;
 	return;
 }
 
-void zescape(u)
-PSEXP u;
+void zescape(PSEXP u)
 {
 	char *x, *y;
 
@@ -407,8 +384,7 @@ PSEXP u;
 }
 
 
-PPAGE zgetpage(tp)  /* modified to get allways from heap G.U.*/
-unsigned tp;
+PPAGE zgetpage(unsigned tp)  /* modified to get allways from heap G.U.*/
 {
 	unsigned n, s1;                                                                    /*TY*/
 	char *x, *y, *z;
@@ -440,9 +416,8 @@ unsigned tp;
 	return p;
 }
 
-void zinitpages()
+void zinitpages(void)
 {
-	PPAGE zgetpage();
 	unsigned n;
 
 	npages = 0;
@@ -532,8 +507,7 @@ void zurwelt()
 	fclose(fp);
 }
 
-void zysuicide(n)
-unsigned n;
+void zysuicide(unsigned n)
 {
 	switch (n) {
 	case 1:
@@ -558,8 +532,7 @@ unsigned n;
 	exit(n);
 }
 
-PSEXP zinteger(x)
-long x;
+PSEXP zinteger(long x)
 {
 	PSEXP v;
 
@@ -572,8 +545,7 @@ long x;
 	}
 }
 
-PSEXP zfloating(x)
-double x;
+PSEXP zfloating(double x)
 {
 	PSEXP v;                                                    /*TY*/
 
@@ -582,8 +554,7 @@ double x;
 	return v;
 }
 
-PSEXP zcons(x, y)
-PSEXP x, y;
+PSEXP zcons(PSEXP x, PSEXP y)
 {
 	PPAIR v;
 	v = Spair(zalloc(Tpair));
@@ -592,8 +563,7 @@ PSEXP x, y;
 	return Sexp(v);
 }
 
-PSEXP zcons1(x)
-PSEXP x;
+PSEXP zcons1(PSEXP x)
 {
 	PPAIR v;
 	v = Spair(zalloc(Tpair));
@@ -602,16 +572,14 @@ PSEXP x;
 	return Sexp(v);
 }
 
-void zconsc(x, y)
-PSEXP x, y;
+void zconsc(PSEXP x, PSEXP y)
 {
 	reg1 = Sexp(zalloc(Tpair));
 	car(reg1) = x;
 	cdr(reg1) = y;
 }
 
-void zcons2c(x)
-PSEXP x;
+void zcons2c(PSEXP x)
 {
 	PPAIR v;
 	v = Spair(zalloc(Tpair));
@@ -620,8 +588,7 @@ PSEXP x;
 	reg1 = Sexp(v);
 }
 
-void zcons3c(x)
-PSEXP x;
+void zcons3c(PSEXP x)
 {
 	PPAIR v;
 	v = Spair(zalloc(Tpair));
@@ -630,8 +597,7 @@ PSEXP x;
 	reg1 = Sexp(v);
 }
 
-void zintern(n)
-unsigned n;             /* n = 0 : set inoblistp to 0 */
+void zintern(unsigned n)             /* n = 0 : set inoblistp to 0 */
 {                       /* n = 1 : set inoblistp to 1 */
 	PCHAR cp;       /* n = 2 : don't change inoblistp.. */
 	unsigned hs;    /* .. if exist, otherwise create & set .. */
@@ -687,12 +653,11 @@ void zinterrupt()
 /*curtrap = trap;        return to current trap not very beginning TY*/
 	inputf = stdin;      /* change the direction of input */
 	curtrap->backtrace = 0; /* do not backtrace */
-	zerror(29);
+	zerror(29, NIL, NIL, NIL);
 }
 
-int ztracearg(u, v)                    /* traceable    trace     redefinition */
-int u, v;                              /*     0          no          no       */
-{
+int ztracearg(int u, int v)            /* traceable    trace     redefinition */
+{                                      /*     0          no          no       */
 	PSEXP x, y;                   /*     1          no          yes      */
 	if (!traceable)
 		return 0;             /*    >1          yes         yes      */
@@ -727,15 +692,14 @@ exit:
 	return zredefined(u, v);
 }
 
-int zredefined(u, v)
-int u, v;
+int zredefined(int u, int v)
 {
 	PSEXP y;
 
 	y = value(&fname[u]);
 	if (car(y) == Sexp(&expr)) {
 		if (v > 5)
-			zerror(40, Sexp(&fname[u]));
+			zerror(40, Sexp(&fname[u]), NIL, NIL);
 		switch (v) {
 		case 0:
 			break;
@@ -761,7 +725,7 @@ int u, v;
 		return 1;
 	} else if (car(y) == Sexp(&fexpr)) {
 		if (v != 1)
-			zerror(40, Sexp(&fname[u]));
+			zerror(40, Sexp(&fname[u]), NIL, NIL);
 		reg2 = reg1;
 		reg1 = cdr(y);
 		Apply();
@@ -770,20 +734,18 @@ int u, v;
 		return 0;
 }
 
-void zundefined(u, v)
-int u, v;
+void zundefined(int u, int v)
 {
 	PSEXP x;
 	x = value(&fname[u]);
 	if (null(x))
 		return;
 	if (car(x) != Sexp(&expr))
-		zerror(34, Sexp(&fname[u]));
+		zerror(34, Sexp(&fname[u]), NIL, NIL);
 	zredefined(u, v);
 }
 
-void ztraceval(u)
-int u;
+void ztraceval(int u)
 {
 	PSEXP x, y;
 	if (traceable < 2)
@@ -848,8 +810,7 @@ void clear_forward(int tp)
 }
 
 
-void zmark(x)
-PSEXP x;
+void zmark(PSEXP x)
 {
 	PCHAR p;
 	if (x == NULL)
@@ -896,9 +857,7 @@ PSEXP x;
 	}
 }
 
-int zcollect(p, tp, v)
-PPAGE p;
-int tp, v;
+int zcollect(PPAGE p, int tp, int v)
 {
 	unsigned n, s1, m = 0;
 	char *x, *y, *z;
@@ -913,7 +872,7 @@ int tp, v;
 			v = 0;
 		} else {
 			if ((tp == Tvector) && usedvec(y)) {
-				free(vectelts(v)); /*ver 5.2 TY*/
+				free(vectelts(y));
 				usedvec(y) = 0;
 			}
 			forwardadr(y) = (PSEXP) x; /* ver 6.0   TY*/
@@ -1013,8 +972,7 @@ void zcompactstring()     /* new in ver. 3.3 ... GU */
 	strcount = strchp - startstr;
 }
 
-void zrelocate(tp)
-int tp;
+void zrelocate(int tp)
 {
 	PCHAR fre, active;
 	PPAGE p, freepage, activepage; /* freepage points to page that contains */
@@ -1088,9 +1046,8 @@ testactive:
 	goto testactive; /* was this element marked ??? */
 }
 
-void zgarbage(tp) /* .... COMPACTIFYING GARBAGE COLLECTION .... *GU*/
-char tp;          /* To turn-on compactification do (setq !*gctest 2) */
-{                  /* all the same until the end of the marking phase */
+void zgarbage(char tp) /* .... COMPACTIFYING GARBAGE COLLECTION .... *GU*/
+{                      /* To turn-on compactification do (setq !*gctest 2) */                  /* all the same until the end of the marking phase */
 	PCHAR p;                                  /*v 6.0  *GU*/
 	unsigned s, k, m, r;                      /*v 6.0  *GU*/
 	int info, n;
@@ -1471,8 +1428,7 @@ void print_cell(FILE *df, PSEXP y)
 
 #if DEBUG
 
-void zdump(fn)
-char *fn;
+void zdump(char *fn)
 {
 	FILE *dumpf;
 	unsigned i, n, s1;

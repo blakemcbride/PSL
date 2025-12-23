@@ -55,7 +55,7 @@ void incr_curpos () /* needed for isstring 7.1 TY */
 	if (curpos < endpos)
 		curpos++;
 	else
-		zerror(44);
+		zerror(44, NIL, NIL, NIL);
 }
 
 
@@ -195,7 +195,7 @@ int soffflo()
 
 /*  PATTERN : 7  */
 
-int isoctal(c)
+int isoctal(int c)
 {
 	if ((c >= '0')  &&  (c <= '7'))
 		return 1;
@@ -282,14 +282,12 @@ void storetext()                 /*  copies matched text into yytext  */
 	yytext[i] = 0;
 }
 
-void unput(c)
-char c;
+void unput(char c)
 {
 	*(--curpos) = c;
 }
 
-void zycpsunput(c)
-char *c;
+void zycpsunput(char *c)
 {
 	ch1 = curpos;  /*  curpos plays the same role as yysptr does  */
 	unput(' ');
@@ -314,8 +312,7 @@ int zycpscheck()
 
 /*  SLAVE FUNCTIONS  */
 
-void zysignonoff(x)
-int x;
+void zysignonoff(int x)
 {
 	if (x)
 		signflag = 1;
@@ -389,7 +386,7 @@ match:
 	}
 	if (is_blank())
 		goto match;
-	zerror(8);
+	zerror(8, NIL, NIL, NIL);
 	return 0; /* just for supressing warning - Mar 2009 TY */
 }
 
@@ -428,7 +425,7 @@ void store_input_buf_save_entry()  /* stores current input from inputf */
 		if (input_buf_save_table[i].file == NULL)
 			goto proceed;
 	/* if we are here no empty place in table ..=> issue error */
-	zerror(42);
+	zerror(42, NIL, NIL, NIL);
 proceed:
 	input_buf_save_table[i].file    =  inputf;
 	input_buf_save_table[i].curpos  =  curpos;
@@ -470,5 +467,5 @@ void create_input_buf_save_entry(FILE *f)   /* creates a buffer for input  7.1 T
 			input_buf_save_table[i].curpos  = "";
 			return;
 		}
-	zerror(42); /* if we are here no empty place in table ..=> issue error */
+	zerror(42, NIL, NIL, NIL); /* if we are here no empty place in table ..=> issue error */
 }
